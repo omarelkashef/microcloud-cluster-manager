@@ -2,17 +2,19 @@
 package main
 
 import (
+	"context"
+	"database/sql"
+	"github.com/canonical/microcluster/config"
+	"github.com/canonical/microcluster/state"
 	"os"
 
 	"github.com/canonical/lxd/shared/logger"
 	"github.com/spf13/cobra"
 
-	"github.com/canonical/microcluster/config"
 	"github.com/canonical/lxd-site-manager/api"
 	"github.com/canonical/lxd-site-manager/database"
 	"github.com/canonical/lxd-site-manager/version"
 	"github.com/canonical/microcluster/microcluster"
-	"github.com/canonical/microcluster/state"
 )
 
 // Debug indicates whether to log debug messages or not.
@@ -63,119 +65,25 @@ func (c *cmdDaemon) Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// exampleHooks are some example post-action hooks that can be run by MicroCluster.
-	exampleHooks := &config.Hooks{
-		// PostBootstrap is run after the daemon is initialized and bootstrapped.
+	hooks := &config.Hooks{
 		PostBootstrap: func(s *state.State, initConfig map[string]string) error {
-			logCtx := logger.Ctx{}
-			for k, v := range initConfig {
-				logCtx[k] = v
-			}
-
-			// You can check your app extensions using the *state.State object.
-			hasMissingExt := s.Extensions.HasExtension("missing_extension")
-			if !hasMissingExt {
-				logger.Warn("The 'missing_extension' is not registered")
-			}
-
-			// You can also check the internal extensions. (starting with "internal:" prefix)
-			// These are read-only and defined at the MicroCluster level and cannot be added at runtime
-			hasInternalExt := s.Extensions.HasExtension("internal:runtime_extension_v1")
-			if !hasInternalExt {
-				logger.Warn("Every system should have the 'internal:runtime_extension_v1' extension")
-			}
-
-			// You can also register new extensions at runtime.
-			err := s.Extensions.Register([]string{"new_extension_at_runtime_1", "new_extension_at_runtime_2"})
-			if err != nil {
+			return s.Database.Transaction(context.TODO(), func(ctx context.Context, tx *sql.Tx) error {
+				_, err := tx.ExecContext(ctx, `
+INSERT INTO sites (name, status) VALUES ('site1', 'DOWN');
+INSERT INTO sites (name, status) VALUES ('site2', 'DOWN');
+INSERT INTO sites (name, status) VALUES ('site3', 'DOWN');
+INSERT INTO sites_addresses (site_id, address) VALUES (1, 'https://127.0.0.1:8443');
+INSERT INTO sites_addresses (site_id, address) VALUES (2, 'https://10.21.232.8:8443');
+INSERT INTO sites_addresses (site_id, address) VALUES (2, 'https://10.21.232.45:8443');
+INSERT INTO sites_addresses (site_id, address) VALUES (2, 'https://10.21.232.54:8443');
+INSERT INTO sites_addresses (site_id, address) VALUES (3, 'https://192.168.0.2:8443');
+`)
 				return err
-			}
-
-			// This shows the number of extensions that are registered (internal and external).
-			numberOfExtensions := s.Extensions.Version()
-			logger.Infof("The number of extensions is %d", numberOfExtensions)
-
-			logger.Info("This is a hook that runs after the daemon is initialized and bootstrapped")
-			logger.Info("Here are the extra configuration keys that were passed into the init --bootstrap command", logCtx)
-
-			return nil
-		},
-
-		PreBootstrap: func(s *state.State, initConfig map[string]string) error {
-			logCtx := logger.Ctx{}
-			for k, v := range initConfig {
-				logCtx[k] = v
-			}
-
-			logger.Info("This is a hook that runs before the daemon is initialized and bootstrapped")
-			logger.Info("Here are the extra configuration keys that were passed into the init --bootstrap command", logCtx)
-
-			return nil
-		},
-
-		// OnStart is run after the daemon is started.
-		OnStart: func(s *state.State) error {
-			logger.Info("This is a hook that runs after the daemon first starts")
-
-			return nil
-		},
-
-		// PostJoin is run after the daemon is initialized and joins a cluster.
-		PostJoin: func(s *state.State, initConfig map[string]string) error {
-			logCtx := logger.Ctx{}
-			for k, v := range initConfig {
-				logCtx[k] = v
-			}
-
-			logger.Info("This is a hook that runs after the daemon is initialized and joins an existing cluster, after OnNewMember runs on all peers")
-			logger.Info("Here are the extra configuration keys that were passed into the init --join command", logCtx)
-
-			return nil
-		},
-
-		// PreJoin is run after the daemon is initialized and joins a cluster.
-		PreJoin: func(s *state.State, initConfig map[string]string) error {
-			logCtx := logger.Ctx{}
-			for k, v := range initConfig {
-				logCtx[k] = v
-			}
-
-			logger.Info("This is a hook that runs after the daemon is initialized and joins an existing cluster, before OnNewMember runs on all peers")
-			logger.Info("Here are the extra configuration keys that were passed into the init --join command", logCtx)
-
-			return nil
-		},
-
-		// PostRemove is run after the daemon is removed from a cluster.
-		PostRemove: func(s *state.State, force bool) error {
-			logger.Infof("This is a hook that is run on peer %q after a cluster member is removed, with the force flag set to %v", s.Name(), force)
-
-			return nil
-		},
-
-		// PreRemove is run before the daemon is removed from the cluster.
-		PreRemove: func(s *state.State, force bool) error {
-			logger.Infof("This is a hook that is run on peer %q just before it is removed, with the force flag set to %v", s.Name(), force)
-
-			return nil
-		},
-
-		// OnHeartbeat is run after a successful heartbeat round.
-		OnHeartbeat: func(s *state.State) error {
-			logger.Info("This is a hook that is run on the dqlite leader after a successful heartbeat")
-
-			return nil
-		},
-
-		// OnNewMember is run after a new member has joined.
-		OnNewMember: func(s *state.State) error {
-			logger.Infof("This is a hook that is run on peer %q when a new cluster member has joined", s.Name())
-
-			return nil
+			})
 		},
 	}
 
-	return m.Start(cmd.Context(), api.Endpoints, database.SchemaExtensions, api.Extensions(), exampleHooks)
+	return m.Start(cmd.Context(), api.Endpoints, database.SchemaExtensions, api.Extensions(), hooks)
 }
 
 func main() {
