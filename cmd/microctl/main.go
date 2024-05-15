@@ -59,8 +59,8 @@ func main() {
 	var cmdWaitready = cmdWaitready{common: &commonCmd}
 	app.AddCommand(cmdWaitready.Command())
 
-	var cmdExtended = cmdExtended{common: &commonCmd}
-	app.AddCommand(cmdExtended.Command())
+	var cmdSite = cmdSite{common: &commonCmd}
+	app.AddCommand(cmdSite.Command())
 
 	app.InitDefaultHelpCmd()
 
