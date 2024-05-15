@@ -4,17 +4,17 @@ package main
 import (
 	"context"
 	"database/sql"
-	"github.com/canonical/microcluster/config"
-	"github.com/canonical/microcluster/state"
 	"os"
 
 	"github.com/canonical/lxd/shared/logger"
+	"github.com/canonical/microcluster/config"
+	"github.com/canonical/microcluster/microcluster"
+	"github.com/canonical/microcluster/state"
 	"github.com/spf13/cobra"
 
 	"github.com/canonical/lxd-site-manager/api"
 	"github.com/canonical/lxd-site-manager/database"
 	"github.com/canonical/lxd-site-manager/version"
-	"github.com/canonical/microcluster/microcluster"
 )
 
 // Debug indicates whether to log debug messages or not.
@@ -33,7 +33,7 @@ type cmdGlobal struct {
 	flagLogVerbose bool
 }
 
-func (c *cmdGlobal) Run(cmd *cobra.Command, args []string) error {
+func (c *cmdGlobal) run(cmd *cobra.Command, args []string) error {
 	Debug = c.flagLogDebug
 	Verbose = c.flagLogVerbose
 
@@ -47,19 +47,24 @@ type cmdDaemon struct {
 	flagSocketGroup string
 }
 
-func (c *cmdDaemon) Command() *cobra.Command {
+func (c *cmdDaemon) command() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "microd",
 		Short:   "Example daemon for MicroCluster - This will start a daemon with a running control socket and no database",
 		Version: version.Version,
 	}
 
-	cmd.RunE = c.Run
+	cmd.RunE = c.run
 
 	return cmd
 }
 
-func (c *cmdDaemon) Run(cmd *cobra.Command, args []string) error {
+func (c *cmdDaemon) run(cmd *cobra.Command, args []string) error {
+	err := c.global.run(cmd, args)
+	if err != nil {
+		return err
+	}
+
 	m, err := microcluster.App(microcluster.Args{StateDir: c.flagStateDir, SocketGroup: c.flagSocketGroup, Verbose: c.global.flagLogVerbose, Debug: c.global.flagLogDebug})
 	if err != nil {
 		return err
@@ -88,7 +93,7 @@ INSERT INTO sites_addresses (site_id, address) VALUES (3, 'https://192.168.0.2:8
 
 func main() {
 	daemonCmd := cmdDaemon{global: &cmdGlobal{}}
-	app := daemonCmd.Command()
+	app := daemonCmd.command()
 	app.SilenceUsage = true
 	app.CompletionOptions = cobra.CompletionOptions{DisableDefaultCmd: true}
 

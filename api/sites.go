@@ -3,15 +3,16 @@ package api
 import (
 	"context"
 	"database/sql"
-	"github.com/canonical/lxd-site-manager/api/types"
-	"github.com/canonical/lxd-site-manager/database"
-	"github.com/gorilla/mux"
 	"net/http"
 	"net/url"
 
 	"github.com/canonical/lxd/lxd/response"
 	"github.com/canonical/microcluster/rest"
 	"github.com/canonical/microcluster/state"
+	"github.com/gorilla/mux"
+
+	"github.com/canonical/lxd-site-manager/api/types"
+	"github.com/canonical/lxd-site-manager/database"
 )
 
 // This is an example extended endpoint on the /1.0 endpoint, reachable at /1.0/extended.

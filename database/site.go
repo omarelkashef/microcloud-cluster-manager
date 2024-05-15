@@ -4,11 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"net/http"
+
 	"github.com/canonical/lxd/lxd/db/query"
 	"github.com/canonical/lxd/shared/api"
-	"net/http"
 )
 
+// Site represents a single LXD site.
 type Site struct {
 	ID        int
 	Name      string
@@ -16,6 +18,7 @@ type Site struct {
 	Status    string
 }
 
+// GetSites returns all sites from the database.
 func GetSites(ctx context.Context, tx *sql.Tx) ([]Site, error) {
 	stmt := `
 SELECT sites.id, sites.name, sites.status, sites_addresses.address 
@@ -56,6 +59,7 @@ JOIN sites ON sites_addresses.site_id = sites.id`
 	return sites, nil
 }
 
+// GetSite returns a single site by name.
 func GetSite(ctx context.Context, tx *sql.Tx, siteName string) (*Site, error) {
 	stmt := `
 SELECT sites.id, sites.name, sites.status, sites_addresses.address 

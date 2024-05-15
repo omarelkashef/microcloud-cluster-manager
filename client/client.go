@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/canonical/lxd/shared/api"
+	"github.com/canonical/microcluster/client"
 
 	"github.com/canonical/lxd-site-manager/api/types"
-	"github.com/canonical/microcluster/client"
 )
 
 // GetSites gets the sites.

@@ -2,26 +2,28 @@ package main
 
 import (
 	"errors"
-	"github.com/canonical/lxd-site-manager/client"
+	"os"
+	"sort"
+	"strings"
+
 	cli "github.com/canonical/lxd/shared/cmd"
 	microClient "github.com/canonical/microcluster/client"
 	"github.com/canonical/microcluster/microcluster"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
-	"os"
-	"sort"
-	"strings"
+
+	"github.com/canonical/lxd-site-manager/client"
 )
 
 type cmdSite struct {
 	common *CmdControl
 }
 
-func (c *cmdSite) Command() *cobra.Command {
+func (c *cmdSite) command() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "site",
 		Short: "Manage sites",
-		RunE:  c.Run,
+		RunE:  c.run,
 	}
 
 	siteListCmd := &cmdSiteList{
@@ -29,19 +31,19 @@ func (c *cmdSite) Command() *cobra.Command {
 		site:   c,
 	}
 
-	cmd.AddCommand(siteListCmd.Command())
+	cmd.AddCommand(siteListCmd.command())
 
 	siteShowCmd := &cmdSiteShow{
 		common: c.common,
 		site:   c,
 	}
 
-	cmd.AddCommand(siteShowCmd.Command())
+	cmd.AddCommand(siteShowCmd.command())
 
 	return cmd
 }
 
-func (c *cmdSite) Run(cmd *cobra.Command, args []string) error {
+func (c *cmdSite) run(cmd *cobra.Command, args []string) error {
 	return cmd.Help()
 }
 
@@ -50,17 +52,17 @@ type cmdSiteList struct {
 	site   *cmdSite
 }
 
-func (c *cmdSiteList) Command() *cobra.Command {
+func (c *cmdSiteList) command() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List sites",
-		RunE:  c.Run,
+		RunE:  c.run,
 	}
 
 	return cmd
 }
 
-func (c *cmdSiteList) Run(cmd *cobra.Command, args []string) error {
+func (c *cmdSiteList) run(cmd *cobra.Command, args []string) error {
 	m, err := microcluster.App(microcluster.Args{StateDir: c.common.FlagStateDir, Verbose: c.common.FlagLogVerbose, Debug: c.common.FlagLogDebug})
 	if err != nil {
 		return err
@@ -108,17 +110,17 @@ type cmdSiteShow struct {
 	site   *cmdSite
 }
 
-func (c *cmdSiteShow) Command() *cobra.Command {
+func (c *cmdSiteShow) command() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "show <name>",
 		Short: "Show a site",
-		RunE:  c.Run,
+		RunE:  c.run,
 	}
 
 	return cmd
 }
 
-func (c *cmdSiteShow) Run(cmd *cobra.Command, args []string) error {
+func (c *cmdSiteShow) run(cmd *cobra.Command, args []string) error {
 	m, err := microcluster.App(microcluster.Args{StateDir: c.common.FlagStateDir, Verbose: c.common.FlagLogVerbose, Debug: c.common.FlagLogDebug})
 	if err != nil {
 		return err
