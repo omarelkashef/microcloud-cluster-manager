@@ -139,9 +139,9 @@ func getMemberConfigs(args []string) (types.MemberConfigPatch, error) {
 
 		switch key {
 		case "https_address":
-			configs.HTTPSAddress = val
+			configs.HTTPSAddress = &val
 		case "external_address":
-			configs.ExternalAddress = val
+			configs.ExternalAddress = &val
 		}
 	}
 

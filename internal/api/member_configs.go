@@ -63,12 +63,12 @@ func memberConfigPatch(siteManagerState *state.SiteManagerState) types.EndpointH
 			return response.BadRequest(err)
 		}
 
-		if payload.HTTPSAddress == "" && payload.ExternalAddress == "" {
+		if payload.HTTPSAddress == nil && payload.ExternalAddress == nil {
 			return response.BadRequest(fmt.Errorf("no fields provided to update"))
 		}
 
-		if payload.ExternalAddress != "" {
-			_, err = microTypes.ParseAddrPort(payload.ExternalAddress)
+		if payload.ExternalAddress != nil && *payload.ExternalAddress != "" {
+			_, err = microTypes.ParseAddrPort(*payload.ExternalAddress)
 			if err != nil {
 				return response.BadRequest(fmt.Errorf("invalid external_address for member %q: %w", memberName, err))
 			}
@@ -82,8 +82,8 @@ func memberConfigPatch(siteManagerState *state.SiteManagerState) types.EndpointH
 			return response.InternalError(fmt.Errorf("failed to get local client: %w", err))
 		}
 
-		if payload.HTTPSAddress != "" {
-			newAddress, err := microTypes.ParseAddrPort(payload.HTTPSAddress)
+		if payload.HTTPSAddress != nil {
+			newAddress, err := microTypes.ParseAddrPort(*payload.HTTPSAddress)
 			if err != nil {
 				return response.BadRequest(fmt.Errorf("invalid https_address for member %q: %w", memberName, err))
 			}
@@ -155,8 +155,8 @@ func memberConfigPatch(siteManagerState *state.SiteManagerState) types.EndpointH
 
 			// if no external address is provided, keep the existing one
 			externalAddress := dbConfigs[0].ExternalAddress
-			if payload.ExternalAddress != "" {
-				externalAddress = payload.ExternalAddress
+			if payload.ExternalAddress != nil {
+				externalAddress = *payload.ExternalAddress
 			}
 
 			serverConfigs, err := client.GetDaemonServerConfigs(r.Context(), localClient)
@@ -238,8 +238,8 @@ func toMemberConfigsAPI(dbConfigs []database.ManagerMemberConfig) []types.Member
 		memberConfigs = append(memberConfigs, types.MemberConfig{
 			Target: c.Target,
 			MemberConfigPatch: types.MemberConfigPatch{
-				HTTPSAddress:    c.HTTPSAddress,
-				ExternalAddress: c.ExternalAddress,
+				HTTPSAddress:    &c.HTTPSAddress,
+				ExternalAddress: &c.ExternalAddress,
 			},
 		})
 	}
