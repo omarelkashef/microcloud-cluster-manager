@@ -30,6 +30,9 @@ func (c *cmdExternalSiteJoinToken) command() *cobra.Command {
 	var cmdShow = cmdExternalSiteJoinTokenShow{common: c.common}
 	cmd.AddCommand(cmdShow.command())
 
+	var cmdRevoke = cmdExternalSiteJoinTokenRevoke{common: c.common}
+	cmd.AddCommand(cmdRevoke.command())
+
 	return cmd
 }
 
@@ -163,4 +166,46 @@ func (c *cmdExternalSiteJoinTokenShow) run(cmd *cobra.Command, args []string) er
 
 	sort.Sort(lxdCmd.SortColumnsNaturally(rows))
 	return lxdCmd.RenderTable(lxdCmd.TableFormatTable, headers, rows, tokens)
+}
+
+type cmdExternalSiteJoinTokenRevoke struct {
+	common *CmdControl
+}
+
+func (c *cmdExternalSiteJoinTokenRevoke) command() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "revoke <site_name>",
+		Short: "Revoke the external site join token with the given LXD site name.",
+		Example: `
+			lxd-site-mgr external-site-join-token revoke <site_name>
+			Will render the specific external site join token invalid.
+		`,
+		RunE: c.run,
+	}
+
+	return cmd
+}
+
+func (c *cmdExternalSiteJoinTokenRevoke) run(cmd *cobra.Command, args []string) error {
+	m, err := microcluster.App(microcluster.Args{
+		StateDir: c.common.FlagStateDir,
+		Verbose:  c.common.FlagLogVerbose,
+		Debug:    c.common.FlagLogDebug,
+		Version:  version.Version(),
+	})
+
+	if err != nil {
+		return err
+	}
+
+	cli, err := m.LocalClient()
+	if err != nil {
+		return err
+	}
+
+	if len(args) < 1 {
+		return cmd.Help()
+	}
+
+	return client.ExternalSiteJoinTokenDeleteCmd(cmd.Context(), cli, args[0])
 }

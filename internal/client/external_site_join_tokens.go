@@ -42,3 +42,18 @@ func ExternalSiteJoinTokenGetCmd(ctx context.Context, c *client.Client) ([]types
 
 	return tokens, nil
 }
+
+// ExternalSiteJoinTokenDeleteCmd sends a DELETE request to /1.0/external-site-join-token/{siteName}.
+func ExternalSiteJoinTokenDeleteCmd(ctx context.Context, c *client.Client, siteName string) error {
+	queryCtx, cancel := context.WithTimeout(ctx, time.Second*30)
+	defer cancel()
+
+	url := api.NewURL().Path("external-site-join-token", siteName)
+	err := c.Query(queryCtx, "DELETE", types.APIVersionPrefix, url, nil, nil)
+	if err != nil {
+		clientURL := c.URL()
+		return fmt.Errorf("Failed performing action on %q: %w", clientURL.String(), err)
+	}
+
+	return nil
+}
