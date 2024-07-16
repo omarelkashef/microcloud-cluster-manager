@@ -1,4 +1,4 @@
-import { FC, MouseEvent, useState } from "react";
+import { FC, MouseEvent } from "react";
 import {
   AppNavigation,
   AppNavigationBar,
@@ -10,21 +10,17 @@ import classnames from "classnames";
 import Logo from "./Logo";
 import NavLink from "components/NavLink";
 import { useMenuCollapsed } from "context/menuCollapsed";
-import { isWidthBelow } from "util/helpers";
+import { isWidthBelow, logout } from "util/helpers";
+import { useAuth } from "context/auth";
 
 const Navigation: FC = () => {
   const isSmallScreen = () => isWidthBelow(620);
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const { menuCollapsed, setMenuCollapsed } = useMenuCollapsed();
+  const { isAuthenticated } = useAuth();
 
   const handleLogout = () => {
-    setIsAuthenticated(false);
+    logout();
     softToggleMenu();
-  };
-
-  const handleLogin = () => {
-    setIsAuthenticated(true);
-    softToggleMenu;
   };
 
   const softToggleMenu = () => {
@@ -37,6 +33,10 @@ const Navigation: FC = () => {
     setMenuCollapsed((prev) => !prev);
     e.stopPropagation();
   };
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <>
@@ -77,82 +77,54 @@ const Navigation: FC = () => {
         >
           <div className="p-side-navigation--icons is-dark">
             <ul className="p-side-navigation__list sidenav-top-ul">
-              {isAuthenticated && (
-                <>
-                  <li>
-                    <NavLink
-                      to={`/ui/sites`}
-                      title={`Clusters List`}
-                      onClick={softToggleMenu}
-                    >
-                      <img
-                        src="/ui/assets/img/cluster-icon.svg"
-                        alt="cluster-icon"
-                        className="p-side-navigation__icon"
-                      />
-                      Clusters
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink
-                      to={`/ui/settings`}
-                      title={`Settings`}
-                      onClick={softToggleMenu}
-                    >
-                      <Icon
-                        className="is-light p-side-navigation__icon"
-                        name="settings"
-                      />
-                      Settings
-                    </NavLink>
-                  </li>
-                </>
-              )}
-              {!isAuthenticated && (
-                <li>
-                  <NavLink to="/ui/login" title="Login" onClick={handleLogin}>
-                    <Icon
-                      className="is-light p-side-navigation__icon"
-                      name="profile"
-                    />
-                    Login
-                  </NavLink>
-                </li>
-              )}
+              <li>
+                <NavLink
+                  to={`/ui/sites`}
+                  title={`Sites List`}
+                  onClick={softToggleMenu}
+                >
+                  <img
+                    src="/ui/assets/img/cluster-icon.svg"
+                    alt="cluster-icon"
+                    className="p-side-navigation__icon"
+                  />
+                  Clusters
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to={`/ui/settings`}
+                  title={`Settings`}
+                  onClick={softToggleMenu}
+                >
+                  <Icon
+                    className="is-light p-side-navigation__icon"
+                    name="settings"
+                  />
+                  Settings
+                </NavLink>
+              </li>
             </ul>
-            <ul
-              className={classnames(
-                "p-side-navigation__list sidenav-bottom-ul",
-                {
-                  "authenticated-nav": isAuthenticated,
-                },
-              )}
-            >
+            <ul className="p-side-navigation__list sidenav-bottom-ul">
               <hr className="is-dark navigation-hr" />
-              {isAuthenticated && (
-                <li className="p-side-navigation__item">
-                  <a
-                    className="p-side-navigation__link"
-                    title="Log out"
-                    onClick={handleLogout}
-                  >
-                    <Icon
-                      className="is-light p-side-navigation__icon p-side-logout"
-                      name="export"
-                    />
-                    Log out
-                  </a>
-                </li>
-              )}
+              <li className="p-side-navigation__item">
+                <a
+                  className="p-side-navigation__link"
+                  title="Log out"
+                  onClick={handleLogout}
+                >
+                  <Icon
+                    className="is-light p-side-navigation__icon p-side-logout"
+                    name="export"
+                  />
+                  Log out
+                </a>
+              </li>
             </ul>
           </div>
         </Panel>
 
-        <div
-          className={classnames("sidenav-toggle-wrapper", {
-            "authenticated-nav": isAuthenticated,
-          })}
-        >
+        <div className="sidenav-toggle-wrapper">
           <Button
             appearance="base"
             aria-label={`${

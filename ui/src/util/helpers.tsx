@@ -55,3 +55,10 @@ export const isoTimeToString = (isoTime: string): string => {
     minute: "2-digit",
   });
 };
+
+export const logout = (): void =>
+  void fetch("/oidc/logout").then(() => {
+    if (!window.location.href.includes("/ui/login")) {
+      window.location.href = "/ui/login";
+    }
+  });
