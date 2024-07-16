@@ -10,25 +10,42 @@ import (
 
 	"github.com/canonical/lxd/lxd/response"
 	"github.com/canonical/microcluster/rest"
-	"github.com/canonical/microcluster/state"
+	microState "github.com/canonical/microcluster/state"
 	"github.com/gorilla/mux"
 
 	"github.com/canonical/lxd-site-manager/internal/api/types"
 	"github.com/canonical/lxd-site-manager/internal/database"
+	"github.com/canonical/lxd-site-manager/internal/state"
 )
 
-var sitesCmd = rest.Endpoint{
-	Path: "sites",
-	Get:  rest.EndpointAction{Handler: sitesGet, AllowUntrusted: true},
+func sitesCmd(s *state.SiteManagerState) rest.Endpoint {
+	return rest.Endpoint{
+		Path: "sites",
+		Get: rest.EndpointAction{
+			Handler:        sitesGet,
+			AllowUntrusted: true,
+			AccessHandler:  authHandler(s),
+		},
+	}
 }
 
-var siteCmd = rest.Endpoint{
-	Path:   "sites/{siteName}",
-	Get:    rest.EndpointAction{Handler: siteGet, AllowUntrusted: true},
-	Delete: rest.EndpointAction{Handler: siteDelete, AllowUntrusted: true},
+func siteCmd(s *state.SiteManagerState) rest.Endpoint {
+	return rest.Endpoint{
+		Path: "sites/{siteName}",
+		Get: rest.EndpointAction{
+			Handler:        siteGet,
+			AllowUntrusted: true,
+			AccessHandler:  authHandler(s),
+		},
+		Delete: rest.EndpointAction{
+			Handler:        siteDelete,
+			AllowUntrusted: true,
+			AccessHandler:  authHandler(s),
+		},
+	}
 }
 
-func sitesGet(s state.State, r *http.Request) response.Response {
+func sitesGet(s microState.State, r *http.Request) response.Response {
 	var dbSiteDetails []database.CoreSiteWithDetails
 
 	err := s.Database().Transaction(r.Context(), func(ctx context.Context, tx *sql.Tx) error {
@@ -49,7 +66,7 @@ func sitesGet(s state.State, r *http.Request) response.Response {
 	return response.SyncResponse(true, result)
 }
 
-func siteGet(s state.State, r *http.Request) response.Response {
+func siteGet(s microState.State, r *http.Request) response.Response {
 	siteName, err := url.PathUnescape(mux.Vars(r)["siteName"])
 	if err != nil {
 		return response.SmartError(err)
@@ -78,7 +95,7 @@ func siteGet(s state.State, r *http.Request) response.Response {
 	return response.SyncResponse(true, result[0])
 }
 
-func siteDelete(s state.State, r *http.Request) response.Response {
+func siteDelete(s microState.State, r *http.Request) response.Response {
 	siteName, err := url.PathUnescape(mux.Vars(r)["siteName"])
 	if err != nil {
 		return response.SmartError(err)

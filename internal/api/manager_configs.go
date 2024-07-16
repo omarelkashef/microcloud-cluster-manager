@@ -23,9 +23,17 @@ import (
 
 var managerConfigsCmd = func(s *state.SiteManagerState) rest.Endpoint {
 	return rest.Endpoint{
-		Path:  "config",
-		Patch: rest.EndpointAction{Handler: managerConfigPatch(s), AllowUntrusted: true},
-		Get:   rest.EndpointAction{Handler: managerConfigsGet, AllowUntrusted: true},
+		Path: "config",
+		Patch: rest.EndpointAction{
+			Handler:        managerConfigPatch(s),
+			AllowUntrusted: true,
+			AccessHandler:  authHandler(s),
+		},
+		Get: rest.EndpointAction{
+			Handler:        managerConfigsGet,
+			AllowUntrusted: true,
+			AccessHandler:  authHandler(s),
+		},
 	}
 }
 

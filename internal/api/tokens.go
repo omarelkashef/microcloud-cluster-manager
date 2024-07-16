@@ -12,25 +12,38 @@ import (
 	"github.com/canonical/lxd/lxd/response"
 	"github.com/canonical/lxd/shared"
 	"github.com/canonical/microcluster/rest"
-	"github.com/canonical/microcluster/state"
+	microState "github.com/canonical/microcluster/state"
 	"github.com/gorilla/mux"
 
 	"github.com/canonical/lxd-site-manager/internal/api/types"
 	"github.com/canonical/lxd-site-manager/internal/database"
+	"github.com/canonical/lxd-site-manager/internal/state"
 )
 
-var externalSiteJoinTokensCmd = rest.Endpoint{
-	Path: "external-site-join-token",
-	Post: rest.EndpointAction{Handler: tokenPost, AllowUntrusted: true},
-	Get:  rest.EndpointAction{Handler: tokenGet, AllowUntrusted: true},
+func externalSiteJoinTokensCmd(s *state.SiteManagerState) rest.Endpoint {
+	return rest.Endpoint{
+		Path: "external-site-join-token",
+		Post: rest.EndpointAction{
+			Handler:        tokenPost,
+			AllowUntrusted: true,
+			AccessHandler:  authHandler(s),
+		},
+		Get: rest.EndpointAction{Handler: tokenGet, AllowUntrusted: true},
+	}
 }
 
-var externalSiteJoinTokenCmd = rest.Endpoint{
-	Path:   "external-site-join-token/{siteName}",
-	Delete: rest.EndpointAction{Handler: tokenDelete, AllowUntrusted: true},
+func externalSiteJoinTokenCmd(s *state.SiteManagerState) rest.Endpoint {
+	return rest.Endpoint{
+		Path: "external-site-join-token/{siteName}",
+		Delete: rest.EndpointAction{
+			Handler:        tokenDelete,
+			AllowUntrusted: true,
+			AccessHandler:  authHandler(s),
+		},
+	}
 }
 
-func tokenPost(s state.State, r *http.Request) response.Response {
+func tokenPost(s microState.State, r *http.Request) response.Response {
 	payload := types.ExternalSiteTokenPost{}
 
 	err := json.NewDecoder(r.Body).Decode(&payload)
@@ -100,7 +113,7 @@ func tokenPost(s state.State, r *http.Request) response.Response {
 	return response.SyncResponse(true, types.ExternalSiteTokenPostResponse{Token: encodedToken})
 }
 
-func tokenGet(s state.State, r *http.Request) response.Response {
+func tokenGet(s microState.State, r *http.Request) response.Response {
 	var tokens []database.CoreSiteToken
 	err := s.Database().Transaction(r.Context(), func(ctx context.Context, tx *sql.Tx) error {
 		var err error
@@ -124,7 +137,7 @@ func tokenGet(s state.State, r *http.Request) response.Response {
 	return response.SyncResponse(true, responseTokens)
 }
 
-func tokenDelete(s state.State, r *http.Request) response.Response {
+func tokenDelete(s microState.State, r *http.Request) response.Response {
 	siteName, err := url.PathUnescape(mux.Vars(r)["siteName"])
 	if err != nil {
 		return response.SmartError(err)
@@ -146,7 +159,7 @@ func tokenDelete(s state.State, r *http.Request) response.Response {
 }
 
 // getSiteManagerAddresses returns the addresses of the site managers that are online.
-func getSiteManagerAddresses(ctx context.Context, s state.State) ([]string, error) {
+func getSiteManagerAddresses(ctx context.Context, s microState.State) ([]string, error) {
 	globalAddress, err := getGlobalAddress(s)
 	if err != nil {
 		return nil, err
@@ -164,7 +177,7 @@ func getSiteManagerAddresses(ctx context.Context, s state.State) ([]string, erro
 	return getLeaderPrioritisedAddresses(ctx, s, memberConfigs)
 }
 
-func getGlobalAddress(s state.State) (string, error) {
+func getGlobalAddress(s microState.State) (string, error) {
 	var globalAddress string
 	err := s.Database().Transaction(context.Background(), func(ctx context.Context, tx *sql.Tx) error {
 		var err error
@@ -185,7 +198,7 @@ func getGlobalAddress(s state.State) (string, error) {
 	return globalAddress, nil
 }
 
-func getMemberConfigs(s state.State) ([]database.ManagerMemberConfig, error) {
+func getMemberConfigs(s microState.State) ([]database.ManagerMemberConfig, error) {
 	var memberConfigs []database.ManagerMemberConfig
 	err := s.Database().Transaction(context.Background(), func(ctx context.Context, tx *sql.Tx) error {
 		var err error
@@ -201,7 +214,7 @@ func getMemberConfigs(s state.State) ([]database.ManagerMemberConfig, error) {
 }
 
 // getLeaderPrioritisedAddresses returns the addresses of site manager members (external if any is set) with the leader as the first address.
-func getLeaderPrioritisedAddresses(ctx context.Context, s state.State, memberConfigs []database.ManagerMemberConfig) ([]string, error) {
+func getLeaderPrioritisedAddresses(ctx context.Context, s microState.State, memberConfigs []database.ManagerMemberConfig) ([]string, error) {
 	hasExternalAddresses := checkExternalAddresses(memberConfigs)
 	leaderName, onlineMembers, err := getLeaderAndOnlineMembers(ctx, s)
 	if err != nil {
@@ -256,7 +269,7 @@ func checkExternalAddresses(memberConfigs []database.ManagerMemberConfig) bool {
 	return false
 }
 
-func getLeaderAndOnlineMembers(ctx context.Context, s state.State) (leaderName string, onlineMembers map[string]bool, err error) {
+func getLeaderAndOnlineMembers(ctx context.Context, s microState.State) (leaderName string, onlineMembers map[string]bool, err error) {
 	leaderClient, err := s.Leader()
 	if err != nil {
 		return "", onlineMembers, err

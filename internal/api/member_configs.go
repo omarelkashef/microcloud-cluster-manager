@@ -24,15 +24,29 @@ import (
 
 func memberConfigCmd(s *state.SiteManagerState) rest.Endpoint {
 	return rest.Endpoint{
-		Path:  "member/{name}/config",
-		Patch: rest.EndpointAction{Handler: memberConfigPatch(s), AllowUntrusted: true},
-		Get:   rest.EndpointAction{Handler: memberConfigGet, AllowUntrusted: true},
+		Path: "member/{name}/config",
+		Patch: rest.EndpointAction{
+			Handler:        memberConfigPatch(s),
+			AllowUntrusted: true,
+			AccessHandler:  authHandler(s),
+		},
+		Get: rest.EndpointAction{
+			Handler:        memberConfigGet,
+			AllowUntrusted: true,
+			AccessHandler:  authHandler(s),
+		},
 	}
 }
 
-var memberConfigsCmd = rest.Endpoint{
-	Path: "member/config",
-	Get:  rest.EndpointAction{Handler: memberConfigsGet, AllowUntrusted: true},
+func memberConfigsCmd(s *state.SiteManagerState) rest.Endpoint {
+	return rest.Endpoint{
+		Path: "member/config",
+		Get: rest.EndpointAction{
+			Handler:        memberConfigsGet,
+			AllowUntrusted: true,
+			AccessHandler:  authHandler(s),
+		},
+	}
 }
 
 // update existing member configs.
