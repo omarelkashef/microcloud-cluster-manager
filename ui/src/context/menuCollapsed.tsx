@@ -12,6 +12,8 @@ export const useMenuCollapsed = () => {
     if (isSmallScreen()) {
       return;
     }
+
+    setMenuCollapsed(isMediumScreen());
   };
 
   useEventListener("resize", collapseOnMediumScreen);

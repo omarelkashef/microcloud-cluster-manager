@@ -1,13 +1,18 @@
 import { FC } from "react";
 import { Link, LoginPageLayout } from "@canonical/react-components";
+import BaseLayout from "components/BaseLayout";
 
 const Login: FC = () => {
+  const postLoginPath = "/ui";
+
   return (
-    <LoginPageLayout title="Login to LXD site manager">
-      <Link href="/oidc/sites" className="p-button">
-        Login
-      </Link>
-    </LoginPageLayout>
+    <BaseLayout title="">
+      <LoginPageLayout title="Login to LXD site manager">
+        <Link href={`/oidc/login?next=${postLoginPath}`} className="p-button">
+          Login
+        </Link>
+      </LoginPageLayout>
+    </BaseLayout>
   );
 };
 

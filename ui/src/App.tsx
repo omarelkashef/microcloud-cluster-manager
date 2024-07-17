@@ -1,32 +1,23 @@
 import React, { FC, lazy, Suspense } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { queryKeys } from "util/queryKeys";
-import { fetchClusters } from "api/clusters";
 import NoMatch from "pages/NoMatch";
 import Settings from "pages/Settings";
+import { useAuth } from "context/auth";
 
 const ClusterList = lazy(() => import("pages/clusters/ClusterList"));
 const Login = lazy(() => import("pages/Login"));
 
 const App: FC = () => {
   const { pathname } = useLocation();
-
-  const { error, isLoading } = useQuery({
-    queryKey: [queryKeys.clusters],
-    queryFn: fetchClusters,
-    retry: false,
-  });
-
-  const isAuthError = error?.message === "not authorized";
+  const { isAuthLoading, isAuthenticated } = useAuth();
   const isLoginPath = pathname === "/ui/login";
 
-  if (!isLoading && !isLoginPath && isAuthError) {
+  if (!isAuthLoading && !isLoginPath && !isAuthenticated) {
     window.location.href = "/ui/login";
     return null;
   }
 
-  if (!isLoading && isLoginPath && !isAuthError) {
+  if (!isAuthLoading && isLoginPath && isAuthenticated) {
     window.location.href = "/ui/sites";
     return null;
   }
