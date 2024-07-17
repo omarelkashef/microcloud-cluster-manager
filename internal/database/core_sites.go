@@ -9,7 +9,6 @@ import (
 //
 //go:generate mapper stmt -d github.com/canonical/microcluster/cluster -e core_site objects table=core_sites
 //go:generate mapper stmt -d github.com/canonical/microcluster/cluster -e core_site objects-by-Name table=core_sites
-//go:generate mapper stmt -d github.com/canonical/microcluster/cluster -e core_site objects-by-SiteCertificate table=core_sites
 //go:generate mapper stmt -d github.com/canonical/microcluster/cluster -e core_site id table=core_sites
 //go:generate mapper stmt -d github.com/canonical/microcluster/cluster -e core_site create table=core_sites
 //go:generate mapper stmt -d github.com/canonical/microcluster/cluster -e core_site delete-by-Name table=core_sites
@@ -26,7 +25,7 @@ import (
 // CoreSite represents data about a site that would be common across all microcluster based projects.
 type CoreSite struct {
 	Name            string `db:"primary=yes"`
-	SiteCertificate string `db:"primary=yes"`
+	SiteCertificate string
 	ID              int64
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
@@ -34,6 +33,5 @@ type CoreSite struct {
 
 // CoreSiteFilter is a required struct for use with lxd-generate. It is used for filtering fields on database fetches.
 type CoreSiteFilter struct {
-	Name            *string
-	SiteCertificate *string
+	Name *string
 }
