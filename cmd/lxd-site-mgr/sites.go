@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
+	"github.com/canonical/lxd-site-manager/internal/api/types"
 	"github.com/canonical/lxd-site-manager/internal/client"
 	"github.com/canonical/lxd-site-manager/version"
 )
@@ -39,6 +40,12 @@ func (c *cmdSite) command() *cobra.Command {
 	}
 
 	cmd.AddCommand(siteShowCmd.command())
+
+	siteEdit := &cmdSiteEdit{
+		common: c.common,
+	}
+
+	cmd.AddCommand(siteEdit.command())
 
 	return cmd
 }
@@ -162,4 +169,62 @@ func (c *cmdSiteShow) run(cmd *cobra.Command, args []string) error {
 	}
 
 	return yaml.NewEncoder(os.Stdout).Encode(site)
+}
+
+type cmdSiteEdit struct {
+	common *CmdControl
+
+	flagStatus string
+}
+
+func (c *cmdSiteEdit) command() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "edit <site_name>",
+		Short: "Edit the data of a site",
+		Example: `
+			lxd-site-mgr site edit <site_name> --status=ACTIVE
+			Will modify the status data attribute for the specified site.
+		`,
+		RunE: c.run,
+	}
+
+	cmd.Flags().StringVar(&c.flagStatus, "status", "", "Set the status of the site, can be ACTIVE or PENDING_APPROVAL")
+
+	return cmd
+}
+
+func (c *cmdSiteEdit) run(cmd *cobra.Command, args []string) error {
+	m, err := microcluster.App(microcluster.Args{
+		StateDir: c.common.FlagStateDir,
+		Verbose:  c.common.FlagLogVerbose,
+		Debug:    c.common.FlagLogDebug,
+		Version:  version.Version(),
+	})
+
+	if err != nil {
+		return err
+	}
+
+	if len(args) < 1 {
+		return cmd.Help()
+	}
+
+	cli, err := m.LocalClient()
+	if err != nil {
+		return err
+	}
+
+	payload := &types.SitePatch{}
+	dataFlagsCount := 0
+
+	if c.flagStatus != "" {
+		payload.Status = types.SiteStatus(c.flagStatus)
+		dataFlagsCount++
+	}
+
+	if dataFlagsCount == 0 {
+		return errors.New("at least one data flag must be provided")
+	}
+
+	return client.SitePatchCmd(cmd.Context(), cli, args[0], payload)
 }

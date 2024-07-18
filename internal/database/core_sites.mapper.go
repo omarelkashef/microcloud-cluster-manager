@@ -20,26 +20,19 @@ var _ = api.ServerEnvironment{}
 var coreSiteObjects = cluster.RegisterStmt(`
 SELECT core_sites.name, core_sites.site_certificate, core_sites.id, core_sites.created_at, core_sites.updated_at
   FROM core_sites
-  ORDER BY core_sites.name, core_sites.site_certificate
+  ORDER BY core_sites.name
 `)
 
 var coreSiteObjectsByName = cluster.RegisterStmt(`
 SELECT core_sites.name, core_sites.site_certificate, core_sites.id, core_sites.created_at, core_sites.updated_at
   FROM core_sites
   WHERE ( core_sites.name = ? )
-  ORDER BY core_sites.name, core_sites.site_certificate
-`)
-
-var coreSiteObjectsBySiteCertificate = cluster.RegisterStmt(`
-SELECT core_sites.name, core_sites.site_certificate, core_sites.id, core_sites.created_at, core_sites.updated_at
-  FROM core_sites
-  WHERE ( core_sites.site_certificate = ? )
-  ORDER BY core_sites.name, core_sites.site_certificate
+  ORDER BY core_sites.name
 `)
 
 var coreSiteID = cluster.RegisterStmt(`
 SELECT core_sites.id FROM core_sites
-  WHERE core_sites.name = ? AND core_sites.site_certificate = ?
+  WHERE core_sites.name = ?
 `)
 
 var coreSiteCreate = cluster.RegisterStmt(`
@@ -132,31 +125,7 @@ func GetCoreSites(ctx context.Context, tx *sql.Tx, filters ...CoreSiteFilter) ([
 	}
 
 	for i, filter := range filters {
-		if filter.SiteCertificate != nil && filter.Name == nil {
-			args = append(args, []any{filter.SiteCertificate}...)
-			if len(filters) == 1 {
-				sqlStmt, err = cluster.Stmt(tx, coreSiteObjectsBySiteCertificate)
-				if err != nil {
-					return nil, fmt.Errorf("Failed to get \"coreSiteObjectsBySiteCertificate\" prepared statement: %w", err)
-				}
-
-				break
-			}
-
-			query, err := cluster.StmtString(coreSiteObjectsBySiteCertificate)
-			if err != nil {
-				return nil, fmt.Errorf("Failed to get \"coreSiteObjects\" prepared statement: %w", err)
-			}
-
-			parts := strings.SplitN(query, "ORDER BY", 2)
-			if i == 0 {
-				copy(queryParts[:], parts)
-				continue
-			}
-
-			_, where, _ := strings.Cut(parts[0], "WHERE")
-			queryParts[0] += "OR" + where
-		} else if filter.Name != nil && filter.SiteCertificate == nil {
+		if filter.Name != nil {
 			args = append(args, []any{filter.Name}...)
 			if len(filters) == 1 {
 				sqlStmt, err = cluster.Stmt(tx, coreSiteObjectsByName)
@@ -180,7 +149,7 @@ func GetCoreSites(ctx context.Context, tx *sql.Tx, filters ...CoreSiteFilter) ([
 
 			_, where, _ := strings.Cut(parts[0], "WHERE")
 			queryParts[0] += "OR" + where
-		} else if filter.Name == nil && filter.SiteCertificate == nil {
+		} else if filter.Name == nil {
 			return nil, fmt.Errorf("Cannot filter on empty CoreSiteFilter")
 		} else {
 			return nil, fmt.Errorf("No statement exists for the given Filter")
@@ -204,10 +173,9 @@ func GetCoreSites(ctx context.Context, tx *sql.Tx, filters ...CoreSiteFilter) ([
 
 // GetCoreSite returns the core_site with the given key.
 // generator: core_site GetOne
-func GetCoreSite(ctx context.Context, tx *sql.Tx, name string, siteCertificate string) (*CoreSite, error) {
+func GetCoreSite(ctx context.Context, tx *sql.Tx, name string) (*CoreSite, error) {
 	filter := CoreSiteFilter{}
 	filter.Name = &name
-	filter.SiteCertificate = &siteCertificate
 
 	objects, err := GetCoreSites(ctx, tx, filter)
 	if err != nil {
@@ -226,13 +194,13 @@ func GetCoreSite(ctx context.Context, tx *sql.Tx, name string, siteCertificate s
 
 // GetCoreSiteID return the ID of the core_site with the given key.
 // generator: core_site ID
-func GetCoreSiteID(ctx context.Context, tx *sql.Tx, name string, siteCertificate string) (int64, error) {
+func GetCoreSiteID(ctx context.Context, tx *sql.Tx, name string) (int64, error) {
 	stmt, err := cluster.Stmt(tx, coreSiteID)
 	if err != nil {
 		return -1, fmt.Errorf("Failed to get \"coreSiteID\" prepared statement: %w", err)
 	}
 
-	row := stmt.QueryRowContext(ctx, name, siteCertificate)
+	row := stmt.QueryRowContext(ctx, name)
 	var id int64
 	err = row.Scan(&id)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -248,8 +216,8 @@ func GetCoreSiteID(ctx context.Context, tx *sql.Tx, name string, siteCertificate
 
 // CoreSiteExists checks if a core_site with the given key exists.
 // generator: core_site Exists
-func CoreSiteExists(ctx context.Context, tx *sql.Tx, name string, siteCertificate string) (bool, error) {
-	_, err := GetCoreSiteID(ctx, tx, name, siteCertificate)
+func CoreSiteExists(ctx context.Context, tx *sql.Tx, name string) (bool, error) {
+	_, err := GetCoreSiteID(ctx, tx, name)
 	if err != nil {
 		if api.StatusErrorCheck(err, http.StatusNotFound) {
 			return false, nil
@@ -265,7 +233,7 @@ func CoreSiteExists(ctx context.Context, tx *sql.Tx, name string, siteCertificat
 // generator: core_site Create
 func CreateCoreSite(ctx context.Context, tx *sql.Tx, object CoreSite) (int64, error) {
 	// Check if a core_site with the same key exists.
-	exists, err := CoreSiteExists(ctx, tx, object.Name, object.SiteCertificate)
+	exists, err := CoreSiteExists(ctx, tx, object.Name)
 	if err != nil {
 		return -1, fmt.Errorf("Failed to check for duplicates: %w", err)
 	}
@@ -331,8 +299,8 @@ func DeleteCoreSite(ctx context.Context, tx *sql.Tx, name string) error {
 
 // UpdateCoreSite updates the core_site matching the given key parameters.
 // generator: core_site Update
-func UpdateCoreSite(ctx context.Context, tx *sql.Tx, name string, siteCertificate string, object CoreSite) error {
-	id, err := GetCoreSiteID(ctx, tx, name, siteCertificate)
+func UpdateCoreSite(ctx context.Context, tx *sql.Tx, name string, object CoreSite) error {
+	id, err := GetCoreSiteID(ctx, tx, name)
 	if err != nil {
 		return err
 	}

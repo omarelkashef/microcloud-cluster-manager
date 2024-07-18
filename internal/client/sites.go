@@ -42,3 +42,18 @@ func GetSite(ctx context.Context, c *client.Client, siteName string) (*types.Sit
 
 	return &site, nil
 }
+
+// SitePatchCmd sends a client requets to PATCH /1.0/sites/{siteName} endpoint.
+func SitePatchCmd(ctx context.Context, c *client.Client, siteName string, payload *types.SitePatch) error {
+	queryCtx, cancel := context.WithTimeout(ctx, time.Second*30)
+	defer cancel()
+
+	url := api.NewURL().Path("sites", siteName)
+	err := c.Query(queryCtx, http.MethodPatch, types.APIVersionPrefix, url, payload, nil)
+	if err != nil {
+		clientURL := c.URL()
+		return fmt.Errorf("Failed performing action on %q: %w", clientURL.String(), err)
+	}
+
+	return nil
+}
