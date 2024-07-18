@@ -51,8 +51,9 @@ func tokenPost(s microState.State, r *http.Request) response.Response {
 		return response.BadRequest(err)
 	}
 
+	// default expiry to 1 day if not set
 	if payload.Expiry == (time.Time{}) {
-		return response.BadRequest(fmt.Errorf("token must have an expiry date"))
+		payload.Expiry = time.Now().Add(time.Hour * 24)
 	}
 
 	if payload.Expiry.Before(time.Now()) {
