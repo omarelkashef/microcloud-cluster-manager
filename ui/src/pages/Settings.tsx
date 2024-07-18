@@ -29,7 +29,7 @@ const Settings: FC = () => {
     "global.address": "",
   };
 
-  const defaultMemberConfigs: MemberOptions = {
+  const defaultMemberConfigs: MemberOptions["config"] = {
     https_address: "",
     external_address: "",
   };
@@ -87,7 +87,7 @@ const Settings: FC = () => {
 
     for (const memberConfig of memberConfigOptions) {
       const configKeys = Object.keys(defaultMemberConfigs) as Array<
-        keyof MemberOptions
+        keyof MemberOptions["config"]
       >;
 
       const currentMemberConfigRows = configKeys.map((key, index) => {
@@ -124,7 +124,7 @@ const Settings: FC = () => {
               content: (
                 <SettingForm
                   configField={key}
-                  value={memberConfig[key] || defaultMemberConfigs[key]}
+                  value={memberConfig.config[key] || defaultMemberConfigs[key]}
                   isLast={index === length - 1}
                   member={memberConfig.target}
                 />

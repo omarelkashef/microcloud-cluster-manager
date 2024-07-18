@@ -64,12 +64,15 @@ func memberConfigPatch(siteManagerState *state.SiteManagerState) types.EndpointH
 			return response.BadRequest(err)
 		}
 
-		if payload.HTTPSAddress == nil && payload.ExternalAddress == nil {
+		HTTPSAddress, hasHTTPSAddress := payload.Config[types.HTTPSAddress]
+		externalAddress, hasExternalAddress := payload.Config[types.ExternalAddress]
+
+		if !hasHTTPSAddress && !hasExternalAddress {
 			return response.BadRequest(fmt.Errorf("no fields provided to update"))
 		}
 
-		if payload.ExternalAddress != nil && *payload.ExternalAddress != "" {
-			_, err = microTypes.ParseAddrPort(*payload.ExternalAddress)
+		if hasExternalAddress && externalAddress != "" {
+			_, err = microTypes.ParseAddrPort(externalAddress)
 			if err != nil {
 				return response.BadRequest(fmt.Errorf("invalid external_address for member %q: %w", memberName, err))
 			}
@@ -83,8 +86,8 @@ func memberConfigPatch(siteManagerState *state.SiteManagerState) types.EndpointH
 			return response.InternalError(fmt.Errorf("failed to get client for member %q: %w", memberName, err))
 		}
 
-		if payload.HTTPSAddress != nil {
-			newAddress, err := microTypes.ParseAddrPort(*payload.HTTPSAddress)
+		if hasHTTPSAddress {
+			newAddress, err := microTypes.ParseAddrPort(HTTPSAddress)
 			if err != nil {
 				return response.BadRequest(fmt.Errorf("invalid https_address for member %q: %w", memberName, err))
 			}
@@ -92,6 +95,7 @@ func memberConfigPatch(siteManagerState *state.SiteManagerState) types.EndpointH
 			// the control listener address is stored in a member's local state directory
 			// we need to update the control listener address, we need to forward the request to the relevant member and let the update happen there
 			if memberName != clusterState.Name() {
+				queryClient.SetClusterNotification()
 				err = client.MemberConfigPatchCmd(r.Context(), queryClient, memberName, &payload)
 				if err != nil {
 					return response.InternalError(fmt.Errorf("failed to update member %q config: %w", memberName, err))
@@ -144,9 +148,8 @@ func memberConfigPatch(siteManagerState *state.SiteManagerState) types.EndpointH
 			}
 
 			// if no external address is provided, keep the existing one
-			externalAddress := dbConfigs[0].ExternalAddress
-			if payload.ExternalAddress != nil {
-				externalAddress = *payload.ExternalAddress
+			if !hasExternalAddress {
+				externalAddress = dbConfigs[0].ExternalAddress
 			}
 
 			serverConfigs, err := client.GetDaemonServerConfigs(r.Context(), queryClient)
@@ -228,8 +231,10 @@ func toMemberConfigsAPI(dbConfigs []database.ManagerMemberConfig) []types.Member
 		memberConfigs = append(memberConfigs, types.MemberConfig{
 			Target: c.Target,
 			MemberConfigPatch: types.MemberConfigPatch{
-				HTTPSAddress:    &c.HTTPSAddress,
-				ExternalAddress: &c.ExternalAddress,
+				Config: map[types.MemberConfigKey]string{
+					types.HTTPSAddress:    c.HTTPSAddress,
+					types.ExternalAddress: c.ExternalAddress,
+				},
 			},
 		})
 	}

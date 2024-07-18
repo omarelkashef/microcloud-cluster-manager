@@ -42,7 +42,7 @@ export const updateMemberConfigs = (
     fetch(`/1.0/member/${member}/config`, {
       method: "PATCH",
       body: JSON.stringify({
-        ...config,
+        config,
       }),
     })
       .then(handleResponse)

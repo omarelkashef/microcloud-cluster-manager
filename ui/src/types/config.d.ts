@@ -8,6 +8,8 @@ interface ManagerOptions {
 
 interface MemberOptions {
   target?: string;
-  https_address: string;
-  external_address?: string;
+  config: {
+    https_address: string;
+    external_address?: string;
+  };
 }
