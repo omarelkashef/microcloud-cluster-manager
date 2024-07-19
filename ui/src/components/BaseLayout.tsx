@@ -14,10 +14,16 @@ const BaseLayout: FC<Props> = ({
   controls,
   children,
   mainClassName,
+  contentClassName,
 }: Props) => {
   return (
     <AppMain className={mainClassName}>
-      <Panel title={title} controls={controls} wrapContent={true}>
+      <Panel
+        title={title}
+        controls={controls}
+        wrapContent={true}
+        contentClassName={contentClassName}
+      >
         {children}
       </Panel>
     </AppMain>

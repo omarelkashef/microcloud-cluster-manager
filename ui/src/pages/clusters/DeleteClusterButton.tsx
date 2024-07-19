@@ -28,6 +28,7 @@ const DeleteClusterButton: FC<Props> = ({ clusterName }) => {
 
   return (
     <ActionButton
+      className="u-no-margin--bottom"
       onClick={() => void handleDeleteCluster()}
       appearance="negative"
       loading={isLoading}

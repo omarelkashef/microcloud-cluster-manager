@@ -5,6 +5,7 @@ import Loader from "components/Loader";
 import { FC } from "react";
 import { isoTimeToString } from "util/helpers";
 import { queryKeys } from "util/queryKeys";
+import RevokeTokenButton from "./RevokeTokenButton";
 
 const ClusterListTokens: FC = () => {
   const { data: tokens = [], isLoading } = useQuery({
@@ -22,6 +23,9 @@ const ClusterListTokens: FC = () => {
     {
       content: "Created at",
     },
+    {
+      content: "Actions",
+    },
   ];
 
   const tableRows = tokens.map((token) => {
@@ -35,6 +39,9 @@ const ClusterListTokens: FC = () => {
         },
         {
           content: `${isoTimeToString(token.created_at)}`,
+        },
+        {
+          content: <RevokeTokenButton token={token} />,
         },
       ],
     };

@@ -10,3 +10,26 @@ export const fetchTokens = (): Promise<Token[]> => {
       .catch(reject);
   });
 };
+
+export const createToken = (body: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    fetch("/1.0/external-site-join-token", {
+      method: "POST",
+      body: body,
+    })
+      .then(handleResponse)
+      .then(resolve)
+      .catch(reject);
+  });
+};
+
+export const deleteToken = (siteName: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    fetch(`/1.0/external-site-join-token/${siteName}`, {
+      method: "DELETE",
+    })
+      .then(handleResponse)
+      .then(() => resolve())
+      .catch(reject);
+  });
+};

@@ -28,6 +28,7 @@ const ApproveClusterButton: FC<Props> = ({ clusterName }) => {
 
   return (
     <ActionButton
+      className="u-no-margin--bottom"
       onClick={() => void handleApproveCluster()}
       appearance="positive"
       loading={isLoading}

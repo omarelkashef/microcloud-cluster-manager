@@ -5,6 +5,7 @@ import { Application } from "@canonical/react-components";
 
 import Navigation from "./components/Navigation";
 import { AuthProvider } from "context/auth";
+import StatusBar from "components/StatusBar";
 
 const queryClient = new QueryClient();
 
@@ -15,6 +16,7 @@ const Root: FC = () => {
         <Application>
           <Navigation />
           <App />
+          <StatusBar />
         </Application>
       </AuthProvider>
     </QueryClientProvider>
