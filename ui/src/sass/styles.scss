@@ -4,12 +4,15 @@
 @import "pattern_navigation";
 @import "pattern_icon";
 @import "cluster_list";
+@import "forms";
 @import "breakpoints";
 @import "meter";
 @import "clustercpu";
 @import "settings_page";
 @import "doughnut_chart";
 @import "cluster_graphs";
+@import "scrollable_container";
+@import "status_bar";
 @include custom-p-icon;
 @include vf-p-icon-units;
 @include vf-p-icon-profile;
