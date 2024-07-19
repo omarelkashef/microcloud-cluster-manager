@@ -1,7 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { fetchClusters } from "api/clusters";
 import { createContext, FC, ReactNode, useContext } from "react";
-import { queryKeys } from "util/queryKeys";
+import { useServer } from "./useServer";
 
 interface ContextProps {
   isAuthenticated: boolean;
@@ -20,14 +18,9 @@ interface ProviderProps {
 }
 
 export const AuthProvider: FC<ProviderProps> = ({ children }) => {
-  // FIXME: this should query /1.0 when the endpoint is ready to check if the user is authenticated
-  const { error, isLoading } = useQuery({
-    queryKey: [queryKeys.clusters],
-    queryFn: fetchClusters,
-    retry: false,
-  });
+  const { data: server, isLoading } = useServer();
 
-  const isAuthenticated = !isLoading && error?.message !== "not authorized";
+  const isAuthenticated = !isLoading && !!server?.trusted;
 
   return (
     <AuthContext.Provider
