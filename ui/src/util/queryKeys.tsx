@@ -3,4 +3,5 @@ export const queryKeys = {
   managerConfigOptions: "managerConfigOptions",
   memberConfigOptions: "memberConfigOptions",
   tokens: "tokens",
+  server: "server",
 };
