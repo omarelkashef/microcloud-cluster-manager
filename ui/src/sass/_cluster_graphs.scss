@@ -1,15 +1,31 @@
+@import "./breakpoints";
+@import "./colors";
+
 $donut-size: 6.5rem;
 
-.cluster-status {
+.cluster-graphs {
+  align-items: center;
   display: flex;
-  flex-direction: row;
-  overflow: auto;
+  flex-wrap: wrap;
+  gap: $sph--large;
 
-  .cluster-status__chart {
-    width: $donut-size;
+  .cluster-status {
+    display: flex;
+
+    .cluster-status__chart {
+      width: $donut-size;
+    }
+
+    .cluster-status-legend {
+      margin-left: $sph--x-large;
+    }
   }
 
-  .cluster-status-legend {
-    margin-left: $sph--x-large;
+  .cluster-disk-bar {
+    fill: $disk-color;
+  }
+
+  .cluster-memory-bar {
+    fill: $memory-color;
   }
 }
