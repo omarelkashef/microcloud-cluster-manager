@@ -2,6 +2,7 @@ package state
 
 import (
 	"sync"
+	"time"
 
 	"github.com/canonical/microcluster/microcluster"
 
@@ -12,12 +13,19 @@ import (
 type ClusterManagerState struct {
 	// OIDCVerifier is the OpenID Connect verifier used for user authentication and validate authentication for protected API endpoints.
 	OIDCVerifier *oidc.Verifier
-	mu           sync.RWMutex
+	// CertificateCache is a map of certificate fingerprints to remote cluster certificates.
+	CertificatesCache *CertificatesCache
+	mu                sync.RWMutex
 }
 
 // New creates a new ClusterManagerState.
 func New(m *microcluster.MicroCluster) *ClusterManagerState {
-	return &ClusterManagerState{}
+	return &ClusterManagerState{
+		CertificatesCache: &CertificatesCache{
+			Certificates: make(map[string]*CertificateCacheEntry),
+			TTL:          time.Now().Add(60 * time.Second),
+		},
+	}
 }
 
 // SetOIDCVerifier sets the OIDCVerifier.
