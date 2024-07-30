@@ -14,7 +14,7 @@ import (
 	"github.com/canonical/lxd-cluster-manager/internal/state"
 )
 
-func authHandler(clusterManagerState *state.ClusterManagerState) types.AccessHandler {
+func oidcAuthHandler(clusterManagerState *state.ClusterManagerState) types.AccessHandler {
 	return func(clusterState microState.State, r *http.Request) (bool, response.Response) {
 		// always allow unix socket requests
 		if r.RemoteAddr == "@" {

@@ -27,12 +27,12 @@ var managerConfigsCmd = func(s *state.ClusterManagerState) rest.Endpoint {
 		Patch: rest.EndpointAction{
 			Handler:        managerConfigPatch(s),
 			AllowUntrusted: true,
-			AccessHandler:  authHandler(s),
+			AccessHandler:  oidcAuthHandler(s),
 		},
 		Get: rest.EndpointAction{
 			Handler:        managerConfigsGet,
 			AllowUntrusted: true,
-			AccessHandler:  authHandler(s),
+			AccessHandler:  oidcAuthHandler(s),
 		},
 	}
 }

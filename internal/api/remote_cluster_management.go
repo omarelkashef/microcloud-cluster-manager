@@ -25,7 +25,7 @@ func remoteClustersCmd(s *state.ClusterManagerState) rest.Endpoint {
 		Get: rest.EndpointAction{
 			Handler:        remoteClustersGet,
 			AllowUntrusted: true,
-			AccessHandler:  authHandler(s),
+			AccessHandler:  oidcAuthHandler(s),
 		},
 	}
 }
@@ -36,17 +36,17 @@ func remoteClusterCmd(s *state.ClusterManagerState) rest.Endpoint {
 		Get: rest.EndpointAction{
 			Handler:        remoteClusterGet,
 			AllowUntrusted: true,
-			AccessHandler:  authHandler(s),
+			AccessHandler:  oidcAuthHandler(s),
 		},
 		Delete: rest.EndpointAction{
 			Handler:        remoteClusterDelete,
 			AllowUntrusted: true,
-			AccessHandler:  authHandler(s),
+			AccessHandler:  oidcAuthHandler(s),
 		},
 		Patch: rest.EndpointAction{
 			Handler:        remoteClusterPatch,
 			AllowUntrusted: true,
-			AccessHandler:  authHandler(s),
+			AccessHandler:  oidcAuthHandler(s),
 		},
 	}
 }
