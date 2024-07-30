@@ -67,17 +67,7 @@ func remoteClustersStatusPost(managerState *state.ClusterManagerState) types.End
 				return fmt.Errorf("remote cluster is pending approval")
 			}
 
-			dbRemoteCluster.CPULoad1 = payload.CPULoad1
-			dbRemoteCluster.CPULoad5 = payload.CPULoad5
-			dbRemoteCluster.CPULoad15 = payload.CPULoad15
-			dbRemoteCluster.CPUTotalCount = payload.CPUTotalCount
-			dbRemoteCluster.DiskTotalSize = payload.DiskTotalSize
-			dbRemoteCluster.DiskUsage = payload.DiskUsage
-			dbRemoteCluster.InstanceCount, dbRemoteCluster.InstanceStatuses = parseStatusDistribution(payload.InstanceStatuses)
-			dbRemoteCluster.MemberCount, dbRemoteCluster.MemberStatuses = parseStatusDistribution(payload.MemberStatuses)
-			dbRemoteCluster.MemoryTotalAmount = payload.MemoryTotalAmount
-			dbRemoteCluster.MemoryUsage = payload.MemoryUsage
-			dbRemoteCluster.UpdatedAt = time.Now()
+			dbRemoteCluster.Put(payload)
 
 			err = database.UpdateRemoteClusterDetail(ctx, tx, remoteClusterID, *dbRemoteCluster)
 			if err != nil {
@@ -101,24 +91,6 @@ func remoteClustersStatusPost(managerState *state.ClusterManagerState) types.End
 			ClusterManagerAddresses: memberAddresses,
 		})
 	}
-}
-
-func parseStatusDistribution(statuses []types.StatusDistribution) (int64, string) {
-	if len(statuses) == 0 {
-		return 0, "[]"
-	}
-
-	parsedStatuses, err := json.Marshal(statuses)
-	if err != nil {
-		return 0, "[]"
-	}
-
-	var total int64
-	for _, s := range statuses {
-		total += s.Count
-	}
-
-	return total, string(parsedStatuses)
 }
 
 func remoteClustersPost(managerState *state.ClusterManagerState) types.EndpointHandler {

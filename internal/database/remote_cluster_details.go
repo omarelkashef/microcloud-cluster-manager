@@ -1,7 +1,10 @@
 package database
 
 import (
+	"encoding/json"
 	"time"
+
+	"github.com/canonical/lxd-cluster-manager/internal/api/types"
 )
 
 //go:generate -command mapper lxd-generate db mapper -t remote_cluster_details.mapper.go
@@ -41,7 +44,40 @@ type RemoteClusterDetail struct {
 	UpdatedAt           time.Time
 }
 
+// Put updates the RemoteClusterDetail with the provided payload.
+func (r *RemoteClusterDetail) Put(payload types.RemoteClusterStatusPost) {
+	r.CPULoad1 = payload.CPULoad1
+	r.CPULoad5 = payload.CPULoad5
+	r.CPULoad15 = payload.CPULoad15
+	r.CPUTotalCount = payload.CPUTotalCount
+	r.DiskTotalSize = payload.DiskTotalSize
+	r.DiskUsage = payload.DiskUsage
+	r.InstanceCount, r.InstanceStatuses = parseStatusDistribution(payload.InstanceStatuses)
+	r.MemberCount, r.MemberStatuses = parseStatusDistribution(payload.MemberStatuses)
+	r.MemoryTotalAmount = payload.MemoryTotalAmount
+	r.MemoryUsage = payload.MemoryUsage
+	r.UpdatedAt = time.Now()
+}
+
 // RemoteClusterDetailFilter is a required struct for use with lxd-generate. It is used for filtering fields on database fetches.
 type RemoteClusterDetailFilter struct {
 	CoreRemoteClusterID *int64
+}
+
+func parseStatusDistribution(statuses []types.StatusDistribution) (int64, string) {
+	if len(statuses) == 0 {
+		return 0, "[]"
+	}
+
+	parsedStatuses, err := json.Marshal(statuses)
+	if err != nil {
+		return 0, "[]"
+	}
+
+	var total int64
+	for _, s := range statuses {
+		total += s.Count
+	}
+
+	return total, string(parsedStatuses)
 }
