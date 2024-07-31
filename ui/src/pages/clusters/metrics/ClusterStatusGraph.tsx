@@ -34,9 +34,8 @@ const ClusterStatusGraph: FC = () => {
   }
 
   return (
-    <div className="cluster-status">
+    <div className="cluster-doughnut-graph">
       <DoughnutChart
-        className="cluster-status__chart"
         chartID="clusterStatus"
         segmentHoverWidth={45}
         segmentWidth={40}
@@ -47,25 +46,25 @@ const ClusterStatusGraph: FC = () => {
         ]}
         size={150}
       />
-      <div className="cluster-status-legend">
-        <div className="u-no-margin p-heading--5 u-no-padding">
+      <ul className="doughnut-chart__legend u-no-margin--left">
+        <li className="u-no-margin p-heading--5 u-no-padding">
           {totalClusters} clusters
-        </div>
-        <div>
+        </li>
+        <li>
           <Icon name="status-succeeded-small" />
           {getPercentageString(activeClusters)} Online
-        </div>
-        <div>
+        </li>
+        <li>
           <Icon name="status-waiting-small" />
           {getPercentageString(pendingClusters)}
           Pending
-        </div>
-        <div>
+        </li>
+        <li>
           <Icon name="status-failed-small" />
           {getPercentageString(degradedClusters)}
           Degraded
-        </div>
-      </div>
+        </li>
+      </ul>
     </div>
   );
 };

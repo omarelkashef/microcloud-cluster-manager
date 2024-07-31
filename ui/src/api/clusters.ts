@@ -11,6 +11,15 @@ export const fetchClusters = (): Promise<Cluster[]> => {
   });
 };
 
+export const fetchCluster = (remoteClusterName: string): Promise<Cluster> => {
+  return new Promise((resolve, reject) => {
+    fetch(`/1.0/remote-clusters/${remoteClusterName}`)
+      .then(handleResponse)
+      .then((data: LxdApiResponse<Cluster>) => resolve(data.metadata))
+      .catch(reject);
+  });
+};
+
 export const deleteCluster = (remoteClusterName: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     fetch(`/1.0/remote-clusters/${remoteClusterName}`, {

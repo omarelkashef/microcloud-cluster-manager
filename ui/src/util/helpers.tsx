@@ -1,4 +1,4 @@
-import { Cluster } from "types/cluster";
+import { Cluster, StatusDistribution } from "types/cluster";
 
 interface ErrorResponse {
   error_code: number;
@@ -20,6 +20,11 @@ export const isWidthBelow = (width: number): boolean =>
 export function getMinutesSinceLastHeartbeat(cluster: Cluster): number {
   const lastSeenTime = Date.parse(cluster.last_status_update_at);
   return Math.floor((Date.now() - lastSeenTime) / 60000);
+}
+
+export function getSecondsSinceLastHeartbeat(cluster: Cluster): number {
+  const lastSeenTime = Date.parse(cluster.last_status_update_at);
+  return Math.floor((Date.now() - lastSeenTime) / 1000);
 }
 
 export const humanFileSize = (bytes: number): string => {
@@ -109,4 +114,16 @@ export const convertToISOFormat = (datetimeLocalString: string) => {
 
   // Return the ISO 8601 formatted string
   return date.toISOString();
+};
+
+// this works only for words that form the plural by adding an "s" at the end
+export const pluralizeWord = (word: string, count: number): string => {
+  return count === 1 ? word : `${word}s`;
+};
+
+export const statusCount = (
+  distribution: StatusDistribution[],
+  status: string,
+) => {
+  return distribution.find((item) => item.status === status)?.count ?? 0;
 };

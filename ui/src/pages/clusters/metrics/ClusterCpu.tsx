@@ -1,11 +1,16 @@
 import { FC } from "react";
 import { Cluster } from "types/cluster";
+import classnames from "classnames";
 
 interface Props {
   cluster: Cluster;
+  containerClassname?: string;
 }
 
-export const ClusterCpu: FC<Props> = ({ cluster }: Props) => {
+export const ClusterCpu: FC<Props> = ({
+  cluster,
+  containerClassname,
+}: Props) => {
   const averageReadings = [
     cluster.cpu_load_1,
     cluster.cpu_load_5,
@@ -21,7 +26,7 @@ export const ClusterCpu: FC<Props> = ({ cluster }: Props) => {
   };
 
   return (
-    <div className="cpu-badges">
+    <div className={classnames("cpu-badges", containerClassname)}>
       {averageReadings.map((reading, index) => (
         <div
           key={index}

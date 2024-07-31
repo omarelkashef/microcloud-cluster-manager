@@ -31,6 +31,7 @@ var uiServeRoutes = []string{
 	"ui/clusters/create",
 	"ui/clusters/pending",
 	"ui/clusters/tokens",
+	"ui/cluster/{remoteClusterName}",
 	"ui/settings",
 }
 

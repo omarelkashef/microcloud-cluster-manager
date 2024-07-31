@@ -7,16 +7,11 @@ $donut-size: 6.5rem;
   align-items: center;
   display: flex;
   flex-wrap: wrap;
-  gap: $sph--large;
 
-  .cluster-status {
+  .cluster-doughnut-graph {
     display: flex;
 
-    .cluster-status__chart {
-      width: $donut-size;
-    }
-
-    .cluster-status-legend {
+    .doughnut-chart__legend {
       margin-left: $sph--x-large;
     }
   }
