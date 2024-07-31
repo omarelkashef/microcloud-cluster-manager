@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"sort"
+	"time"
 
 	cli "github.com/canonical/lxd/shared/cmd"
 	"github.com/canonical/microcluster/microcluster"
@@ -38,6 +39,8 @@ func (c *cmdSecrets) run(cmd *cobra.Command, args []string) error {
 
 type cmdTokensAdd struct {
 	common *CmdControl
+
+	flagExpiry time.Duration
 }
 
 func (c *cmdTokensAdd) command() *cobra.Command {
@@ -46,6 +49,8 @@ func (c *cmdTokensAdd) command() *cobra.Command {
 		Short: "Add a new join token under the given name",
 		RunE:  c.run,
 	}
+
+	cmd.Flags().DurationVar(&c.flagExpiry, "expiry", 0, "Specify the duration (i.e. 5m or 48h) for the token to be valid")
 
 	return cmd
 }
@@ -61,7 +66,7 @@ func (c *cmdTokensAdd) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	token, err := m.NewJoinToken(cmd.Context(), args[0])
+	token, err := m.NewJoinToken(cmd.Context(), args[0], c.flagExpiry)
 	if err != nil {
 		return err
 	}
