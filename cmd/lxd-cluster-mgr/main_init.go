@@ -10,7 +10,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/canonical/lxd-cluster-manager/internal/api"
-	"github.com/canonical/lxd-cluster-manager/version"
 )
 
 type cmdInit struct {
@@ -47,12 +46,7 @@ func (c *cmdInit) run(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
 	}
 
-	m, err := microcluster.App(microcluster.Args{
-		StateDir: c.common.FlagStateDir,
-		Verbose:  c.common.FlagLogVerbose,
-		Debug:    c.common.FlagLogDebug,
-		Version:  version.Version(),
-	})
+	m, err := microcluster.App(microcluster.Args{StateDir: c.common.FlagStateDir})
 
 	if err != nil {
 		return fmt.Errorf("Unable to configure cluster: %w", err)
