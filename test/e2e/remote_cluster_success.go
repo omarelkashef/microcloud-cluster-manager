@@ -185,7 +185,7 @@ func sendJoinRequest(env *helpers.Environment, tokenData types.RemoteClusterToke
 	defer cancel()
 
 	// generate dedicated lxd cert for Cluster Manager
-	clientCert, err := shared.KeyPairAndCA(env.CertDir(), tokenData.ServerName, shared.CertClient, false)
+	clientCert, err := shared.KeyPairAndCA(env.CertDir(), tokenData.ServerName, shared.CertClient, shared.CertOptions{AddHosts: false})
 	if err != nil {
 		return err
 	}
@@ -252,7 +252,7 @@ func sendStatusUpdate(env *helpers.Environment, tokenData types.RemoteClusterTok
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	clientCert, err := shared.KeyPairAndCA(env.CertDir(), tokenData.ServerName, shared.CertClient, false)
+	clientCert, err := shared.KeyPairAndCA(env.CertDir(), tokenData.ServerName, shared.CertClient, shared.CertOptions{AddHosts: false})
 	if err != nil {
 		return nil, err
 	}

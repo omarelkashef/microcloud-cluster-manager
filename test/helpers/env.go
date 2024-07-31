@@ -141,7 +141,7 @@ func (e *Environment) Cleanup() error {
 
 // GetClusterCert returns the cluster certificate from the state directory within the test environment.
 func (e *Environment) GetClusterCert() (*shared.CertInfo, error) {
-	cert, err := shared.KeyPairAndCA(e.StateDir(nil), "cluster", shared.CertServer, false)
+	cert, err := shared.KeyPairAndCA(e.StateDir(nil), "cluster", shared.CertServer, shared.CertOptions{AddHosts: false})
 	if err != nil {
 		return nil, err
 	}
