@@ -34,7 +34,12 @@ func InitialiseControlListener(ctx context.Context, clusterState microState.Stat
 		},
 	}
 
-	err = m.UpdateServers(ctx, serverConfig)
+	localClient, err := m.LocalClient()
+	if err != nil {
+		return err
+	}
+
+	err = localClient.UpdateServers(ctx, serverConfig)
 	if err != nil {
 		return fmt.Errorf("failed to update initialise control listener: %w", err)
 	}
