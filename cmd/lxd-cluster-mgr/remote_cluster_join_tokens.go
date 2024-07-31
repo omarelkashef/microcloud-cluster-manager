@@ -10,7 +10,6 @@ import (
 
 	"github.com/canonical/lxd-cluster-manager/internal/api/types"
 	"github.com/canonical/lxd-cluster-manager/internal/client"
-	"github.com/canonical/lxd-cluster-manager/version"
 )
 
 type cmdRemoteClusterJoinToken struct {
@@ -63,13 +62,7 @@ func (c *cmdRemoteClusterJoinTokenAdd) command() *cobra.Command {
 }
 
 func (c *cmdRemoteClusterJoinTokenAdd) run(cmd *cobra.Command, args []string) error {
-	m, err := microcluster.App(microcluster.Args{
-		StateDir: c.common.FlagStateDir,
-		Verbose:  c.common.FlagLogVerbose,
-		Debug:    c.common.FlagLogDebug,
-		Version:  version.Version(),
-	})
-
+	m, err := microcluster.App(microcluster.Args{StateDir: c.common.FlagStateDir})
 	if err != nil {
 		return err
 	}
@@ -124,13 +117,7 @@ func (c *cmdRemoteClusterJoinTokenShow) command() *cobra.Command {
 }
 
 func (c *cmdRemoteClusterJoinTokenShow) run(cmd *cobra.Command, args []string) error {
-	m, err := microcluster.App(microcluster.Args{
-		StateDir: c.common.FlagStateDir,
-		Verbose:  c.common.FlagLogVerbose,
-		Debug:    c.common.FlagLogDebug,
-		Version:  version.Version(),
-	})
-
+	m, err := microcluster.App(microcluster.Args{StateDir: c.common.FlagStateDir})
 	if err != nil {
 		return err
 	}
@@ -187,13 +174,7 @@ func (c *cmdRemoteClusterJoinTokenRevoke) command() *cobra.Command {
 }
 
 func (c *cmdRemoteClusterJoinTokenRevoke) run(cmd *cobra.Command, args []string) error {
-	m, err := microcluster.App(microcluster.Args{
-		StateDir: c.common.FlagStateDir,
-		Verbose:  c.common.FlagLogVerbose,
-		Debug:    c.common.FlagLogDebug,
-		Version:  version.Version(),
-	})
-
+	m, err := microcluster.App(microcluster.Args{StateDir: c.common.FlagStateDir})
 	if err != nil {
 		return err
 	}

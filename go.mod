@@ -1,10 +1,10 @@
 module github.com/canonical/lxd-cluster-manager
 
-go 1.22.4
+go 1.22.5
 
 require (
-	github.com/canonical/lxd v0.0.0-20240716125348-d5501d7d3877
-	github.com/canonical/microcluster v0.0.0-20240716041521-0ce3eea4a4a7
+	github.com/canonical/lxd v0.0.0-20240731072238-d371eb7e85d9
+	github.com/canonical/microcluster v0.0.0-20240731081051-5e541090e0c4
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/securecookie v1.1.2
@@ -18,11 +18,11 @@ require (
 require (
 	github.com/Rican7/retry v0.3.1 // indirect
 	github.com/armon/go-proxyproto v0.1.0 // indirect
-	github.com/canonical/go-dqlite v1.21.0 // indirect
+	github.com/canonical/go-dqlite v1.22.0 // indirect
 	github.com/flosch/pongo2 v0.0.0-20200913210552-0d938eb266f3 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/fvbommel/sortorder v1.1.0 // indirect
-	github.com/go-jose/go-jose/v4 v4.0.3 // indirect
+	github.com/go-jose/go-jose/v4 v4.0.4 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/google/renameio v1.0.1 // indirect
@@ -31,12 +31,12 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/kr/fs v0.1.0 // indirect
-	github.com/mattn/go-runewidth v0.0.15 // indirect
+	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/muhlemmer/gu v0.3.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/sftp v1.13.6 // indirect
-	github.com/pkg/xattr v0.4.9 // indirect
+	github.com/pkg/xattr v0.4.10 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect

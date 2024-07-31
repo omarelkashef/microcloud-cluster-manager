@@ -2,6 +2,7 @@
 package main
 
 import (
+	"context"
 	"os"
 
 	"github.com/canonical/lxd/shared/logger"
@@ -63,37 +64,42 @@ func (c *cmdDaemon) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	m, err := microcluster.App(microcluster.Args{
-		StateDir:    c.flagStateDir,
-		SocketGroup: c.flagSocketGroup,
-		Verbose:     c.global.flagLogVerbose,
-		Debug:       c.global.flagLogDebug,
-		Version:     version.Version(),
-	})
+	m, err := microcluster.App(microcluster.Args{StateDir: c.flagStateDir})
 
 	if err != nil {
 		return err
 	}
 
 	clusterManagerState := state.New(m)
-	m.AddServers(api.GetServers(clusterManagerState))
 
-	hooks := &microState.Hooks{
-		PostBootstrap: func(clusterState microState.State, initConfig map[string]string) error {
-			return InitialiseControlListener(cmd.Context(), clusterState, m, initConfig)
+	dargs := microcluster.DaemonArgs{
+		Verbose: c.global.flagLogVerbose,
+		Debug:   c.global.flagLogDebug,
+		Version: version.Version(),
+
+		SocketGroup: c.flagSocketGroup,
+
+		ExtensionsSchema: database.SchemaExtensions,
+		APIExtensions:    api.Extensions(),
+		ExtensionServers: api.GetServers(clusterManagerState),
+	}
+
+	dargs.Hooks = &microState.Hooks{
+		PostBootstrap: func(ctx context.Context, clusterState microState.State, initConfig map[string]string) error {
+			return InitialiseControlListener(ctx, clusterState, m, initConfig)
 		},
 
-		PostJoin: func(clusterState microState.State, initConfig map[string]string) error {
-			err := InitialiseConfigOIDC(cmd.Context(), clusterState, clusterManagerState)
+		PostJoin: func(ctx context.Context, clusterState microState.State, initConfig map[string]string) error {
+			err := InitialiseConfigOIDC(ctx, clusterState, clusterManagerState)
 			if err != nil {
 				return err
 			}
 
-			return InitialiseControlListener(cmd.Context(), clusterState, m, initConfig)
+			return InitialiseControlListener(ctx, clusterState, m, initConfig)
 		},
 	}
 
-	return m.Start(cmd.Context(), database.SchemaExtensions, api.Extensions(), hooks)
+	return m.Start(cmd.Context(), dargs)
 }
 
 func main() {

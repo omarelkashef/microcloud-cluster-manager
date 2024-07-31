@@ -119,7 +119,12 @@ func memberConfigPatch(clusterManagerState *state.ClusterManagerState) types.End
 				newServerConfig[name] = config
 			}
 
-			err = clusterManagerState.MicroCluster.UpdateServers(r.Context(), newServerConfig)
+			localClient, err := clusterManagerState.MicroCluster.LocalClient()
+			if err != nil {
+				return response.InternalError(fmt.Errorf("failed to get local client: %w", err))
+			}
+
+			err = localClient.UpdateServers(r.Context(), newServerConfig)
 			if err != nil {
 				return response.InternalError(fmt.Errorf("failed to update local member %q config: %w", memberName, err))
 			}
@@ -127,7 +132,7 @@ func memberConfigPatch(clusterManagerState *state.ClusterManagerState) types.End
 			// in case if the dqlite transaction fails to update the member config, we need to revert the control listener address update
 			// this will keep daemon local configs in sync with what's stored in dqlite
 			reverter.Add(func() {
-				err := clusterManagerState.MicroCluster.UpdateServers(r.Context(), existingServerConfig)
+				err := localClient.UpdateServers(r.Context(), existingServerConfig)
 				if err != nil {
 					logger.Warn("Failed to revert control listener address update, data may be inconsistent")
 				}

@@ -13,7 +13,6 @@ import (
 
 	"github.com/canonical/lxd-cluster-manager/internal/api/types"
 	"github.com/canonical/lxd-cluster-manager/internal/client"
-	"github.com/canonical/lxd-cluster-manager/version"
 )
 
 type cmdRemoteCluster struct {
@@ -70,12 +69,7 @@ func (c *cmdRemoteClusterList) command() *cobra.Command {
 }
 
 func (c *cmdRemoteClusterList) run(cmd *cobra.Command, args []string) error {
-	m, err := microcluster.App(microcluster.Args{
-		StateDir: c.common.FlagStateDir,
-		Verbose:  c.common.FlagLogVerbose,
-		Debug:    c.common.FlagLogDebug,
-		Version:  version.Version(),
-	})
+	m, err := microcluster.App(microcluster.Args{StateDir: c.common.FlagStateDir})
 
 	if err != nil {
 		return err
@@ -136,12 +130,7 @@ func (c *cmdRemoteClusterShow) command() *cobra.Command {
 }
 
 func (c *cmdRemoteClusterShow) run(cmd *cobra.Command, args []string) error {
-	m, err := microcluster.App(microcluster.Args{
-		StateDir: c.common.FlagStateDir,
-		Verbose:  c.common.FlagLogVerbose,
-		Debug:    c.common.FlagLogDebug,
-		Version:  version.Version(),
-	})
+	m, err := microcluster.App(microcluster.Args{StateDir: c.common.FlagStateDir})
 
 	if err != nil {
 		return err
@@ -194,12 +183,7 @@ func (c *cmdRemoteClusterEdit) command() *cobra.Command {
 }
 
 func (c *cmdRemoteClusterEdit) run(cmd *cobra.Command, args []string) error {
-	m, err := microcluster.App(microcluster.Args{
-		StateDir: c.common.FlagStateDir,
-		Verbose:  c.common.FlagLogVerbose,
-		Debug:    c.common.FlagLogDebug,
-		Version:  version.Version(),
-	})
+	m, err := microcluster.App(microcluster.Args{StateDir: c.common.FlagStateDir})
 
 	if err != nil {
 		return err

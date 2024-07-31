@@ -3,12 +3,11 @@ package main
 import (
 	"fmt"
 	"sort"
+	"time"
 
 	cli "github.com/canonical/lxd/shared/cmd"
 	"github.com/canonical/microcluster/microcluster"
 	"github.com/spf13/cobra"
-
-	"github.com/canonical/lxd-cluster-manager/version"
 )
 
 type cmdSecrets struct {
@@ -40,6 +39,8 @@ func (c *cmdSecrets) run(cmd *cobra.Command, args []string) error {
 
 type cmdTokensAdd struct {
 	common *CmdControl
+
+	flagExpiry time.Duration
 }
 
 func (c *cmdTokensAdd) command() *cobra.Command {
@@ -49,6 +50,8 @@ func (c *cmdTokensAdd) command() *cobra.Command {
 		RunE:  c.run,
 	}
 
+	cmd.Flags().DurationVar(&c.flagExpiry, "expiry", 0, "Specify the duration (i.e. 5m or 48h) for the token to be valid")
+
 	return cmd
 }
 
@@ -57,18 +60,13 @@ func (c *cmdTokensAdd) run(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
 	}
 
-	m, err := microcluster.App(microcluster.Args{
-		StateDir: c.common.FlagStateDir,
-		Verbose:  c.common.FlagLogVerbose,
-		Debug:    c.common.FlagLogDebug,
-		Version:  version.Version(),
-	})
+	m, err := microcluster.App(microcluster.Args{StateDir: c.common.FlagStateDir})
 
 	if err != nil {
 		return err
 	}
 
-	token, err := m.NewJoinToken(cmd.Context(), args[0])
+	token, err := m.NewJoinToken(cmd.Context(), args[0], c.flagExpiry)
 	if err != nil {
 		return err
 	}
@@ -97,12 +95,7 @@ func (c *cmdTokensList) run(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
 	}
 
-	m, err := microcluster.App(microcluster.Args{
-		StateDir: c.common.FlagStateDir,
-		Verbose:  c.common.FlagLogVerbose,
-		Debug:    c.common.FlagLogDebug,
-		Version:  version.Version(),
-	})
+	m, err := microcluster.App(microcluster.Args{StateDir: c.common.FlagStateDir})
 
 	if err != nil {
 		return err
@@ -143,12 +136,7 @@ func (c *cmdTokensRevoke) run(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
 	}
 
-	m, err := microcluster.App(microcluster.Args{
-		StateDir: c.common.FlagStateDir,
-		Verbose:  c.common.FlagLogVerbose,
-		Debug:    c.common.FlagLogDebug,
-		Version:  version.Version(),
-	})
+	m, err := microcluster.App(microcluster.Args{StateDir: c.common.FlagStateDir})
 
 	if err != nil {
 		return err

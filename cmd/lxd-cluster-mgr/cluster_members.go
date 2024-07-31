@@ -8,8 +8,6 @@ import (
 	"github.com/canonical/microcluster/client"
 	"github.com/canonical/microcluster/microcluster"
 	"github.com/spf13/cobra"
-
-	"github.com/canonical/lxd-cluster-manager/version"
 )
 
 type cmdClusterMembers struct {
@@ -56,12 +54,7 @@ func (c *cmdClusterMembersList) run(cmd *cobra.Command, args []string) error {
 	}
 
 	// Get all state information for MicroCluster.
-	m, err := microcluster.App(microcluster.Args{
-		StateDir: c.common.FlagStateDir,
-		Verbose:  c.common.FlagLogVerbose,
-		Debug:    c.common.FlagLogDebug,
-		Version:  version.Version(),
-	})
+	m, err := microcluster.App(microcluster.Args{StateDir: c.common.FlagStateDir})
 
 	if err != nil {
 		return err
@@ -121,12 +114,7 @@ func (c *cmdClusterMemberRemove) run(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
 	}
 
-	m, err := microcluster.App(microcluster.Args{
-		StateDir: c.common.FlagStateDir,
-		Verbose:  c.common.FlagLogVerbose,
-		Debug:    c.common.FlagLogDebug,
-		Version:  version.Version(),
-	})
+	m, err := microcluster.App(microcluster.Args{StateDir: c.common.FlagStateDir})
 
 	if err != nil {
 		return err

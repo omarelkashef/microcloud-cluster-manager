@@ -3,8 +3,6 @@ package main
 import (
 	"github.com/canonical/microcluster/microcluster"
 	"github.com/spf13/cobra"
-
-	"github.com/canonical/lxd-cluster-manager/version"
 )
 
 type cmdShutdown struct {
@@ -26,12 +24,7 @@ func (c *cmdShutdown) run(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
 	}
 
-	m, err := microcluster.App(microcluster.Args{
-		StateDir: c.common.FlagStateDir,
-		Verbose:  c.common.FlagLogVerbose,
-		Debug:    c.common.FlagLogDebug,
-		Version:  version.Version(),
-	})
+	m, err := microcluster.App(microcluster.Args{StateDir: c.common.FlagStateDir})
 
 	if err != nil {
 		return err
