@@ -38,6 +38,7 @@ func remoteClusterManagementListener(s *state.ClusterManagerState) rest.Server {
 				PathPrefix: types.APIVersionPrefix,
 				Endpoints: []rest.Endpoint{
 					apiRootCmd(s),
+					metadataConfigurationCmd(s),
 					remoteClusterCmd(s),
 					remoteClustersCmd(s),
 					managerConfigsCmd(s),

@@ -4,4 +4,5 @@ export const queryKeys = {
   memberConfigOptions: "memberConfigOptions",
   tokens: "tokens",
   server: "server",
+  configOptions: "configOptions",
 };
