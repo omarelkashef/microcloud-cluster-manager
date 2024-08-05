@@ -5,6 +5,7 @@ import Settings from "pages/Settings";
 import { useAuth } from "context/auth";
 import CreateCluster from "pages/clusters/CreateCluster";
 import { logout } from "util/helpers";
+import ClusterDetail from "pages/clusters/ClusterDetail";
 
 const ClusterList = lazy(() => import("pages/clusters/ClusterList"));
 const Login = lazy(() => import("pages/Login"));
@@ -29,6 +30,7 @@ const App: FC = () => {
       <Route path="/ui/clusters" element={<ClusterList />} />
       <Route path="/ui/clusters/:activeTab" element={<ClusterList />} />
       <Route path="/ui/clusters/create" element={<CreateCluster />} />
+      <Route path="/ui/cluster/:name" element={<ClusterDetail />} />
       <Route path="/ui/settings" element={<Settings />} />
       <Route path="*" element={<NoMatch />} />
     </>
