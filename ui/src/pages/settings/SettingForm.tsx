@@ -4,9 +4,10 @@ import { updateManagerConfigs, updateMemberConfigs } from "api/settings";
 import { queryKeys } from "util/queryKeys";
 import { useQueryClient } from "@tanstack/react-query";
 import SettingFormInput from "./SettingFormInput";
+import { ConfigField } from "types/config";
 
 interface Props {
-  configField: string;
+  configField: ConfigField;
   value?: string;
   isLast?: boolean;
   member?: string;
@@ -21,7 +22,7 @@ const SettingForm: FC<Props> = ({ configField, value, isLast, member }) => {
 
   const onSubmit = (newValue: string | boolean) => {
     const config = {
-      [configField]: String(newValue),
+      [configField.key]: String(newValue),
     };
 
     (member
@@ -30,7 +31,7 @@ const SettingForm: FC<Props> = ({ configField, value, isLast, member }) => {
     )
       .then(() => {
         setEditMode(false);
-        notify.success(`Setting ${configField} updated.`);
+        notify.success(`Setting ${configField.key} updated.`);
       })
       .catch((e) => {
         notify.failure("Setting update failed", e);

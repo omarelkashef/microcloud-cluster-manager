@@ -11,16 +11,31 @@ import SettingForm from "./settings/SettingForm";
 import { MainTableRow } from "@canonical/react-components/dist/components/MainTable/MainTable";
 import { ManagerOptions, MemberOptions } from "types/config";
 import NotificationRow from "components/NotificationRow";
+import ConfigFieldDescription from "./settings/ConfigFieldDescription";
+import { fetchConfigOptions } from "api/server";
+import Loader from "components/Loader";
+import { getConfigMetadata } from "util/config";
 
 const Settings: FC = () => {
-  const { data: managerConfigOptions } = useQuery({
+  const {
+    data: managerConfigOptions,
+    isLoading: isManagerConfigOptionsLoading,
+  } = useQuery({
     queryKey: [queryKeys.managerConfigOptions],
     queryFn: fetchManagerConfigOptions,
   });
 
-  const { data: memberConfigOptions = [] } = useQuery({
+  const {
+    data: memberConfigOptions = [],
+    isLoading: isMemberConfigOptionsLoading,
+  } = useQuery({
     queryKey: [queryKeys.memberConfigOptions],
     queryFn: fetchMemberConfigOptions,
+  });
+
+  const { data: configOptions, isLoading: isConfigOptionsLoading } = useQuery({
+    queryKey: [queryKeys.configOptions],
+    queryFn: () => fetchConfigOptions(),
   });
 
   const defaultManagerConfigs: ManagerOptions["config"] = {
@@ -41,6 +56,8 @@ const Settings: FC = () => {
     { content: "Value" },
   ];
 
+  const configMetadata = getConfigMetadata(configOptions || undefined);
+
   const generateManagerConfigRows = () => {
     const configKeys = Object.keys(defaultManagerConfigs);
 
@@ -56,7 +73,15 @@ const Settings: FC = () => {
             "aria-label": "Scope",
           },
           {
-            content: <div className="key-cell">{key}</div>,
+            content: (
+              <div className="key-cell">
+                {key}
+                <ConfigFieldDescription
+                  description={configMetadata[key]?.shortdesc}
+                  className="p-text--small u-text--muted u-no-margin--bottom"
+                />
+              </div>
+            ),
             role: "cell",
             className: "key",
             "aria-label": "Key",
@@ -64,7 +89,7 @@ const Settings: FC = () => {
           {
             content: (
               <SettingForm
-                configField={key}
+                configField={configMetadata[key]}
                 value={
                   managerConfigOptions?.config[key] ||
                   defaultManagerConfigs[key]
@@ -113,8 +138,12 @@ const Settings: FC = () => {
             },
             {
               content: (
-                <div className="key-cell u-truncate" title={memberConfigKey}>
-                  {memberConfigKey}
+                <div className="key-cell" title={memberConfigKey}>
+                  <span className="u-truncate">{memberConfigKey}</span>
+                  <ConfigFieldDescription
+                    description={configMetadata[key]?.shortdesc}
+                    className="p-text--small u-text--muted u-no-margin--bottom"
+                  />
                 </div>
               ),
               role: "cell",
@@ -124,7 +153,7 @@ const Settings: FC = () => {
             {
               content: (
                 <SettingForm
-                  configField={key}
+                  configField={configMetadata[key]}
                   value={memberConfig.config[key] || defaultMemberConfigs[key]}
                   isLast={index === length - 1}
                   member={memberConfig.target}
@@ -145,6 +174,14 @@ const Settings: FC = () => {
   };
 
   const rows = [...generateManagerConfigRows(), ...generateMemberConfigRows()];
+
+  if (
+    isConfigOptionsLoading ||
+    isManagerConfigOptionsLoading ||
+    isMemberConfigOptionsLoading
+  ) {
+    return <Loader />;
+  }
 
   return (
     <BaseLayout title="Settings">
