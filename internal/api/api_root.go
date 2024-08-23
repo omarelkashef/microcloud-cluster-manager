@@ -18,7 +18,7 @@ func apiRootCmd(s *state.ClusterManagerState) rest.Endpoint {
 		Get: rest.EndpointAction{
 			Handler:        apiRootGet,
 			AllowUntrusted: true,
-			AccessHandler:  authHandler(s),
+			AccessHandler:  oidcAuthHandler(s),
 		},
 	}
 }

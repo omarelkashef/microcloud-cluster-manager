@@ -26,7 +26,7 @@ func remoteClusterJoinTokensCmd(s *state.ClusterManagerState) rest.Endpoint {
 		Post: rest.EndpointAction{
 			Handler:        tokenPost,
 			AllowUntrusted: true,
-			AccessHandler:  authHandler(s),
+			AccessHandler:  oidcAuthHandler(s),
 		},
 		Get: rest.EndpointAction{Handler: tokenGet, AllowUntrusted: true},
 	}
@@ -38,7 +38,7 @@ func remoteClusterJoinTokenCmd(s *state.ClusterManagerState) rest.Endpoint {
 		Delete: rest.EndpointAction{
 			Handler:        tokenDelete,
 			AllowUntrusted: true,
-			AccessHandler:  authHandler(s),
+			AccessHandler:  oidcAuthHandler(s),
 		},
 	}
 }

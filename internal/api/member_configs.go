@@ -30,12 +30,12 @@ func memberConfigCmd(s *state.ClusterManagerState) rest.Endpoint {
 		Patch: rest.EndpointAction{
 			Handler:        memberConfigPatch,
 			AllowUntrusted: true,
-			AccessHandler:  authHandler(s),
+			AccessHandler:  oidcAuthHandler(s),
 		},
 		Get: rest.EndpointAction{
 			Handler:        memberConfigGet,
 			AllowUntrusted: true,
-			AccessHandler:  authHandler(s),
+			AccessHandler:  oidcAuthHandler(s),
 		},
 	}
 }
@@ -46,7 +46,7 @@ func memberConfigsCmd(s *state.ClusterManagerState) rest.Endpoint {
 		Get: rest.EndpointAction{
 			Handler:        memberConfigsGet,
 			AllowUntrusted: true,
-			AccessHandler:  authHandler(s),
+			AccessHandler:  oidcAuthHandler(s),
 		},
 	}
 }

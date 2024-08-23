@@ -21,7 +21,7 @@ func metadataConfigurationCmd(s *state.ClusterManagerState) rest.Endpoint {
 		Get: rest.EndpointAction{
 			Handler:        metadataConfigurationGet,
 			AllowUntrusted: true,
-			AccessHandler:  authHandler(s),
+			AccessHandler:  oidcAuthHandler(s),
 		},
 	}
 }
