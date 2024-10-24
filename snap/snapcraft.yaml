@@ -37,6 +37,7 @@ parts:
       - sqlite3
     build-packages:
       - liblz4-dev
+      - pkg-config
       - libsqlite3-dev
       - libuv1-dev
     organize:
