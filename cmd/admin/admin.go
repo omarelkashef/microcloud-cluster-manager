@@ -22,8 +22,7 @@ func migrate() error {
 	// =========================================================================
 	// Load configuration
 
-	requireCert := false
-	cfg, err := config.LoadConfig(requireCert)
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		logger.Log.Error("Failed to load configuration")
 	}

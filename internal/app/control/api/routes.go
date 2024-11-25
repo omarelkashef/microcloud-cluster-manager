@@ -7,4 +7,5 @@ import (
 
 var APIRoutes = []types.RouteGroup{
 	v1.RemoteCluster,
+	v1.RemoteClusterProtected,
 }

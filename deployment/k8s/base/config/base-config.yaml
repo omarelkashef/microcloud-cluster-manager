@@ -23,9 +23,9 @@ data:
   CONTROL_PORT: base
   # TODO: define proper versioning strategy
   VERSION: base
-  TLS_CERT_PATH: /etc/ssl/certs/tls.crt
-  TLS_KEY_PATH: /etc/ssl/certs/tls.key
-  TLS_CA_PATH: /etc/ssl/certs/ca.crt
+  MANAGEMENT_TLS_PATH: /etc/ssl/management
+  CONTROL_TLS_PATH: /etc/ssl/control
+  CONTROL_ADDRESS: base
   # oidc configs
   OIDC_CLIENT_ID: base
   OIDC_ISSUER: base

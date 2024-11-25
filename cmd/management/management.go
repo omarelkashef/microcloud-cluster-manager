@@ -2,7 +2,6 @@ package management
 
 import (
 	"context"
-	"crypto/tls"
 	"expvar"
 	"fmt"
 	"net/http"
@@ -22,6 +21,7 @@ import (
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/middleware"
+	"github.com/canonical/lxd/lxd/util"
 )
 
 // Run will initialise and start the management service API
@@ -40,10 +40,14 @@ func Run() error {
 	// =========================================================================
 	// Load configuration
 
-	requireCert := true
-	cfg, err := config.LoadConfig(requireCert)
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		logger.Log.Error("Failed to load configuration")
+	}
+
+	err = cfg.LoadCertificates()
+	if err != nil {
+		return fmt.Errorf("failed to load certificates: %w", err)
 	}
 
 	// =========================================================================
@@ -60,7 +64,7 @@ func Run() error {
 		cfg.OIDCIssuer,
 		cfg.OIDCClientID,
 		cfg.OIDCAudience,
-		cfg.ServerCert,
+		cfg.ManagementCert,
 		cfg.Version == "development",
 	)
 
@@ -102,10 +106,10 @@ func Run() error {
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
 	a := api.NewApi(api.ApiConfig{
-		Shutdown: shutdown,
-		DB:       db,
-		Auth:     oidcVerifier,
-		Version:  cfg.ApiVersion,
+		Shutdown:  shutdown,
+		DB:        db,
+		Auth:      oidcVerifier,
+		EnvConfig: cfg,
 	})
 
 	// register global middlewares in order
@@ -116,12 +120,7 @@ func Run() error {
 	a.RegisterRoutes(routes.APIRoutes)
 
 	// Construct a TLS enabled server to service the requests against the mux.
-	tlsConfig := &tls.Config{}
-	// List of server certs presented during handshake.
-	// NOTE: for the management service we do not need to setup mtls, therefore client certificates are not required.
-	tlsConfig.Certificates = []tls.Certificate{cfg.ServerCert.KeyPair()}
-	tlsConfig.MinVersion = tls.VersionTLS13
-
+	tlsConfig := util.ServerTLSConfig(cfg.ManagementCert)
 	server := http.Server{
 		Addr:         cfg.ServerHost + ":" + cfg.ManagementPort,
 		Handler:      a,

@@ -87,24 +87,20 @@ func tokenPost(rc types.RouteConfig) types.EndpointHandler {
 		}
 
 		// create the token to be sent to LXD
+		cert, err := rc.Env.ControlCert.PublicKeyX509()
+		if err != nil {
+			return response.InternalError(err).Render(w, r)
+		}
 
-		// TODO: get the cluster cert
-		// if err != nil {
-		// 	return response.InternalError(err).Render(w, r)
-		// }
-
-		// TODO: get the control service address for the token payload
-		// memberAddresses, err := getClusterManagerAddresses(r.Context(), s)
-		// if err != nil {
-		// 	return response.InternalError(err)
-		// }
+		// get the control service address for the token payload
+		controlAddress := rc.Env.ControlAddress
 
 		token := models.RemoteClusterTokenBody{
 			Secret:      secret,
 			ExpiresAt:   payload.Expiry,
-			Address:     "localhost",
+			Address:     controlAddress,
 			ServerName:  payload.ClusterName,
-			Fingerprint: "abc",
+			Fingerprint: shared.CertFingerprint(cert),
 		}
 
 		encodedToken, err := token.Encode()

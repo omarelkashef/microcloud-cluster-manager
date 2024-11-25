@@ -75,10 +75,10 @@ func remoteClusterGet(rc types.RouteConfig) types.EndpointHandler {
 			return response.SmartError(err).Render(w, r)
 		}
 
-		var dbRemoteClusterDetails []store.RemoteClusterWithDetail
+		var dbRemoteClusterDetail *store.RemoteClusterWithDetail
 		err = rc.DB.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
 			var err error
-			dbRemoteClusterDetails, err = store.GetRemoteClusterWithDetailByName(ctx, tx, remoteClusterName)
+			dbRemoteClusterDetail, err = store.GetRemoteClusterWithDetailByName(ctx, tx, remoteClusterName)
 			return err
 		})
 
@@ -86,11 +86,11 @@ func remoteClusterGet(rc types.RouteConfig) types.EndpointHandler {
 			return response.SmartError(err).Render(w, r)
 		}
 
-		if len(dbRemoteClusterDetails) == 0 {
+		if dbRemoteClusterDetail == nil {
 			return response.NotFound(fmt.Errorf("RemoteCluster not found")).Render(w, r)
 		}
 
-		result, err := toRemoteClustersAPI(dbRemoteClusterDetails)
+		result, err := toRemoteClustersAPI([]store.RemoteClusterWithDetail{*dbRemoteClusterDetail})
 		if err != nil {
 			return response.InternalError(err).Render(w, r)
 		}

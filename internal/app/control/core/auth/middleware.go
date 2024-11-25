@@ -10,15 +10,10 @@ import (
 
 // AuthMiddleware is a middleware function that checks if the request is authenticated.
 func AuthMiddleware(rc types.RouteConfig) mux.MiddlewareFunc {
-	verifier := rc.Auth.(*Verifier)
+	verifier := rc.Auth.(*MtlsAuthenticator)
 
 	middlewareFunc := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.TLS == nil {
-				response.Forbidden(nil).Render(w, r)
-				return
-			}
-
 			if verifier == nil {
 				response.Forbidden(nil).Render(w, r)
 				return

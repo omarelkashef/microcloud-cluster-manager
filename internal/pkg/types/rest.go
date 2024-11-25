@@ -6,6 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/canonical/lxd-cluster-manager/config"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 )
 
@@ -26,9 +27,9 @@ type Authenticator interface {
 
 // RouteConfig holds the necessary dependencies for routes and middlewares within service APIs
 type RouteConfig struct {
-	Auth    Authenticator
-	DB      *database.DB
-	Version string
+	Auth Authenticator
+	DB   *database.DB
+	Env  *config.Config
 }
 
 // RouteMiddleware represents middlewares in service APIs that requires route dependencies

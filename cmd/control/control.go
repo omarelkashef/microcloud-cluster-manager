@@ -20,6 +20,7 @@ import (
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/middleware"
+	"github.com/canonical/lxd/lxd/util"
 )
 
 // Run will initialise and start the control service API
@@ -38,10 +39,14 @@ func Run() error {
 	// =========================================================================
 	// Load configuration
 
-	requireCert := true
-	cfg, err := config.LoadConfig(requireCert)
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		logger.Log.Error("Failed to load configuration")
+	}
+
+	err = cfg.LoadCertificates()
+	if err != nil {
+		return fmt.Errorf("failed to load certificates: %w", err)
 	}
 
 	// =========================================================================
@@ -88,9 +93,9 @@ func Run() error {
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
 	a := api.NewApi(api.ApiConfig{
-		Shutdown: shutdown,
-		DB:       db,
-		Version:  cfg.ApiVersion,
+		Shutdown:  shutdown,
+		DB:        db,
+		EnvConfig: cfg,
 	})
 
 	// register global middlewares in order
@@ -100,7 +105,8 @@ func Run() error {
 	// register api routes
 	a.RegisterRoutes(routes.APIRoutes)
 
-	// Construct a server to service the requests against the mux.
+	// NOTE: Construct a TLS enabled server to service the requests against the mux.
+	tlsConfig := util.ServerTLSConfig(cfg.ControlCert)
 	server := http.Server{
 		Addr:         cfg.ServerHost + ":" + cfg.ControlPort,
 		Handler:      a,
@@ -108,6 +114,7 @@ func Run() error {
 		WriteTimeout: time.Duration(cfg.WriteTimeout) * time.Second,
 		IdleTimeout:  time.Duration(cfg.IdleTimeout) * time.Second,
 		ErrorLog:     zap.NewStdLog(logger.Log.Desugar()),
+		TLSConfig:    tlsConfig,
 	}
 
 	// Make a channel to listen for errors coming from the listener. Use a
@@ -117,7 +124,7 @@ func Run() error {
 	// Start the server listening for requests.
 	go func() {
 		logger.Log.Infow("startup", "status", "api router started", "host", server.Addr)
-		serverErrors <- server.ListenAndServe()
+		serverErrors <- server.ListenAndServeTLS("", "")
 	}()
 
 	// =========================================================================

@@ -4,7 +4,9 @@ import (
 	"crypto/tls"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/canonical/lxd/shared"
@@ -12,9 +14,11 @@ import (
 
 type Config struct {
 	// system configs
-	Version    string
-	ApiVersion string
-	ServerCert *shared.CertInfo
+	Version        string
+	ApiVersion     string
+	ManagementCert *shared.CertInfo
+	ControlCert    *shared.CertInfo
+	ControlAddress string
 	// db configs
 	database.DBConfig
 	// api configs
@@ -49,22 +53,29 @@ func getEnvAsInt(key string, defaultValue int) (int, error) {
 	return defaultValue, nil
 }
 
-// getServiceCert loads the TLS certificate and key from the environment.
-func getServiceCert() (*shared.CertInfo, error) {
-	tlsCertPath := os.Getenv("TLS_CERT_PATH")
-	tlsKeyPath := os.Getenv("TLS_KEY_PATH")
-	certCAPath := os.Getenv("TLS_CA_PATH")
-
-	if tlsCertPath == "" || tlsKeyPath == "" || certCAPath == "" {
-		return nil, fmt.Errorf("TLS_CERT_PATH, TLS_KEY_PATH and TLS_CERT_PATH are required")
+// getServiceCert loads the TLS certificate and key from the environment based on the service name.
+func getServiceCert(service string) (*shared.CertInfo, error) {
+	if service != "management" && service != "control" {
+		return nil, fmt.Errorf("invalid service name: %s", service)
 	}
 
-	cert, err := tls.LoadX509KeyPair(tlsCertPath, tlsKeyPath)
+	key := strings.ToUpper(service) + "_TLS_PATH"
+	tlsPath := os.Getenv(key)
+
+	if tlsPath == "" {
+		return nil, fmt.Errorf("missing config %s", key)
+	}
+
+	certPath := filepath.Join(tlsPath, "tls.crt")
+	keyPath := filepath.Join(tlsPath, "tls.key")
+	caPath := filepath.Join(tlsPath, "ca.crt")
+
+	cert, err := tls.LoadX509KeyPair(certPath, keyPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load server certificate: %w", err)
 	}
 
-	ca, err := shared.ReadCert(certCAPath)
+	ca, err := shared.ReadCert(caPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load CA certificate: %w", err)
 	}
@@ -73,7 +84,7 @@ func getServiceCert() (*shared.CertInfo, error) {
 }
 
 // LoadConfig loads the configuration from the environment variables.
-func LoadConfig(requireCerts bool) (*Config, error) {
+func LoadConfig() (*Config, error) {
 	// DB Config
 	dbMaxIdleConns, err := getEnvAsInt("DB_MAX_IDLE", 10)
 	if err != nil {
@@ -82,15 +93,6 @@ func LoadConfig(requireCerts bool) (*Config, error) {
 	dbMaxOpenConns, err := getEnvAsInt("DB_MAX_OPEN", 2)
 	if err != nil {
 		return nil, fmt.Errorf("invalid DB_MAX_OPEN: %w", err)
-	}
-
-	// Server Cert
-	var serverCert *shared.CertInfo
-	if requireCerts {
-		serverCert, err = getServiceCert()
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	// OIDC Config
@@ -111,7 +113,7 @@ func LoadConfig(requireCerts bool) (*Config, error) {
 		ReadTimeout:    10,
 		WriteTimeout:   10,
 		IdleTimeout:    60,
-		ServerCert:     serverCert,
+		ControlAddress: getEnvOrDefault("CONTROL_ADDRESS", "https://localhost:8415"),
 		DBConfig: database.DBConfig{
 			DBPort:         getEnvOrDefault("DB_PORT", "5432"),
 			DBUser:         getEnvOrDefault("DB_USER", "admin"),
@@ -126,4 +128,23 @@ func LoadConfig(requireCerts bool) (*Config, error) {
 		OIDCIssuer:   oidcIssuer,
 		OIDCAudience: oidcAudience,
 	}, nil
+}
+
+// LoadCertificates loads the TLS certificates from the environment.
+func (c *Config) LoadCertificates() error {
+	// service certificates
+	managementCert, err := getServiceCert("management")
+	if err != nil {
+		return fmt.Errorf("failed to load management certificate: %w", err)
+	}
+
+	controlCert, err := getServiceCert("control")
+	if err != nil {
+		return fmt.Errorf("failed to load control certificate: %w", err)
+	}
+
+	c.ManagementCert = managementCert
+	c.ControlCert = controlCert
+
+	return nil
 }

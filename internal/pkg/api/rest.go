@@ -21,7 +21,7 @@ func registerRoutes(mux *mux.Router, routes []types.RouteGroup, rc types.RouteCo
 func registerRouteGroup(mux *mux.Router, rg types.RouteGroup, rc types.RouteConfig) {
 	routeGroupPath := path.Join("/", rg.Prefix)
 	if !rg.IsRoot {
-		routeGroupPath = path.Join("/", rc.Version, rg.Prefix)
+		routeGroupPath = path.Join("/", rc.Env.ApiVersion, rg.Prefix)
 	}
 
 	// apply middlewares at route group level

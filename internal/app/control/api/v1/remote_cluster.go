@@ -5,16 +5,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 	"time"
 
+	"github.com/canonical/lxd/lxd/request"
+	"github.com/canonical/lxd/lxd/response"
+	"github.com/jmoiron/sqlx"
+
+	"github.com/canonical/lxd-cluster-manager/internal/app/control/core/auth"
+	"github.com/canonical/lxd-cluster-manager/internal/app/control/core/certificate"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/store"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
-	"github.com/canonical/lxd/lxd/response"
-	"github.com/gorilla/mux"
-	"github.com/jmoiron/sqlx"
 )
 
 var RemoteCluster = types.RouteGroup{
@@ -24,13 +26,21 @@ var RemoteCluster = types.RouteGroup{
 			Method:  http.MethodPost,
 			Handler: remoteClustersPost,
 		},
+	},
+}
+
+var RemoteClusterProtected = types.RouteGroup{
+	Prefix: "remote-cluster",
+	Middlewares: []types.RouteMiddleware{
+		auth.AuthMiddleware,
+	},
+	Endpoints: []types.Endpoint{
 		{
 			Path:    "status",
 			Method:  http.MethodPost,
 			Handler: remoteClusterStatusPost,
 		},
 		{
-			Path:    "{remoteClusterName}",
 			Method:  http.MethodDelete,
 			Handler: remoteClusterDelete,
 		},
@@ -54,11 +64,10 @@ func remoteClustersPost(rc types.RouteConfig) types.EndpointHandler {
 			return response.BadRequest(fmt.Errorf("remote cluster certificate is required")).Render(w, r)
 		}
 
-		// TODO: parse certificate
-		// cert, err := microTypes.ParseX509Certificate(payload.ClusterCertificate)
-		// if err != nil {
-		// 	return response.BadRequest(fmt.Errorf("invalid certificate: %v", err)).Render(w, r)
-		// }
+		cert, err := certificate.ParseX509Certificate(payload.ClusterCertificate)
+		if err != nil {
+			return response.BadRequest(fmt.Errorf("invalid certificate: %v", err)).Render(w, r)
+		}
 
 		// get token secret for HMAC verification
 		var token *store.RemoteClusterToken
@@ -81,13 +90,13 @@ func remoteClustersPost(rc types.RouteConfig) types.EndpointHandler {
 			return response.Forbidden(fmt.Errorf("token has expired")).Render(w, r)
 		}
 
-		// TODO: verify HMAC
-		// hmacOK, err := verifyHMAC(payload, r, token.Secret)
-		// if err != nil || !hmacOK {
-		// 	return response.Forbidden(err)
-		// }
+		hmacOK, err := auth.VerifyHMAC(payload, r, token.Secret)
+		if err != nil || !hmacOK {
+			return response.Forbidden(err).Render(w, r)
+		}
 
 		// Create remote cluster entry and delete token in a single db transaction
+		var remoteClusterID int
 		err = rc.DB.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
 			// create remote cluster entry
 			newRemoteCluster, err := store.CreateRemoteCluster(ctx, tx, store.RemoteCluster{
@@ -99,6 +108,8 @@ func remoteClustersPost(rc types.RouteConfig) types.EndpointHandler {
 			if err != nil {
 				return err
 			}
+
+			remoteClusterID = newRemoteCluster.ID
 
 			// create relevant remote cluster details
 			_, err = store.CreateRemoteClusterDetail(ctx, tx, store.RemoteClusterDetail{
@@ -119,8 +130,12 @@ func remoteClustersPost(rc types.RouteConfig) types.EndpointHandler {
 			return response.SmartError(err).Render(w, r)
 		}
 
-		if err != nil {
-			return response.InternalError(err).Render(w, r)
+		verifier, ok := rc.Auth.(*auth.MtlsAuthenticator)
+		if ok {
+			err = verifier.Cache().AddCertificate(cert.Certificate, remoteClusterID)
+			if err != nil {
+				return response.InternalError(err).Render(w, r)
+			}
 		}
 
 		return response.EmptySyncResponse.Render(w, r)
@@ -136,33 +151,44 @@ func remoteClusterStatusPost(rc types.RouteConfig) types.EndpointHandler {
 			return response.BadRequest(err).Render(w, r)
 		}
 
-		// TODO: mtls verification
-		// remoteClusterID, err := request.GetCtxValue[int64](r.Context(), ctxRemoteClusterID)
-		// if err != nil {
-		// 	return response.SmartError(err).Render(w, r)
-		// }
+		remoteClusterID, err := request.GetCtxValue[int](r.Context(), auth.CtxRemoteClusterID)
+		if err != nil {
+			return response.SmartError(err).Render(w, r)
+		}
 
-		var remoteClusterID int
 		err = rc.DB.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
-			// TODO: get remote cluster by certificate after mtls logic is in place
-			dbRemoteCluster, err := store.GetRemoteCluster(ctx, tx, payload.ClusterName)
+			dbRemoteCluster, err := store.GetRemoteClusterWithDetailByID(ctx, tx, remoteClusterID)
 			if err != nil {
 				return err
 			}
 
-			remoteClusterID = dbRemoteCluster.ID
-			dbRemoteClusterDetail, err := store.GetRemoteClusterDetail(ctx, tx, dbRemoteCluster.ID)
-			if err != nil {
-				return err
+			if dbRemoteCluster == nil {
+				return fmt.Errorf("remote cluster not found")
 			}
 
 			if dbRemoteCluster.Status == string(models.PENDING_APPROVAL) {
 				return fmt.Errorf("remote cluster is pending approval")
 			}
 
-			dbRemoteClusterDetail.Put(payload)
+			dbRemoteClusterDetail, err := store.GetRemoteClusterDetail(ctx, tx, remoteClusterID)
+			if err != nil {
+				return err
+			}
 
+			dbRemoteClusterDetail.Put(payload)
 			err = store.UpdateRemoteClusterDetail(ctx, tx, dbRemoteCluster.ID, *dbRemoteClusterDetail)
+			if err != nil {
+				return err
+			}
+
+			newClutser := store.RemoteCluster{
+				Name:               dbRemoteCluster.Name,
+				Status:             string(models.ACTIVE),
+				JoinedAt:           time.Now(),
+				ClusterCertificate: dbRemoteCluster.ClusterCertificate,
+			}
+
+			err = store.UpdateRemoteCluster(ctx, tx, dbRemoteCluster.Name, newClutser)
 			if err != nil {
 				return err
 			}
@@ -176,23 +202,26 @@ func remoteClusterStatusPost(rc types.RouteConfig) types.EndpointHandler {
 		}
 
 		// TODO: determine next update time
-
 		return response.SyncResponse(true, models.RemoteClusterStatusPostResponse{
 			NextUpdateInSeconds: time.Now().Local().String(),
 		}).Render(w, r)
 	}
 }
 
-// TODO: use cert fingerprint instead of path param for deleting cluster
 func remoteClusterDelete(rc types.RouteConfig) types.EndpointHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
-		remoteClusterName, err := url.PathUnescape(mux.Vars(r)["remoteClusterName"])
+		remoteClusterID, err := request.GetCtxValue[int](r.Context(), auth.CtxRemoteClusterID)
 		if err != nil {
 			return response.SmartError(err).Render(w, r)
 		}
 
 		err = rc.DB.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
-			return store.DeleteRemoteCluster(ctx, tx, remoteClusterName)
+			existing, err := store.GetRemoteClusterWithDetailByID(ctx, tx, remoteClusterID)
+			if err != nil {
+				return err
+			}
+
+			return store.DeleteRemoteCluster(ctx, tx, existing.Name)
 		})
 
 		if err != nil {

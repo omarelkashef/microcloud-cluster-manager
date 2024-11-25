@@ -396,25 +396,25 @@ func GetRemoteClustersWithDetails(ctx context.Context, tx *sqlx.Tx) ([]RemoteClu
 }
 
 // GetRemoteClusterWithDetailByName fetches the remote cluster detail with remote cluster information from the database filtered by remote cluster name.
-func GetRemoteClusterWithDetailByName(ctx context.Context, tx *sqlx.Tx, remoteClusterName string) ([]RemoteClusterWithDetail, error) {
+func GetRemoteClusterWithDetailByName(ctx context.Context, tx *sqlx.Tx, remoteClusterName string) (*RemoteClusterWithDetail, error) {
 	q := fmt.Sprintf(`%s WHERE remote_clusters.name = $1`, baseDetailQuery)
 	remoteClusterDetails, err := getRemoteClusterWithDetails(ctx, tx, q, remoteClusterName)
 	if err != nil {
 		return nil, err
 	}
 
-	return remoteClusterDetails, nil
+	return &remoteClusterDetails[0], nil
 }
 
 // GetRemoteClusterWithDetailByID fetches the remote cluster detail with information from the database filtered by site id.
-func GetRemoteClusterWithDetailByID(ctx context.Context, tx *sqlx.Tx, remoteClusterID int) ([]RemoteClusterWithDetail, error) {
+func GetRemoteClusterWithDetailByID(ctx context.Context, tx *sqlx.Tx, remoteClusterID int) (*RemoteClusterWithDetail, error) {
 	q := fmt.Sprintf(`%s WHERE remote_clusters.id = $1`, baseDetailQuery)
 	remoteClusterDetails, err := getRemoteClusterWithDetails(ctx, tx, q, remoteClusterID)
 	if err != nil {
 		return nil, err
 	}
 
-	return remoteClusterDetails, nil
+	return &remoteClusterDetails[0], nil
 }
 
 func parseStatusDistribution(statuses []models.StatusDistribution) (int, json.RawMessage) {

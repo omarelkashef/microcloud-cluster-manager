@@ -9,6 +9,7 @@ import (
 	"github.com/canonical/lxd/lxd/response"
 	"github.com/gorilla/mux"
 
+	"github.com/canonical/lxd-cluster-manager/config"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
@@ -19,20 +20,20 @@ import (
 type Handler func(ctx context.Context, w http.ResponseWriter, r *http.Request) error
 
 type ApiConfig struct {
-	Shutdown chan os.Signal
-	DB       *database.DB
-	Auth     types.Authenticator
-	Version  string
+	Shutdown  chan os.Signal
+	DB        *database.DB
+	Auth      types.Authenticator
+	EnvConfig *config.Config
 }
 
 // Api is the entrypoint into our application and what configures our context
 // object for each of our http handlers.
 type Api struct {
-	mux      *mux.Router
-	shutdown chan os.Signal
-	db       *database.DB
-	auth     types.Authenticator
-	version  string
+	mux       *mux.Router
+	shutdown  chan os.Signal
+	db        *database.DB
+	auth      types.Authenticator
+	envConfig *config.Config
 }
 
 // NewApp creates an App value that handle a set of routes for the application.
@@ -43,11 +44,11 @@ func NewApi(cfg ApiConfig) *Api {
 	mux.UseEncodedPath()
 
 	return &Api{
-		mux:      mux,
-		shutdown: cfg.Shutdown,
-		db:       cfg.DB,
-		auth:     cfg.Auth,
-		version:  cfg.Version,
+		mux:       mux,
+		shutdown:  cfg.Shutdown,
+		db:        cfg.DB,
+		auth:      cfg.Auth,
+		envConfig: cfg.EnvConfig,
 	}
 }
 
@@ -65,9 +66,9 @@ func (a *Api) UseGlobalMiddleWares(mw ...mux.MiddlewareFunc) {
 // RegisterRoutes adds the routes to the router.
 func (a *Api) RegisterRoutes(routes []types.RouteGroup) {
 	rc := types.RouteConfig{
-		Auth:    a.auth,
-		DB:      a.db,
-		Version: a.version,
+		Auth: a.auth,
+		DB:   a.db,
+		Env:  a.envConfig,
 	}
 
 	registerRoutes(a.mux, routes, rc)
