@@ -10,29 +10,24 @@ import (
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/schema"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
-	"go.uber.org/zap"
 )
 
-var service = "admin"
+var service = "ADMIN"
 
 func main() {
-	log, err := logger.New(service)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	defer log.Sync()
+	logger.SetService(service)
+	defer logger.Cleanup()
 
-	err = migrate(log)
+	err := migrate()
 	if err != nil {
-		log.Errorw("admin", "ERROR", err)
-		log.Sync()
+		logger.Log.Errorw("admin", "ERROR", err)
+		logger.Log.Sync()
 		os.Exit(1)
 	}
 }
 
-func migrate(log *zap.SugaredLogger) error {
-	log.Infow("migrate", "message", "Migrating the database")
+func migrate() error {
+	logger.Log.Infow("migrate", "message", "Migrating the database")
 
 	// =========================================================================
 	// Load configuration
@@ -40,12 +35,12 @@ func migrate(log *zap.SugaredLogger) error {
 	requireCert := false
 	cfg, err := config.LoadConfig(requireCert)
 	if err != nil {
-		log.Error("Failed to load configuration")
+		logger.Log.Error("Failed to load configuration")
 	}
 
 	// =========================================================================
 	// connect to database
-	log.Infow("admin migrate", "status", "connecting to the database", "host", cfg.DBHost)
+	logger.Log.Infow("admin migrate", "status", "connecting to the database", "host", cfg.DBHost)
 	dbConfigs := database.DBConfig{
 		DBHost:         cfg.DBHost,
 		DBUser:         cfg.DBUser,
@@ -54,7 +49,6 @@ func migrate(log *zap.SugaredLogger) error {
 		DBMaxIdleConns: cfg.DBMaxIdleConns,
 		DBMaxOpenConns: cfg.DBMaxOpenConns,
 		DBDisableTLS:   cfg.DBDisableTLS,
-		Logger:         log,
 	}
 
 	db, err := database.NewDB(dbConfigs)
@@ -62,7 +56,7 @@ func migrate(log *zap.SugaredLogger) error {
 		return fmt.Errorf("database connection error: %w", err)
 	}
 	defer func() {
-		log.Infow("shutdown", "status", "stopping database", "host", cfg.DBHost)
+		logger.Log.Infow("shutdown", "status", "stopping database", "host", cfg.DBHost)
 		db.Close()
 	}()
 
@@ -75,21 +69,21 @@ func migrate(log *zap.SugaredLogger) error {
 	// ensure the database is ready
 	err = db.StatusCheck(ctx)
 	if err != nil {
-		log.Errorw("admin migrate", "status", "database not ready", "ERROR", err)
+		logger.Log.Errorw("admin migrate", "status", "database not ready", "ERROR", err)
 		return err
 	}
 
 	applied, err := schema.Migrate(ctx, db.Conn().DB, cfg.Version)
 	if applied {
-		log.Infow("admin migrate", "status", "database version matches the environment version, no migration needed")
+		logger.Log.Infow("admin migrate", "status", "database version matches the environment version, no migration needed")
 		return nil
 	}
 
 	if err != nil {
-		log.Errorw("admin migrate", "status", "database migration failed", "ERROR", err)
+		logger.Log.Errorw("admin migrate", "status", "database migration failed", "ERROR", err)
 		return err
 	}
 
-	log.Infow("admin migrate", "status", "database migration successful")
+	logger.Log.Infow("admin migrate", "status", "database migration successful")
 	return nil
 }

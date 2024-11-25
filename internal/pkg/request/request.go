@@ -47,6 +47,7 @@ func SetStatusCode(ctx context.Context, statusCode int) error {
 	return nil
 }
 
+// RequestKey returns the context key for request values.
 func RequestKey() ctxKey {
 	return key
 }

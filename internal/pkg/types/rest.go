@@ -1,11 +1,12 @@
 package types
 
 import (
+	"context"
 	"net/http"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/gorilla/mux"
-	"go.uber.org/zap"
+
+	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 )
 
 // EndpointHandler is a function that returns a http.HandlerFunc
@@ -13,15 +14,30 @@ type EndpointHandler func(w http.ResponseWriter, r *http.Request) error
 
 // Endpoint holds the handler function, method and path for a route
 type Endpoint struct {
-	Handler func(*database.DB, *zap.SugaredLogger) EndpointHandler
+	Handler func(RouteConfig) EndpointHandler
 	Method  string
 	Path    string
 }
+
+// Authenticator represents the interface that each service in cluster manager must implement for securing their respective APIs.
+type Authenticator interface {
+	Auth(ctx context.Context, w http.ResponseWriter, r *http.Request) (bool, error)
+}
+
+// RouteConfig holds the necessary dependencies for routes and middlewares within service APIs
+type RouteConfig struct {
+	Auth    Authenticator
+	DB      *database.DB
+	Version string
+}
+
+// RouteMiddleware represents middlewares in service APIs that requires route dependencies
+type RouteMiddleware func(RouteConfig) mux.MiddlewareFunc
 
 // RouteGroup holds a prefix and a list of endpoints
 type RouteGroup struct {
 	IsRoot      bool
 	Prefix      string
 	Endpoints   []Endpoint
-	Middlewares []mux.MiddlewareFunc
+	Middlewares []RouteMiddleware
 }

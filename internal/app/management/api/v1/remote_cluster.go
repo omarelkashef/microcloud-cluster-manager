@@ -8,18 +8,20 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/canonical/lxd-cluster-manager/internal/app/management/core/auth"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/store"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
 	"github.com/canonical/lxd/lxd/response"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
 )
 
 var RemoteCluster = types.RouteGroup{
 	Prefix: "remote-cluster",
+	Middlewares: []types.RouteMiddleware{
+		auth.AuthMiddleware,
+	},
 	Endpoints: []types.Endpoint{
 		{
 			Method:  http.MethodGet,
@@ -43,11 +45,11 @@ var RemoteCluster = types.RouteGroup{
 	},
 }
 
-func remoteClustersGet(db *database.DB, logger *zap.SugaredLogger) types.EndpointHandler {
+func remoteClustersGet(rc types.RouteConfig) types.EndpointHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		var dbRemoteClusterDetails []store.RemoteClusterWithDetail
 
-		err := db.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
+		err := rc.DB.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
 			var err error
 			dbRemoteClusterDetails, err = store.GetRemoteClustersWithDetails(ctx, tx)
 			return err
@@ -66,7 +68,7 @@ func remoteClustersGet(db *database.DB, logger *zap.SugaredLogger) types.Endpoin
 	}
 }
 
-func remoteClusterGet(db *database.DB, logger *zap.SugaredLogger) types.EndpointHandler {
+func remoteClusterGet(rc types.RouteConfig) types.EndpointHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		remoteClusterName, err := url.PathUnescape(mux.Vars(r)["remoteClusterName"])
 		if err != nil {
@@ -74,7 +76,7 @@ func remoteClusterGet(db *database.DB, logger *zap.SugaredLogger) types.Endpoint
 		}
 
 		var dbRemoteClusterDetails []store.RemoteClusterWithDetail
-		err = db.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
+		err = rc.DB.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
 			var err error
 			dbRemoteClusterDetails, err = store.GetRemoteClusterWithDetailByName(ctx, tx, remoteClusterName)
 			return err
@@ -97,14 +99,14 @@ func remoteClusterGet(db *database.DB, logger *zap.SugaredLogger) types.Endpoint
 	}
 }
 
-func remoteClusterDelete(db *database.DB, logger *zap.SugaredLogger) types.EndpointHandler {
+func remoteClusterDelete(rc types.RouteConfig) types.EndpointHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		remoteClusterName, err := url.PathUnescape(mux.Vars(r)["remoteClusterName"])
 		if err != nil {
 			return response.SmartError(err).Render(w, r)
 		}
 
-		err = db.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
+		err = rc.DB.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
 			return store.DeleteRemoteCluster(ctx, tx, remoteClusterName)
 		})
 
@@ -116,7 +118,7 @@ func remoteClusterDelete(db *database.DB, logger *zap.SugaredLogger) types.Endpo
 	}
 }
 
-func remoteClusterPatch(db *database.DB, logger *zap.SugaredLogger) types.EndpointHandler {
+func remoteClusterPatch(rc types.RouteConfig) types.EndpointHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		remoteClusterName, err := url.PathUnescape(mux.Vars(r)["remoteClusterName"])
 		if err != nil {
@@ -135,7 +137,7 @@ func remoteClusterPatch(db *database.DB, logger *zap.SugaredLogger) types.Endpoi
 			}
 		}
 
-		err = db.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
+		err = rc.DB.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
 			existingRemoteCluster, err := store.GetRemoteCluster(ctx, tx, remoteClusterName)
 			if err != nil {
 				return err

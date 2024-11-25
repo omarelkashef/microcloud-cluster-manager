@@ -26,24 +26,19 @@ var build = "development"
 var service = "CONTROL"
 
 func main() {
-	// Construct logger for the service.
-	log, err := logger.New(service)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	defer log.Sync()
+	logger.SetService(service)
+	defer logger.Cleanup()
 
 	// Perform the startup and shutdown sequence.
-	err = run(log)
+	err := run()
 	if err != nil {
-		log.Errorw("startup", "ERROR", err)
-		log.Sync()
+		logger.Log.Errorw("startup", "ERROR", err)
+		logger.Log.Sync()
 		os.Exit(1)
 	}
 }
 
-func run(logger *zap.SugaredLogger) error {
+func run() error {
 
 	// =========================================================================
 	// GOMAXPROCS
@@ -53,7 +48,7 @@ func run(logger *zap.SugaredLogger) error {
 	if _, err := maxprocs.Set(); err != nil {
 		return fmt.Errorf("maxprocs: %w", err)
 	}
-	logger.Infow("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
+	logger.Log.Infow("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
 
 	// =========================================================================
 	// Load configuration
@@ -61,15 +56,15 @@ func run(logger *zap.SugaredLogger) error {
 	requireCert := true
 	cfg, err := config.LoadConfig(requireCert)
 	if err != nil {
-		logger.Error("Failed to load configuration")
+		logger.Log.Error("Failed to load configuration")
 	}
 
 	// =========================================================================
 	// App starting
 
-	logger.Infow("starting service", "environment", build)
+	logger.Log.Infow("starting service", "environment", build)
 	expvar.NewString("build").Set(build)
-	defer logger.Infow("shutdown complete")
+	defer logger.Log.Infow("shutdown complete")
 
 	// =========================================================================
 	// Initialize authentication support
@@ -77,7 +72,7 @@ func run(logger *zap.SugaredLogger) error {
 	// =========================================================================
 	// Database Support
 
-	logger.Infow("startup", "status", "initializing database support", "host", cfg.DBHost)
+	logger.Log.Infow("startup", "status", "initializing database support", "host", cfg.DBHost)
 	dbConfigs := database.DBConfig{
 		DBHost:         cfg.DBHost,
 		DBUser:         cfg.DBUser,
@@ -86,7 +81,6 @@ func run(logger *zap.SugaredLogger) error {
 		DBMaxIdleConns: cfg.DBMaxIdleConns,
 		DBMaxOpenConns: cfg.DBMaxOpenConns,
 		DBDisableTLS:   cfg.DBDisableTLS,
-		Logger:         logger,
 	}
 
 	db, err := database.NewDB(dbConfigs)
@@ -94,14 +88,14 @@ func run(logger *zap.SugaredLogger) error {
 		return fmt.Errorf("database connection error: %w", err)
 	}
 	defer func() {
-		logger.Infow("shutdown", "status", "stopping database support", "host", cfg.DBHost)
+		logger.Log.Infow("shutdown", "status", "stopping database support", "host", cfg.DBHost)
 		db.Close()
 	}()
 
 	// =========================================================================
 	// Initialize api
 
-	logger.Infow("startup", "status", "initializing API")
+	logger.Log.Infow("startup", "status", "initializing API")
 
 	// Make a channel to listen for an interrupt or terminate signal from the OS.
 	// Use a buffered channel because the signal package requires it.
@@ -111,19 +105,15 @@ func run(logger *zap.SugaredLogger) error {
 	a := api.NewApi(api.ApiConfig{
 		Shutdown: shutdown,
 		DB:       db,
-		Logger:   logger,
+		Version:  cfg.ApiVersion,
 	})
 
 	// register global middlewares in order
-	m := middleware.NewMiddleware(logger)
-	a.UseGlobalMiddleWares(
-		m.RequestTrace,
-		m.LogRequest,
-	)
+	a.Mux().Use(middleware.RequestTrace)
+	a.Mux().Use(middleware.LogRequest)
 
 	// register api routes
-	version := "1.0"
-	a.RegisterRoutes(routes.APIRoutes, version)
+	a.RegisterRoutes(routes.APIRoutes)
 
 	// Construct a server to service the requests against the mux.
 	server := http.Server{
@@ -132,7 +122,7 @@ func run(logger *zap.SugaredLogger) error {
 		ReadTimeout:  time.Duration(cfg.ReadTimeout) * time.Second,
 		WriteTimeout: time.Duration(cfg.WriteTimeout) * time.Second,
 		IdleTimeout:  time.Duration(cfg.IdleTimeout) * time.Second,
-		ErrorLog:     zap.NewStdLog(logger.Desugar()),
+		ErrorLog:     zap.NewStdLog(logger.Log.Desugar()),
 	}
 
 	// Make a channel to listen for errors coming from the listener. Use a
@@ -141,7 +131,7 @@ func run(logger *zap.SugaredLogger) error {
 
 	// Start the server listening for requests.
 	go func() {
-		logger.Infow("startup", "status", "api router started", "host", server.Addr)
+		logger.Log.Infow("startup", "status", "api router started", "host", server.Addr)
 		serverErrors <- server.ListenAndServe()
 	}()
 
@@ -154,8 +144,8 @@ func run(logger *zap.SugaredLogger) error {
 		return fmt.Errorf("server error: %w", err)
 
 	case sig := <-shutdown:
-		logger.Infow("shutdown", "status", "shutdown started", "signal", sig)
-		defer logger.Infow("shutdown", "status", "shutdown complete", "signal", sig)
+		logger.Log.Infow("shutdown", "status", "shutdown started", "signal", sig)
+		defer logger.Log.Infow("shutdown", "status", "shutdown complete", "signal", sig)
 
 		// Give outstanding requests a deadline for completion.
 		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(20*time.Second))

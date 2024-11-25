@@ -9,13 +9,12 @@ import (
 	"time"
 
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/store"
+	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
 	"github.com/canonical/lxd/lxd/response"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
 )
 
 var RemoteCluster = types.RouteGroup{
@@ -38,7 +37,7 @@ var RemoteCluster = types.RouteGroup{
 	},
 }
 
-func remoteClustersPost(db *database.DB, logger *zap.SugaredLogger) types.EndpointHandler {
+func remoteClustersPost(rc types.RouteConfig) types.EndpointHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		payload := models.RemoteClusterPost{}
 
@@ -63,7 +62,7 @@ func remoteClustersPost(db *database.DB, logger *zap.SugaredLogger) types.Endpoi
 
 		// get token secret for HMAC verification
 		var token *store.RemoteClusterToken
-		err = db.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
+		err = rc.DB.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
 			var err error
 			token, err = store.GetRemoteClusterToken(ctx, tx, payload.ClusterName)
 			if err != nil {
@@ -89,7 +88,7 @@ func remoteClustersPost(db *database.DB, logger *zap.SugaredLogger) types.Endpoi
 		// }
 
 		// Create remote cluster entry and delete token in a single db transaction
-		err = db.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
+		err = rc.DB.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
 			// create remote cluster entry
 			newRemoteCluster, err := store.CreateRemoteCluster(ctx, tx, store.RemoteCluster{
 				Name:               payload.ClusterName,
@@ -129,7 +128,7 @@ func remoteClustersPost(db *database.DB, logger *zap.SugaredLogger) types.Endpoi
 }
 
 // apply mtls for this endpoint
-func remoteClusterStatusPost(db *database.DB, logger *zap.SugaredLogger) types.EndpointHandler {
+func remoteClusterStatusPost(rc types.RouteConfig) types.EndpointHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		payload := models.RemoteClusterStatusPost{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
@@ -144,7 +143,7 @@ func remoteClusterStatusPost(db *database.DB, logger *zap.SugaredLogger) types.E
 		// }
 
 		var remoteClusterID int
-		err = db.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
+		err = rc.DB.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
 			// TODO: get remote cluster by certificate after mtls logic is in place
 			dbRemoteCluster, err := store.GetRemoteCluster(ctx, tx, payload.ClusterName)
 			if err != nil {
@@ -172,7 +171,7 @@ func remoteClusterStatusPost(db *database.DB, logger *zap.SugaredLogger) types.E
 		})
 
 		if err != nil {
-			logger.Warnw("Failed to update remote cluster status", "remote cluster", remoteClusterID, "err", err)
+			logger.Log.Warnw("Failed to update remote cluster status", "remote cluster", remoteClusterID, "err", err)
 			return response.SmartError(err).Render(w, r)
 		}
 
@@ -185,14 +184,14 @@ func remoteClusterStatusPost(db *database.DB, logger *zap.SugaredLogger) types.E
 }
 
 // TODO: use cert fingerprint instead of path param for deleting cluster
-func remoteClusterDelete(db *database.DB, logger *zap.SugaredLogger) types.EndpointHandler {
+func remoteClusterDelete(rc types.RouteConfig) types.EndpointHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		remoteClusterName, err := url.PathUnescape(mux.Vars(r)["remoteClusterName"])
 		if err != nil {
 			return response.SmartError(err).Render(w, r)
 		}
 
-		err = db.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
+		err = rc.DB.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
 			return store.DeleteRemoteCluster(ctx, tx, remoteClusterName)
 		})
 

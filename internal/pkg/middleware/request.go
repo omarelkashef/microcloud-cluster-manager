@@ -5,13 +5,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/request"
 	"github.com/canonical/lxd/lxd/response"
 	"github.com/google/uuid"
 )
 
 // RequestTrace is a middleware that adds a trace ID and timestamp to the request context
-func (m *Middleware) RequestTrace(next http.Handler) http.Handler {
+func RequestTrace(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id, err := uuid.NewUUID()
 		if err != nil {
@@ -30,7 +31,7 @@ func (m *Middleware) RequestTrace(next http.Handler) http.Handler {
 }
 
 // LogRequest is a middleware that logs a request/response cycle
-func (m *Middleware) LogRequest(next http.Handler) http.Handler {
+func LogRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		// If the context is missing this value, we can't log anything
@@ -41,7 +42,7 @@ func (m *Middleware) LogRequest(next http.Handler) http.Handler {
 		}
 
 		// Generate a new trace ID
-		m.log.Infow(
+		logger.Log.Infow(
 			"request started",
 			"traceid", v.TraceID,
 			"method", r.Method,
@@ -53,7 +54,7 @@ func (m *Middleware) LogRequest(next http.Handler) http.Handler {
 		rw := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
 		next.ServeHTTP(rw, r)
 
-		m.log.Infow(
+		logger.Log.Infow(
 			"request completed",
 			"traceid", v.TraceID,
 			"method", r.Method,

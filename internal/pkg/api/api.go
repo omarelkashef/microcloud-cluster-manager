@@ -6,18 +6,13 @@ import (
 	"os"
 	"syscall"
 
+	"github.com/canonical/lxd/lxd/response"
 	"github.com/gorilla/mux"
-	"go.uber.org/zap"
 
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
+	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
-	"github.com/canonical/lxd/lxd/response"
 )
-
-// Router represents a group of related routes
-type Router interface {
-	RegisterRoutes(r *mux.Router, db *database.DB)
-}
 
 // A Handler is a type that handles an http request within our own little mini
 // framework.
@@ -26,7 +21,8 @@ type Handler func(ctx context.Context, w http.ResponseWriter, r *http.Request) e
 type ApiConfig struct {
 	Shutdown chan os.Signal
 	DB       *database.DB
-	Logger   *zap.SugaredLogger
+	Auth     types.Authenticator
+	Version  string
 }
 
 // Api is the entrypoint into our application and what configures our context
@@ -35,7 +31,8 @@ type Api struct {
 	mux      *mux.Router
 	shutdown chan os.Signal
 	db       *database.DB
-	logger   *zap.SugaredLogger
+	auth     types.Authenticator
+	version  string
 }
 
 // NewApp creates an App value that handle a set of routes for the application.
@@ -49,7 +46,8 @@ func NewApi(cfg ApiConfig) *Api {
 		mux:      mux,
 		shutdown: cfg.Shutdown,
 		db:       cfg.DB,
-		logger:   cfg.Logger,
+		auth:     cfg.Auth,
+		version:  cfg.Version,
 	}
 }
 
@@ -65,25 +63,36 @@ func (a *Api) UseGlobalMiddleWares(mw ...mux.MiddlewareFunc) {
 }
 
 // RegisterRoutes adds the routes to the router.
-func (a *Api) RegisterRoutes(routes []types.RouteGroup, version string) {
-	registerRoutes(a.mux, a.db, a.logger, routes, version)
+func (a *Api) RegisterRoutes(routes []types.RouteGroup) {
+	rc := types.RouteConfig{
+		Auth:    a.auth,
+		DB:      a.db,
+		Version: a.version,
+	}
+
+	registerRoutes(a.mux, routes, rc)
 
 	a.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		err := response.SyncResponse(true, []string{"/1.0"}).Render(w, r)
 		if err != nil {
-			a.logger.Errorw("Failed to write HTTP response", "url", r.URL, "err", err.Error())
+			logger.Log.Errorw("Failed to write HTTP response", "url", r.URL, "err", err.Error())
 		}
 	})
 
 	a.mux.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		a.logger.Infow("Sending top level 404", "url", r.URL)
+		logger.Log.Infow("Sending top level 404", "url", r.URL)
 		w.Header().Set("Content-Type", "application/json")
 		err := response.NotFound(nil).Render(w, r)
 		if err != nil {
-			a.logger.Error("Failed to write HTTP response", "url", r.URL, "err", err.Error())
+			logger.Log.Error("Failed to write HTTP response", "url", r.URL, "err", err.Error())
 		}
 	})
+}
+
+// Mux returns the router.
+func (a *Api) Mux() *mux.Router {
+	return a.mux
 }
 
 // ServeHTTP implements the http.Handler interface.

@@ -12,16 +12,18 @@ import (
 	"github.com/canonical/lxd/shared"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
 
+	"github.com/canonical/lxd-cluster-manager/internal/app/management/core/auth"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/store"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
 )
 
 var RemoteClusterJoinToken = types.RouteGroup{
 	Prefix: "remote-cluster-join-token",
+	Middlewares: []types.RouteMiddleware{
+		auth.AuthMiddleware,
+	},
 	Endpoints: []types.Endpoint{
 		{
 			Method:  http.MethodPost,
@@ -39,7 +41,7 @@ var RemoteClusterJoinToken = types.RouteGroup{
 	},
 }
 
-func tokenPost(db *database.DB, _ *zap.SugaredLogger) types.EndpointHandler {
+func tokenPost(rc types.RouteConfig) types.EndpointHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		payload := models.RemoteClusterTokenPost{}
 
@@ -67,7 +69,7 @@ func tokenPost(db *database.DB, _ *zap.SugaredLogger) types.EndpointHandler {
 		}
 
 		// store token details in the database
-		err = db.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
+		err = rc.DB.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
 			var err error
 			tokenData := store.RemoteClusterToken{
 				ClusterName: payload.ClusterName,
@@ -114,10 +116,10 @@ func tokenPost(db *database.DB, _ *zap.SugaredLogger) types.EndpointHandler {
 	}
 }
 
-func tokensGet(db *database.DB, _ *zap.SugaredLogger) types.EndpointHandler {
+func tokensGet(rc types.RouteConfig) types.EndpointHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		var tokens []store.RemoteClusterToken
-		err := db.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
+		err := rc.DB.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
 			var err error
 			tokens, err = store.GetRemoteClusterTokens(ctx, tx)
 			return err
@@ -140,7 +142,7 @@ func tokensGet(db *database.DB, _ *zap.SugaredLogger) types.EndpointHandler {
 	}
 }
 
-func tokenDelete(db *database.DB, _ *zap.SugaredLogger) types.EndpointHandler {
+func tokenDelete(rc types.RouteConfig) types.EndpointHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		remoteClusterName, err := url.PathUnescape(mux.Vars(r)["remoteClusterName"])
 		if err != nil {
@@ -151,7 +153,7 @@ func tokenDelete(db *database.DB, _ *zap.SugaredLogger) types.EndpointHandler {
 			return response.BadRequest(fmt.Errorf("cluster name is required")).Render(w, r)
 		}
 
-		err = db.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
+		err = rc.DB.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
 			return store.DeleteRemoteClusterToken(ctx, tx, remoteClusterName)
 		})
 

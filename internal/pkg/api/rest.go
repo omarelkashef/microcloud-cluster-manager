@@ -4,47 +4,49 @@ import (
 	"net/http"
 	"path"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
 	"github.com/canonical/lxd/lxd/response"
 	"github.com/gorilla/mux"
-	"go.uber.org/zap"
+
+	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
+	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
 )
 
-func registerRoutes(mux *mux.Router, db *database.DB, logger *zap.SugaredLogger, routes []types.RouteGroup, version string) {
+func registerRoutes(mux *mux.Router, routes []types.RouteGroup, rc types.RouteConfig) {
 	// Register route groups
-	for _, r := range routes {
-		registerRouteGroup(mux, db, logger, r, version)
+	for _, rg := range routes {
+		registerRouteGroup(mux, rg, rc)
 	}
 }
 
-func registerRouteGroup(mux *mux.Router, db *database.DB, logger *zap.SugaredLogger, r types.RouteGroup, version string) {
-	routeGroupPath := path.Join("/", r.Prefix)
-	if !r.IsRoot {
-		routeGroupPath = path.Join("/", version, r.Prefix)
+func registerRouteGroup(mux *mux.Router, rg types.RouteGroup, rc types.RouteConfig) {
+	routeGroupPath := path.Join("/", rg.Prefix)
+	if !rg.IsRoot {
+		routeGroupPath = path.Join("/", rc.Version, rg.Prefix)
 	}
 
 	// apply middlewares at route group level
 	sr := mux.PathPrefix(routeGroupPath).Subrouter()
-	if len(r.Middlewares) > 0 {
-		sr.Use(r.Middlewares...)
+	if len(rg.Middlewares) > 0 {
+		for _, m := range rg.Middlewares {
+			sr.Use(m(rc))
+		}
 	}
 
-	for _, e := range r.Endpoints {
-		registerEndpoint(sr, db, logger, routeGroupPath, e)
+	for _, e := range rg.Endpoints {
+		registerEndpoint(sr, routeGroupPath, e, rc)
 	}
 }
 
-func registerEndpoint(mux *mux.Router, db *database.DB, logger *zap.SugaredLogger, prefix string, e types.Endpoint) {
+func registerEndpoint(mux *mux.Router, prefix string, e types.Endpoint, rc types.RouteConfig) {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		err := e.Handler(db, logger)(w, r)
+		err := e.Handler(rc)(w, r)
 		if err != nil {
-			logger.Errorw("internal error", "ERROR", err)
+			logger.Log.Errorw("internal error", "ERROR", err)
 			renderErr := response.InternalError(err).Render(w, r)
 			if renderErr != nil {
-				logger.Errorw("failed to write error response", "path", path.Join(prefix, e.Path), "ERROR", renderErr.Error())
+				logger.Log.Errorw("failed to write error response", "path", path.Join(prefix, e.Path), "ERROR", renderErr.Error())
 			}
 		}
 	})

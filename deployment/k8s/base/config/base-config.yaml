@@ -25,3 +25,8 @@ data:
   VERSION: base
   TLS_CERT_PATH: /etc/ssl/certs/tls.crt
   TLS_KEY_PATH: /etc/ssl/certs/tls.key
+  TLS_CA_PATH: /etc/ssl/certs/ca.crt
+  # oidc configs
+  OIDC_CLIENT_ID: base
+  OIDC_ISSUER: base
+  OIDC_AUDIENCE: base

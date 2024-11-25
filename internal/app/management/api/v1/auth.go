@@ -3,10 +3,10 @@ package v1
 import (
 	"net/http"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
+	"github.com/canonical/lxd-cluster-manager/internal/app/management/core/auth"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
 	"github.com/canonical/lxd/lxd/response"
-	"go.uber.org/zap"
+	"github.com/google/uuid"
 )
 
 var Auth = types.RouteGroup{
@@ -31,23 +31,58 @@ var Auth = types.RouteGroup{
 	},
 }
 
-func login(db *database.DB, logger *zap.SugaredLogger) types.EndpointHandler {
+func login(rc types.RouteConfig) types.EndpointHandler {
+	verifier := rc.Auth.(*auth.Verifier)
 	return func(w http.ResponseWriter, r *http.Request) error {
-		response.SyncResponse(true, "oidc/login").Render(w, r)
-		return nil
+		redirectURL := r.URL.Query().Get("next")
+
+		stateToken := auth.StateToken{
+			RedirectURL: redirectURL,
+			ID:          uuid.New().String(),
+		}
+
+		state, err := stateToken.String()
+		if err != nil {
+			return response.InternalError(err).Render(w, r)
+		}
+
+		loginHandler := func(w http.ResponseWriter) error {
+			verifier.Login(w, r, state)
+			return nil
+		}
+
+		return response.ManualResponse(loginHandler).Render(w, r)
 	}
 }
 
-func callback(db *database.DB, logger *zap.SugaredLogger) types.EndpointHandler {
+func callback(rc types.RouteConfig) types.EndpointHandler {
+	verifier := rc.Auth.(*auth.Verifier)
 	return func(w http.ResponseWriter, r *http.Request) error {
-		response.SyncResponse(true, "oidc/callback").Render(w, r)
-		return nil
+		state := r.URL.Query().Get("state")
+		stateToken, err := auth.DecodeStateToken(state)
+		if err != nil {
+			return response.InternalError(err).Render(w, r)
+		}
+
+		callbackHandler := func(w http.ResponseWriter) error {
+			verifier.Callback(w, r, stateToken.RedirectURL)
+			return nil
+		}
+
+		return response.ManualResponse(callbackHandler).Render(w, r)
 	}
 }
 
-func logout(db *database.DB, logger *zap.SugaredLogger) types.EndpointHandler {
+func logout(rc types.RouteConfig) types.EndpointHandler {
+	verifier := rc.Auth.(*auth.Verifier)
 	return func(w http.ResponseWriter, r *http.Request) error {
-		response.SyncResponse(true, "oidc/logout").Render(w, r)
-		return nil
+		redirectURL := r.URL.Query().Get("next")
+
+		logoutHandler := func(w http.ResponseWriter) error {
+			verifier.Logout(w, r, redirectURL)
+			return nil
+		}
+
+		return response.ManualResponse(logoutHandler).Render(w, r)
 	}
 }

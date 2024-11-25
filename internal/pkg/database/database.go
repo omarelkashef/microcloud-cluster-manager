@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/request"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // Calls init function.
-	"go.uber.org/zap"
 )
 
 // Set of error variables for CRUD operations.
@@ -23,7 +23,7 @@ var (
 	ErrForbidden             = errors.New("attempted action is not allowed")
 )
 
-// Config is the required properties to use the database.
+// DBConfig is the required properties to use the database.
 type DBConfig struct {
 	DBPort         string
 	DBUser         string
@@ -33,14 +33,11 @@ type DBConfig struct {
 	DBMaxIdleConns int
 	DBMaxOpenConns int
 	DBDisableTLS   bool
-
-	Logger *zap.SugaredLogger
 }
 
 // DB is a wrapper around the sqlx database connection.
 type DB struct {
 	cfg  DBConfig
-	log  *zap.SugaredLogger
 	conn *sqlx.DB
 }
 
@@ -56,7 +53,6 @@ func NewDB(cfg DBConfig) (*DB, error) {
 
 	return &DB{
 		cfg:  cfg,
-		log:  cfg.Logger,
 		conn: db,
 	}, nil
 }
@@ -132,7 +128,7 @@ func (db *DB) StatusCheck(ctx context.Context) error {
 	return db.conn.QueryRowContext(ctx, q).Scan(&tmp)
 }
 
-// Retry executes the provided function with retry logic for transient errors.
+// retry executes the provided function with retry logic for transient errors.
 // The function fn should return an error if it fails, or nil if it succeeds.
 func (db *DB) retry(ctx context.Context, fn func(ctx context.Context) error) error {
 	var lastErr error
@@ -147,7 +143,7 @@ func (db *DB) retry(ctx context.Context, fn func(ctx context.Context) error) err
 			}
 
 			// Log and continue for retriable errors.
-			db.log.Infow("retry transaction", "traceid", traceID, "attempt", attempt, "maxRetries", maxRetries, "error", err)
+			logger.Log.Infow("retry transaction", "traceid", traceID, "attempt", attempt, "maxRetries", maxRetries, "error", err)
 			continue
 		}
 		// If the function succeeds, return nil.
@@ -168,7 +164,7 @@ func (db *DB) Transaction(ctx context.Context, fn func(context.Context, *sqlx.Tx
 		traceID := request.GetTraceID(ctx)
 
 		// Begin the transaction.
-		db.log.Infow("begin tran", "traceid", traceID)
+		logger.Log.Infow("begin tran", "traceid", traceID)
 		tx, err := db.conn.Beginx()
 		if err != nil {
 			return fmt.Errorf("begin tran: %w", err)
@@ -182,9 +178,9 @@ func (db *DB) Transaction(ctx context.Context, fn func(context.Context, *sqlx.Tx
 		// need to rollback the transaction.
 		defer func() {
 			if mustRollback {
-				db.log.Infow("rollback tran", "traceid", traceID)
+				logger.Log.Infow("rollback tran", "traceid", traceID)
 				if err := tx.Rollback(); err != nil {
-					db.log.Errorw("unable to rollback tran", "traceid", traceID, "ERROR", err)
+					logger.Log.Errorw("unable to rollback tran", "traceid", traceID, "ERROR", err)
 				}
 			}
 		}()
@@ -199,7 +195,7 @@ func (db *DB) Transaction(ctx context.Context, fn func(context.Context, *sqlx.Tx
 		mustRollback = false
 
 		// Commit the transaction.
-		db.log.Infow("commit tran", "traceid", traceID)
+		logger.Log.Infow("commit tran", "traceid", traceID)
 		if err := tx.Commit(); err != nil {
 			return fmt.Errorf("commit tran: %w", err)
 		}

@@ -3,10 +3,8 @@ package v1
 import (
 	"net/http"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
 	"github.com/canonical/lxd/lxd/response"
-	"go.uber.org/zap"
 )
 
 var UI = types.RouteGroup{
@@ -21,7 +19,7 @@ var UI = types.RouteGroup{
 	},
 }
 
-func ui(db *database.DB, logger *zap.SugaredLogger) types.EndpointHandler {
+func ui(rc types.RouteConfig) types.EndpointHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		response.SyncResponse(true, "ui").Render(w, r)
 		return nil
