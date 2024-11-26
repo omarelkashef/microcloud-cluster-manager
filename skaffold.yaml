@@ -32,11 +32,11 @@ portForward:
 - resourceType: deployment
   resourceName: management-depl
   port: management
-  localPort: 8414
+  localPort: 9000
 - resourceType: deployment
   resourceName: control-depl
   port: control
-  localPort: 8415
+  localPort: 9001
 # For debugging purposes, we can connect via pgadmin here
 - resourceType: deployment
   resourceName: db-depl
@@ -59,11 +59,11 @@ profiles:
   - resourceType: deployment
     resourceName: management-depl
     port: management
-    localPort: 8414
+    localPort: 9000
   - resourceType: deployment
     resourceName: control-depl
     port: control
-    localPort: 8415
+    localPort: 9001
   - resourceType: deployment
     resourceName: management-depl
     port: debug  # Debug port exposed by Delve

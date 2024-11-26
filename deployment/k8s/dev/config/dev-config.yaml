@@ -24,7 +24,7 @@ data:
   CONTROL_PORT: "9001"
   # TODO: define proper versioning strategy
   VERSION: "development"
-  CONTROL_ADDRESS: "https://localhost:8415"
+  CONTROL_ADDRESS: "https://localhost:9001"
   # oidc configs
   OIDC_CLIENT_ID: NBXrnTZUrulBYNPuc4raZySTEWDTuvM2
   OIDC_ISSUER: https://dev-xjrvvfikbsv4jxn7.us.auth0.com/

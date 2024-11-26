@@ -16,6 +16,7 @@ import (
 
 	"github.com/canonical/lxd-cluster-manager/config"
 	routes "github.com/canonical/lxd-cluster-manager/internal/app/control/api"
+	"github.com/canonical/lxd-cluster-manager/internal/app/control/core/auth"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/api"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
@@ -57,9 +58,6 @@ func Run() error {
 	defer logger.Log.Infow("shutdown complete")
 
 	// =========================================================================
-	// Initialize authentication support
-
-	// =========================================================================
 	// Database Support
 
 	logger.Log.Infow("startup", "status", "initializing database support", "host", cfg.DBHost)
@@ -83,6 +81,11 @@ func Run() error {
 	}()
 
 	// =========================================================================
+	// Initialize authentication support
+
+	mtlsAuthenticator := auth.NewMtlsAuthenticator(db)
+
+	// =========================================================================
 	// Initialize api
 
 	logger.Log.Infow("startup", "status", "initializing API")
@@ -96,6 +99,7 @@ func Run() error {
 		Shutdown:  shutdown,
 		DB:        db,
 		EnvConfig: cfg,
+		Auth:      mtlsAuthenticator,
 	})
 
 	// register global middlewares in order

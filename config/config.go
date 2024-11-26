@@ -113,7 +113,7 @@ func LoadConfig() (*Config, error) {
 		ReadTimeout:    10,
 		WriteTimeout:   10,
 		IdleTimeout:    60,
-		ControlAddress: getEnvOrDefault("CONTROL_ADDRESS", "https://localhost:8415"),
+		ControlAddress: getEnvOrDefault("CONTROL_ADDRESS", "https://localhost:9001"),
 		DBConfig: database.DBConfig{
 			DBPort:         getEnvOrDefault("DB_PORT", "5432"),
 			DBUser:         getEnvOrDefault("DB_USER", "admin"),
