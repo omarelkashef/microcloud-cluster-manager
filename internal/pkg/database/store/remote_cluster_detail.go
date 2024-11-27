@@ -298,7 +298,7 @@ func UpdateRemoteClusterDetail(ctx context.Context, tx *sqlx.Tx, remoteClusterID
 	q := `
         UPDATE remote_cluster_details
         SET cpu_total_count = $1, cpu_load_1 = $2, cpu_load_5 = $3, cpu_load_15 = $4, memory_total_amount = $5, memory_usage = $6, disk_total_size = $7, disk_usage = $8, instance_count = $9, instance_statuses = $10, member_count = $11, member_statuses = $12
-        WHERE remote_cluster_id = $13;
+        WHERE id = $13;
     `
 
 	result, err := tx.ExecContext(ctx, q,

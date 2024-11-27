@@ -22,9 +22,10 @@ data:
   SERVER_HOST: "localhost"
   MANAGEMENT_PORT: "9000"
   CONTROL_PORT: "9001"
+  TEST_MODE: "false"
   # TODO: define proper versioning strategy
   VERSION: "development"
-  CONTROL_ADDRESS: "https://localhost:9001"
+  CONTROL_ADDRESS: "localhost:9001"
   # oidc configs
   OIDC_CLIENT_ID: NBXrnTZUrulBYNPuc4raZySTEWDTuvM2
   OIDC_ISSUER: https://dev-xjrvvfikbsv4jxn7.us.auth0.com/

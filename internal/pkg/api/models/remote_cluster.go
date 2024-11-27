@@ -69,5 +69,6 @@ type RemoteClusterStatusPost struct {
 
 // RemoteClusterStatusPostResponse is sent to LXD in response to a remote cluster status update.
 type RemoteClusterStatusPostResponse struct {
-	NextUpdateInSeconds string `json:"next_update_in_seconds"`
+	NextUpdateInSeconds   string `json:"next_update_in_seconds"`
+	ClusterManagerAddress string `json:"cluster_manager_address"`
 }

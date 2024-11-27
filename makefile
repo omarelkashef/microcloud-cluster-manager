@@ -137,3 +137,6 @@ migrate-db:
 # curl -X POST http://localhost:8415/1.0/remote-cluster/status -H "Content-Type: application/json" -d '{ "cpu_total_count": 20, "cpu_load_1": "0.1", "cpu_load_5": "0.2", "cpu_load_15": "0.3", "memory_total_amount": 30, "memory_usage": 40, "disk_total_size": 50, "disk_usage": 60, "member_statuses": [{"status": "RUNNING", "count": 10}, {"status": "DOWN", "count": 100}], "instance_statuses": [{"status": "RUNNING", "count": 10}, {"status": "DOWN", "count": 100}], "cluster_name": "test-cluster" }'
 # DELETE /1.0/remote-cluster/:name
 # curl -X DELETE http://localhost:8415/1.0/remote-cluster/test-cluster -H "Content-Type: application/json"
+.PHONY: test-e2e
+test-e2e:
+	go test -count=1 -v ./test/e2e

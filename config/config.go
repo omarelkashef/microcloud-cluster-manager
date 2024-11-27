@@ -19,6 +19,7 @@ type Config struct {
 	ManagementCert *shared.CertInfo
 	ControlCert    *shared.CertInfo
 	ControlAddress string
+	TestMode       bool
 	// db configs
 	database.DBConfig
 	// api configs
@@ -109,11 +110,12 @@ func LoadConfig() (*Config, error) {
 		ServerHost:     getEnvOrDefault("SERVER_HOST", "localhost"),
 		ManagementPort: getEnvOrDefault("MANAGEMENT_PORT", "9000"),
 		ControlPort:    getEnvOrDefault("CONTROL_PORT", "9001"),
+		TestMode:       getEnvOrDefault("TEST_MODE", "false") == "true",
 		AllowedOrigins: []string{"*"},
 		ReadTimeout:    10,
 		WriteTimeout:   10,
 		IdleTimeout:    60,
-		ControlAddress: getEnvOrDefault("CONTROL_ADDRESS", "https://localhost:9001"),
+		ControlAddress: getEnvOrDefault("CONTROL_ADDRESS", "localhost:9001"),
 		DBConfig: database.DBConfig{
 			DBPort:         getEnvOrDefault("DB_PORT", "5432"),
 			DBUser:         getEnvOrDefault("DB_USER", "admin"),
