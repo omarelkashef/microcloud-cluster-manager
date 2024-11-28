@@ -41,6 +41,9 @@ func testRemoteClusterStatusNoCert(env *helpers.Environment) (testName string, t
 
 			helpers.LogTestOutcome(t, condition, err)
 		}
+
+		env.RemoveRemoteClusterToken(remoteClusterName)
+		env.RemoveRemoteCluster(remoteClusterName)
 	}
 }
 
@@ -74,6 +77,9 @@ func testRemoteClusterStatusInactive(env *helpers.Environment) (testName string,
 
 			helpers.LogTestOutcome(t, condition, err)
 		}
+
+		env.RemoveRemoteClusterToken(remoteClusterName)
+		env.RemoveRemoteCluster(remoteClusterName)
 	}
 }
 
@@ -107,6 +113,9 @@ func testRemoteClusterStatusInvalidCert(env *helpers.Environment) (testName stri
 
 			helpers.LogTestOutcome(t, condition, err)
 		}
+
+		env.RemoveRemoteClusterToken(remoteClusterName)
+		env.RemoveRemoteCluster(remoteClusterName)
 	}
 }
 

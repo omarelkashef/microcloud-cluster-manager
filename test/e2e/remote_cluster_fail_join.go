@@ -28,6 +28,9 @@ func testRemoteClusterJoinInvalidHMAC(env *helpers.Environment) (testName string
 
 			helpers.LogTestOutcome(t, condition, err)
 		}
+
+		env.RemoveRemoteClusterToken(remoteClusterName)
+		env.RemoveRemoteCluster(remoteClusterName)
 	}
 }
 
@@ -54,5 +57,8 @@ func testRemoteClusterJoinExpiredToken(env *helpers.Environment) (testName strin
 
 			helpers.LogTestOutcome(t, condition, err)
 		}
+
+		env.RemoveRemoteClusterToken(remoteClusterName)
+		env.RemoveRemoteCluster(remoteClusterName)
 	}
 }

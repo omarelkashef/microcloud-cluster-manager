@@ -18,7 +18,7 @@ import (
 	"github.com/canonical/lxd/shared/api"
 )
 
-func testRemoteClusterSuccess(e *helpers.Environment) (testName string, testFunc func(t *testing.T)) {
+func testRemoteClusterSuccess(env *helpers.Environment) (testName string, testFunc func(t *testing.T)) {
 	return "lxd remote cluster join and status updates under normal conditions", func(t *testing.T) {
 		remoteClusterName := "remote_cluster_control_e2e"
 		var condition string
@@ -27,7 +27,7 @@ func testRemoteClusterSuccess(e *helpers.Environment) (testName string, testFunc
 
 		{
 			condition = "Should be able to create token with valid data"
-			tokenData, err = helpers.CreateAndReturnRemoteClusterJoinToken(e, remoteClusterName, time.Time{})
+			tokenData, err = helpers.CreateAndReturnRemoteClusterJoinToken(env, remoteClusterName, time.Time{})
 			if err != nil {
 				helpers.LogTestOutcome(t, condition, err)
 			}
@@ -42,7 +42,7 @@ func testRemoteClusterSuccess(e *helpers.Environment) (testName string, testFunc
 				helpers.LogTestOutcome(t, condition, err)
 			}
 
-			if tokenData.Address != e.ControlHost() {
+			if tokenData.Address != env.ControlHost() {
 				err = fmt.Errorf("invalid address")
 				helpers.LogTestOutcome(t, condition, err)
 			}
@@ -62,13 +62,13 @@ func testRemoteClusterSuccess(e *helpers.Environment) (testName string, testFunc
 
 		{
 			condition = "Should be able to receive a join request"
-			err = sendJoinRequest(e, tokenData)
+			err = sendJoinRequest(env, tokenData)
 			helpers.LogTestOutcome(t, condition, err)
 		}
 
 		{
 			condition = "Should be able to get remote cluster with PENDING_APPROVAL status"
-			remoteCluster, err := helpers.FindRemoteCluster(e, remoteClusterName)
+			remoteCluster, err := helpers.FindRemoteCluster(env, remoteClusterName)
 			if err != nil {
 				helpers.LogTestOutcome(t, condition, err)
 			}
@@ -83,7 +83,7 @@ func testRemoteClusterSuccess(e *helpers.Environment) (testName string, testFunc
 
 		{
 			condition = "Should have deleted the remote cluster join token after receiving join request"
-			token, err := helpers.FindToken(e, remoteClusterName)
+			token, err := helpers.FindToken(env, remoteClusterName)
 			if err != nil {
 				helpers.LogTestOutcome(t, condition, err)
 			}
@@ -98,12 +98,12 @@ func testRemoteClusterSuccess(e *helpers.Environment) (testName string, testFunc
 
 		{
 			condition = "Should be able to approve a join request"
-			err = approveJoinRequest(e, remoteClusterName)
+			err = approveJoinRequest(env, remoteClusterName)
 			if err != nil {
 				helpers.LogTestOutcome(t, condition, err)
 			}
 
-			remoteCluster, err := helpers.FindRemoteCluster(e, remoteClusterName)
+			remoteCluster, err := helpers.FindRemoteCluster(env, remoteClusterName)
 			if err != nil {
 				helpers.LogTestOutcome(t, condition, err)
 			}
@@ -118,12 +118,12 @@ func testRemoteClusterSuccess(e *helpers.Environment) (testName string, testFunc
 
 		{
 			condition = "Should be able to receive a status update"
-			response, err := sendStatusUpdate(e, tokenData)
+			response, err := sendStatusUpdate(env, tokenData)
 			if err != nil {
 				helpers.LogTestOutcome(t, condition, err)
 			}
 
-			expected := e.ControlHost()
+			expected := env.ControlHost()
 
 			if !reflect.DeepEqual(response.ClusterManagerAddress, expected) {
 				err = fmt.Errorf("invalid Cluster Manager address")
@@ -135,7 +135,7 @@ func testRemoteClusterSuccess(e *helpers.Environment) (testName string, testFunc
 
 		{
 			condition = "Should be able to get remote cluster status"
-			remoteCluster, err := helpers.FindRemoteCluster(e, remoteClusterName)
+			remoteCluster, err := helpers.FindRemoteCluster(env, remoteClusterName)
 			if err != nil {
 				helpers.LogTestOutcome(t, condition, err)
 			}
@@ -173,6 +173,9 @@ func testRemoteClusterSuccess(e *helpers.Environment) (testName string, testFunc
 
 			helpers.LogTestOutcome(t, condition, nil)
 		}
+
+		env.RemoveRemoteClusterToken(remoteClusterName)
+		env.RemoveRemoteCluster(remoteClusterName)
 	}
 }
 

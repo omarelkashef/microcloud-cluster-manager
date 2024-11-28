@@ -1,6 +1,7 @@
 ui/node_modules/
 ui/keys/
 ui/tests/
+test/e2e/data
 .github/
 .vscode/
 *.md

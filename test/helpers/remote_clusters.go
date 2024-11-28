@@ -33,3 +33,22 @@ func FindRemoteCluster(env *Environment, remoteClusterName string) (*models.Remo
 
 	return output, nil
 }
+
+// DeleteRemoteCluster deletes a remote cluster by name.
+func DeleteRemoteCluster(env *Environment, remoteClusterName string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	certPublicKey, err := env.ManagementCert().PublicKeyX509()
+	if err != nil {
+		return err
+	}
+
+	tlsClient, err := NewTLSHTTPClient(api.URL{}, nil, certPublicKey)
+	if err != nil {
+		return err
+	}
+
+	path := api.NewURL().Scheme("https").Host(env.ManagementHost()).Path("1.0", "remote-cluster", remoteClusterName)
+	return tlsClient.Query(ctx, http.MethodDelete, path, nil, nil, nil)
+}

@@ -27,15 +27,17 @@ const (
 
 // Environment represents the environment for the tests.
 type Environment struct {
-	rootDir        string
-	testDir        string
-	certDir        string
-	processIDs     []int
-	kClient        *kubernetes.Clientset
-	managementCert *shared.CertInfo
-	controlCert    *shared.CertInfo
-	managementHost string
-	controlHost    string
+	rootDir             string
+	testDir             string
+	certDir             string
+	processIDs          []int
+	kClient             *kubernetes.Clientset
+	managementCert      *shared.CertInfo
+	controlCert         *shared.CertInfo
+	managementHost      string
+	controlHost         string
+	remoteClusters      []string
+	remoteClusterTokens []string
 }
 
 // NewEnv creates a new environment.
@@ -72,6 +74,16 @@ func (e *Environment) AddProcessID(pid int) {
 // ProcessIDs returns the pids for all processes started during a test run.
 func (e *Environment) ProcessIDs() []int {
 	return e.processIDs
+}
+
+// AddRemoteCluster mark a remote cluster for removal during test cleanup.
+func (e *Environment) RemoveRemoteCluster(name string) {
+	e.remoteClusters = append(e.remoteClusters, name)
+}
+
+// AddRemoteClusterToken mark a remote cluster join token for removal during test cleanup.
+func (e *Environment) RemoveRemoteClusterToken(token string) {
+	e.remoteClusterTokens = append(e.remoteClusterTokens, token)
 }
 
 // Init initializes the environment.
@@ -111,6 +123,21 @@ func (e *Environment) Cleanup() error {
 
 	if err := os.RemoveAll(e.DataDir()); err != nil {
 		return err
+	}
+
+	// remove all new clusters and tokens created during the test
+	for _, cluster := range e.remoteClusters {
+		err := DeleteRemoteCluster(e, cluster)
+		if err != nil {
+			continue
+		}
+	}
+
+	for _, token := range e.remoteClusterTokens {
+		err := DeleteRemoteClusterJoinToken(e, token)
+		if err != nil {
+			continue
+		}
 	}
 
 	// Reset the test mode
