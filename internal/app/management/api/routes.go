@@ -10,6 +10,7 @@ var APIRoutes = []types.RouteGroup{
 	v1.UIRoot,
 	v1.ApiRoot,
 	v1.Auth,
+	v1.Configuration,
 	v1.RemoteCluster,
 	v1.RemoteClusterJoinToken,
 }

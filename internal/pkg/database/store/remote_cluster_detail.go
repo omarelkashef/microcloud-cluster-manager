@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models"
+	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models/v1"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/query"
 	"github.com/canonical/lxd/shared/api"
 	"github.com/jmoiron/sqlx"

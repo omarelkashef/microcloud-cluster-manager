@@ -1,0 +1,20 @@
+package models
+
+// ConfigData is a struct that holds the configuration data.
+type ConfigData struct {
+	Value       string `json:"value"`
+	Description string `json:"description"`
+	Title       string `json:"title"`
+}
+
+// Configuration represents application environment data shown to users
+type Configuration struct {
+	ApiVersion         ConfigData `json:"api_version"`
+	ControlAddress     ConfigData `json:"control_address"`
+	OIDCClientID       ConfigData `json:"oidc_client_id"`
+	OIDCIssuer         ConfigData `json:"oidc_issuer"`
+	OIDCAudience       ConfigData `json:"oidc_audience"`
+	DBConnectionString ConfigData `json:"db_connection_string"`
+	DBMaxIdleConns     ConfigData `json:"db_max_idle_conns"`
+	DBMaxOpenConns     ConfigData `json:"db_max_open_conns"`
+}

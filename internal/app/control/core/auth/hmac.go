@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models"
+	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models/v1"
 )
 
 func VerifyHMAC(payload models.RemoteClusterPost, r *http.Request, secret string) (bool, error) {

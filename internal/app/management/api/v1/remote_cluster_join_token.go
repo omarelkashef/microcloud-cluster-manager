@@ -14,7 +14,7 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/canonical/lxd-cluster-manager/internal/app/management/core/auth"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models"
+	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models/v1"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/store"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
 )

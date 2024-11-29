@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models"
+	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models/v1"
 	"github.com/canonical/lxd-cluster-manager/test/helpers"
 	"github.com/canonical/lxd/shared"
 	"github.com/canonical/lxd/shared/api"
