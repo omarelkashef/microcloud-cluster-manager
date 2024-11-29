@@ -28,7 +28,7 @@ sudo install skaffold /usr/local/bin/
 
 # Running the local development cluster
 
-Once you have all the prerequisite dependencies installed. You can start the development clutser by running the following commands in project root:
+Once you have all the prerequisite dependencies installed. You can start the development cluster by running the following commands in project root:
 
 ### Start the development cluster
 ```

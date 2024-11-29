@@ -4,13 +4,14 @@ kind: Kustomization
 resources:
 - ../base/config
 - ../base/db
-- ../base/management
-- ../base/control
+- ../base/management-api
+- ../base/cluster-connector
 
 patches:
 - path: ./config/dev-config.yaml
 - path: ./db/dev-db-pv.yaml
 - path: ./db/dev-db-pvc.yaml
-- path: ./management/dev-cm-depl.yaml
-- path: ./management/dev-cm-svc.yaml
-- path: ./control/dev-cc-depl.yaml
+- path: ./management-api/dev-depl.yaml
+- path: ./management-api/dev-svc.yaml
+- path: ./cluster-connector/dev-depl.yaml
+- path: ./cluster-connector/dev-svc.yaml

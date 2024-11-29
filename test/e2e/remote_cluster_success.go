@@ -20,7 +20,7 @@ import (
 
 func testRemoteClusterSuccess(env *helpers.Environment) (testName string, testFunc func(t *testing.T)) {
 	return "lxd remote cluster join and status updates under normal conditions", func(t *testing.T) {
-		remoteClusterName := "remote_cluster_control_e2e"
+		remoteClusterName := "remote_cluster_e2e"
 		var condition string
 		var err error
 		var tokenData models.RemoteClusterTokenBody
@@ -42,7 +42,7 @@ func testRemoteClusterSuccess(env *helpers.Environment) (testName string, testFu
 				helpers.LogTestOutcome(t, condition, err)
 			}
 
-			if tokenData.Address != env.ControlHost() {
+			if tokenData.Address != env.ClusterConnectorHost() {
 				err = fmt.Errorf("invalid address")
 				helpers.LogTestOutcome(t, condition, err)
 			}
@@ -123,7 +123,7 @@ func testRemoteClusterSuccess(env *helpers.Environment) (testName string, testFu
 				helpers.LogTestOutcome(t, condition, err)
 			}
 
-			expected := env.ControlHost()
+			expected := env.ClusterConnectorHost()
 
 			if !reflect.DeepEqual(response.ClusterManagerAddress, expected) {
 				err = fmt.Errorf("invalid Cluster Manager address")
@@ -190,13 +190,13 @@ func sendJoinRequest(env *helpers.Environment, tokenData models.RemoteClusterTok
 		return err
 	}
 
-	controlCert := env.ControlCert()
-	controlCertPublicKey, err := controlCert.PublicKeyX509()
+	clusterConnectorCert := env.ClusterConnectorCert()
+	clusterConnectorCertPublicKey, err := clusterConnectorCert.PublicKeyX509()
 	if err != nil {
 		return err
 	}
 
-	tlsClient, err := helpers.NewTLSHTTPClient(api.URL{}, clientCert, controlCertPublicKey)
+	tlsClient, err := helpers.NewTLSHTTPClient(api.URL{}, clientCert, clusterConnectorCertPublicKey)
 	if err != nil {
 		return err
 	}
@@ -230,13 +230,13 @@ func approveJoinRequest(env *helpers.Environment, remoteClusterName string) erro
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	managementCert := env.ManagementCert()
-	managementCertPublicKey, err := managementCert.PublicKeyX509()
+	managemenApiCert := env.ManagementApiCert()
+	managemenApiCertPublicKey, err := managemenApiCert.PublicKeyX509()
 	if err != nil {
 		return err
 	}
 
-	tlsClient, err := helpers.NewTLSHTTPClient(api.URL{}, nil, managementCertPublicKey)
+	tlsClient, err := helpers.NewTLSHTTPClient(api.URL{}, nil, managemenApiCertPublicKey)
 	if err != nil {
 		return err
 	}
@@ -245,7 +245,7 @@ func approveJoinRequest(env *helpers.Environment, remoteClusterName string) erro
 		Status: models.ACTIVE,
 	}
 
-	path := api.NewURL().Scheme("https").Host(env.ManagementHost()).Path("1.0", "remote-cluster", remoteClusterName)
+	path := api.NewURL().Scheme("https").Host(env.ManagementApiHost()).Path("1.0", "remote-cluster", remoteClusterName)
 	return tlsClient.Query(ctx, http.MethodPatch, path, input, nil, nil)
 }
 
@@ -259,13 +259,13 @@ func sendStatusUpdate(env *helpers.Environment, tokenData models.RemoteClusterTo
 		return nil, err
 	}
 
-	controlCert := env.ControlCert()
-	controlCertPublicKey, err := controlCert.PublicKeyX509()
+	clusterConnectorCert := env.ClusterConnectorCert()
+	clusterConnectorCertPublicKey, err := clusterConnectorCert.PublicKeyX509()
 	if err != nil {
 		return nil, err
 	}
 
-	tlsClient, err := helpers.NewTLSHTTPClient(api.URL{}, clientCert, controlCertPublicKey)
+	tlsClient, err := helpers.NewTLSHTTPClient(api.URL{}, clientCert, clusterConnectorCertPublicKey)
 	if err != nil {
 		return nil, err
 	}

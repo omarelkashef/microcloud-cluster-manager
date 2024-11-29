@@ -10,7 +10,7 @@ data:
   POSTGRES_DB: cm
   POSTGRES_USER: admin
   POSTGRES_PASSWORD: admin
-  # configs for the management deployment
+  # configs for the management-api deployment
   DB_PORT: "5432"
   DB_USER: admin
   DB_PASSWORD: admin
@@ -20,12 +20,12 @@ data:
   DB_MAX_IDLE: "2"
   DB_DISABLE_TLS: "true"
   SERVER_HOST: "localhost"
-  MANAGEMENT_PORT: "9000"
-  CONTROL_PORT: "9001"
+  MANAGEMENT_API_PORT: "9000"
+  CLUSTER_CONNECTOR_PORT: "9001"
   TEST_MODE: "false"
   # TODO: define proper versioning strategy
   VERSION: "development"
-  CONTROL_ADDRESS: "localhost:9001"
+  CLUSTER_CONNECTOR_ADDRESS: "localhost:9001"
   # oidc configs
   OIDC_CLIENT_ID: NBXrnTZUrulBYNPuc4raZySTEWDTuvM2
   OIDC_ISSUER: https://dev-xjrvvfikbsv4jxn7.us.auth0.com/

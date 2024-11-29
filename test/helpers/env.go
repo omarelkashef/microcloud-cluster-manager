@@ -27,27 +27,27 @@ const (
 
 // Environment represents the environment for the tests.
 type Environment struct {
-	rootDir             string
-	testDir             string
-	certDir             string
-	processIDs          []int
-	kClient             *kubernetes.Clientset
-	managementCert      *shared.CertInfo
-	controlCert         *shared.CertInfo
-	managementHost      string
-	controlHost         string
-	remoteClusters      []string
-	remoteClusterTokens []string
+	rootDir              string
+	testDir              string
+	certDir              string
+	processIDs           []int
+	kClient              *kubernetes.Clientset
+	managementApiCert    *shared.CertInfo
+	clusterConnectorCert *shared.CertInfo
+	managementApiHost    string
+	clusterConnectorHost string
+	remoteClusters       []string
+	remoteClusterTokens  []string
 }
 
 // NewEnv creates a new environment.
 func NewEnv() *Environment {
 	return &Environment{
-		rootDir:        getProjectRoot(),
-		testDir:        "",
-		certDir:        "",
-		managementHost: "localhost:9000",
-		controlHost:    "localhost:9001",
+		rootDir:              getProjectRoot(),
+		testDir:              "",
+		certDir:              "",
+		managementApiHost:    "localhost:9000",
+		clusterConnectorHost: "localhost:9001",
 	}
 }
 
@@ -149,29 +149,29 @@ func (e *Environment) Cleanup() error {
 	return nil
 }
 
-// ManagementCert returns the management certificate.
-func (e *Environment) ManagementCert() *shared.CertInfo {
-	return e.managementCert
+// ManagementApiCert returns the management-api certificate.
+func (e *Environment) ManagementApiCert() *shared.CertInfo {
+	return e.managementApiCert
 }
 
-// ControlCert returns the control certificate.
-func (e *Environment) ControlCert() *shared.CertInfo {
-	return e.controlCert
+// ClusterConnectorCert returns the cluster-connector certificate.
+func (e *Environment) ClusterConnectorCert() *shared.CertInfo {
+	return e.clusterConnectorCert
 }
 
-// ManagementHost returns the management host.
-func (e *Environment) ManagementHost() string {
-	return e.managementHost
+// ManagementApiHost returns the management-api host.
+func (e *Environment) ManagementApiHost() string {
+	return e.managementApiHost
 }
 
-// ControlHost returns the control host.
-func (e *Environment) ControlHost() string {
-	return e.controlHost
+// ClusterConnectorHost returns the cluster-connector host.
+func (e *Environment) ClusterConnectorHost() string {
+	return e.clusterConnectorHost
 }
 
 func (e *Environment) setTestMode(val string) error {
-	deploymentName := "management-depl"
-	containerName := "management"
+	deploymentName := "management-api-depl"
+	containerName := "management-api"
 
 	// Get the Deployment
 	deployment, err := e.kClient.AppsV1().Deployments("default").Get(context.TODO(), deploymentName, v1.GetOptions{})
@@ -276,27 +276,27 @@ func (e *Environment) setCertificates() error {
 		return shared.NewCertInfo(cert, ca, nil), nil
 	}
 
-	// Fetch management and control certificate data
-	managementCert, managementKey, managementCA, err := getCertificateData("management-cert-secret")
+	// Fetch management-api and cluster-connector certificate data
+	managementApiCert, managementApiKey, managementApiCA, err := getCertificateData("management-api-cert-secret")
 	if err != nil {
 		return err
 	}
 
-	certInfo, err := getCertInfo(managementCert, managementKey, managementCA)
+	certInfo, err := getCertInfo(managementApiCert, managementApiKey, managementApiCA)
 	if err != nil {
 		return err
 	}
-	e.managementCert = certInfo
+	e.managementApiCert = certInfo
 
-	controlCert, controlKey, controlCA, err := getCertificateData("control-cert-secret")
+	clusterConnectorCert, clusterConnectorKey, clusterConnectorCA, err := getCertificateData("cluster-connector-cert-secret")
 	if err != nil {
 		return err
 	}
-	certInfo, err = getCertInfo(controlCert, controlKey, controlCA)
+	certInfo, err = getCertInfo(clusterConnectorCert, clusterConnectorKey, clusterConnectorCA)
 	if err != nil {
 		return err
 	}
-	e.controlCert = certInfo
+	e.clusterConnectorCert = certInfo
 
 	return nil
 }

@@ -14,7 +14,7 @@ func FindRemoteCluster(env *Environment, remoteClusterName string) (*models.Remo
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	certPublicKey, err := env.ManagementCert().PublicKeyX509()
+	certPublicKey, err := env.ManagementApiCert().PublicKeyX509()
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +25,7 @@ func FindRemoteCluster(env *Environment, remoteClusterName string) (*models.Remo
 	}
 
 	output := &models.RemoteCluster{}
-	path := api.NewURL().Scheme("https").Host(env.ManagementHost()).Path("1.0", "remote-cluster", remoteClusterName)
+	path := api.NewURL().Scheme("https").Host(env.ManagementApiHost()).Path("1.0", "remote-cluster", remoteClusterName)
 	err = tlsClient.Query(ctx, http.MethodGet, path, nil, output, nil)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func DeleteRemoteCluster(env *Environment, remoteClusterName string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	certPublicKey, err := env.ManagementCert().PublicKeyX509()
+	certPublicKey, err := env.ManagementApiCert().PublicKeyX509()
 	if err != nil {
 		return err
 	}
@@ -49,6 +49,6 @@ func DeleteRemoteCluster(env *Environment, remoteClusterName string) error {
 		return err
 	}
 
-	path := api.NewURL().Scheme("https").Host(env.ManagementHost()).Path("1.0", "remote-cluster", remoteClusterName)
+	path := api.NewURL().Scheme("https").Host(env.ManagementApiHost()).Path("1.0", "remote-cluster", remoteClusterName)
 	return tlsClient.Query(ctx, http.MethodDelete, path, nil, nil, nil)
 }

@@ -30,12 +30,12 @@ deploy:
 
 portForward:
 - resourceType: deployment
-  resourceName: management-depl
-  port: management
+  resourceName: management-api-depl
+  port: management-api
   localPort: 9000
 - resourceType: deployment
-  resourceName: control-depl
-  port: control
+  resourceName: cluster-connector-depl
+  port: cluster-conn
   localPort: 9001
 # For debugging purposes, we can connect via pgadmin here
 - resourceType: deployment
@@ -57,19 +57,19 @@ profiles:
           DEBUG: "true"
   portForward:
   - resourceType: deployment
-    resourceName: management-depl
-    port: management
+    resourceName: management-api-depl
+    port: management-api
     localPort: 9000
   - resourceType: deployment
-    resourceName: control-depl
-    port: control
+    resourceName: cluster-connector-depl
+    port: cluster-conn
     localPort: 9001
   - resourceType: deployment
-    resourceName: management-depl
+    resourceName: management-api-depl
     port: debug  # Debug port exposed by Delve
     localPort: 40000
   - resourceType: deployment
-    resourceName: control-depl
+    resourceName: cluster-connector-depl
     port: debug  # Debug port exposed by Delve
     localPort: 40001
   - resourceType: deployment

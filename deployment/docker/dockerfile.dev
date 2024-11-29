@@ -28,7 +28,7 @@ COPY --from=builder-ui /app/build /ui/build
 COPY . ./
 
 # pull UI static assets over for binary embedding later
-WORKDIR /app/internal/app/management/api/v1/
+WORKDIR /app/internal/app/management-api/api/v1/
 RUN go generate
 
 WORKDIR /app/cmd

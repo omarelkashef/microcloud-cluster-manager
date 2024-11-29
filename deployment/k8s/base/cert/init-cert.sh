@@ -21,13 +21,13 @@ kubectl apply -f deployment/k8s/base/cert/cert-issuer.yaml
 
 # Apply the Certificate resource
 echo "Applying Certificates..."
-kubectl apply -f deployment/k8s/base/cert/management-cert.yaml
-kubectl apply -f deployment/k8s/base/cert/control-cert.yaml
+kubectl apply -f deployment/k8s/base/cert/management-api-cert.yaml
+kubectl apply -f deployment/k8s/base/cert/cluster-connector-cert.yaml
 
 # Wait for the cert Secret to be created (it contains the certificate)
 echo "Waiting for the certificate Secrets to be created..."
-kubectl wait --for=create --timeout=600s secret/management-cert-secret -n default
-kubectl wait --for=create --timeout=600s secret/control-cert-secret -n default
+kubectl wait --for=create --timeout=600s secret/management-api-cert-secret -n default
+kubectl wait --for=create --timeout=600s secret/cluster-connector-cert-secret -n default
 
 echo "Certificates is ready!"
 echo "Proceeding to application deployment..."

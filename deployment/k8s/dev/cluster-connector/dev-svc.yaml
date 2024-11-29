@@ -1,0 +1,14 @@
+# Note: for local development, we are directly passing https traffic to the cluster-connector service
+apiVersion: v1
+kind: Service
+metadata:
+  name: cluster-connector-svc
+spec:
+  type: LoadBalancer
+  selector:
+    app: cluster-connector
+  ports:
+  - name: cluster-conn
+    port: 9001
+    targetPort: cluster-conn
+    protocol: TCP

@@ -114,7 +114,7 @@ migrate-db:
 # ====================================================================
 # test utilities
 
-# management API tests
+# management-api API tests
 # POST /1.0/remote-cluster-join-token
 # curl -X POST http://localhost:8414/1.0/remote-cluster-join-token -H "Content-Type: application/json" -d '{ "expiry": "2024-11-21T15:30:00Z", "cluster_name": "example-cluster" }'
 # GET /1.0/remote-cluster-join-token
@@ -130,7 +130,7 @@ migrate-db:
 # DELETE /1.0/remote-cluster/:name
 # curl -X DELETE http://localhost:8414/1.0/remote-cluster/test -H "Content-Type: application/json"
 
-# control API tests
+# cluster connector API tests
 # POST /1.0/remote-cluster
 # curl -X POST http://localhost:8415/1.0/remote-cluster -H "Content-Type: application/json" -d '{ "cluster_certificate": "abc", "cluster_name": "test-cluster" }'
 # POST /1.0/remote-cluster/status

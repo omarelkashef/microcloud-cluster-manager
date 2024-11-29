@@ -14,22 +14,22 @@ import (
 
 type Config struct {
 	// system configs
-	Version        string
-	ApiVersion     string
-	ManagementCert *shared.CertInfo
-	ControlCert    *shared.CertInfo
-	ControlAddress string
-	TestMode       bool
+	Version                 string
+	ApiVersion              string
+	ManagementApiCert       *shared.CertInfo
+	ClusterConnectorCert    *shared.CertInfo
+	ClusterConnectorAddress string
+	TestMode                bool
 	// db configs
 	database.DBConfig
 	// api configs
-	ServerHost     string
-	ManagementPort string
-	ControlPort    string
-	AllowedOrigins []string
-	ReadTimeout    int
-	WriteTimeout   int
-	IdleTimeout    int
+	ServerHost           string
+	ManagementApiPort    string
+	ClusterConnectorPort string
+	AllowedOrigins       []string
+	ReadTimeout          int
+	WriteTimeout         int
+	IdleTimeout          int
 	// oidc configs
 	OIDCClientID string
 	OIDCIssuer   string
@@ -56,10 +56,12 @@ func getEnvAsInt(key string, defaultValue int) (int, error) {
 
 // getServiceCert loads the TLS certificate and key from the environment based on the service name.
 func getServiceCert(service string) (*shared.CertInfo, error) {
-	if service != "management" && service != "control" {
+	if service != "management-api" && service != "cluster-connector" {
 		return nil, fmt.Errorf("invalid service name: %s", service)
 	}
 
+	// convert service to underscore
+	service = strings.ReplaceAll(service, "-", "_")
 	key := strings.ToUpper(service) + "_TLS_PATH"
 	tlsPath := os.Getenv(key)
 
@@ -105,17 +107,17 @@ func LoadConfig() (*Config, error) {
 	}
 
 	return &Config{
-		Version:        getEnvOrDefault("VERSION", "development"),
-		ApiVersion:     getEnvOrDefault("API_VERSION", "1.0"),
-		ServerHost:     getEnvOrDefault("SERVER_HOST", "localhost"),
-		ManagementPort: getEnvOrDefault("MANAGEMENT_PORT", "9000"),
-		ControlPort:    getEnvOrDefault("CONTROL_PORT", "9001"),
-		TestMode:       getEnvOrDefault("TEST_MODE", "false") == "true",
-		AllowedOrigins: []string{"*"},
-		ReadTimeout:    10,
-		WriteTimeout:   10,
-		IdleTimeout:    60,
-		ControlAddress: getEnvOrDefault("CONTROL_ADDRESS", "localhost:9001"),
+		Version:                 getEnvOrDefault("VERSION", "development"),
+		ApiVersion:              getEnvOrDefault("API_VERSION", "1.0"),
+		ServerHost:              getEnvOrDefault("SERVER_HOST", "localhost"),
+		ManagementApiPort:       getEnvOrDefault("MANAGEMENT_API_PORT", "9000"),
+		ClusterConnectorPort:    getEnvOrDefault("CLUSTER_CONNECTOR_PORT", "9001"),
+		TestMode:                getEnvOrDefault("TEST_MODE", "false") == "true",
+		AllowedOrigins:          []string{"*"},
+		ReadTimeout:             10,
+		WriteTimeout:            10,
+		IdleTimeout:             60,
+		ClusterConnectorAddress: getEnvOrDefault("CLUSTER_CONNECTOR_ADDRESS", "localhost:9001"),
 		DBConfig: database.DBConfig{
 			DBPort:         getEnvOrDefault("DB_PORT", "5432"),
 			DBUser:         getEnvOrDefault("DB_USER", "admin"),
@@ -135,18 +137,18 @@ func LoadConfig() (*Config, error) {
 // LoadCertificates loads the TLS certificates from the environment.
 func (c *Config) LoadCertificates() error {
 	// service certificates
-	managementCert, err := getServiceCert("management")
+	managementApiCert, err := getServiceCert("management-api")
 	if err != nil {
-		return fmt.Errorf("failed to load management certificate: %w", err)
+		return fmt.Errorf("failed to load management-api certificate: %w", err)
 	}
 
-	controlCert, err := getServiceCert("control")
+	clusterConnectorCert, err := getServiceCert("cluster-connector")
 	if err != nil {
-		return fmt.Errorf("failed to load control certificate: %w", err)
+		return fmt.Errorf("failed to load cluster-connector certificate: %w", err)
 	}
 
-	c.ManagementCert = managementCert
-	c.ControlCert = controlCert
+	c.ManagementApiCert = managementApiCert
+	c.ClusterConnectorCert = clusterConnectorCert
 
 	return nil
 }

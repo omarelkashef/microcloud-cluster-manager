@@ -5,14 +5,14 @@ import (
 	"os"
 
 	"github.com/canonical/lxd-cluster-manager/cmd/admin"
-	"github.com/canonical/lxd-cluster-manager/cmd/control"
-	"github.com/canonical/lxd-cluster-manager/cmd/management"
+	cluster_connector "github.com/canonical/lxd-cluster-manager/cmd/cluster-connector"
+	management_api "github.com/canonical/lxd-cluster-manager/cmd/management-api"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
 )
 
 var SERVICES = []string{
-	"management",
-	"control",
+	"management-api",
+	"cluster-connector",
 	"admin",
 }
 
@@ -38,12 +38,12 @@ func run() error {
 	// Initialize the logger for the service
 	logger.SetService(service)
 
-	if service == "management" {
-		return management.Run()
+	if service == "management-api" {
+		return management_api.Run()
 	}
 
-	if service == "control" {
-		return control.Run()
+	if service == "cluster-connector" {
+		return cluster_connector.Run()
 	}
 
 	if service == "admin" {
