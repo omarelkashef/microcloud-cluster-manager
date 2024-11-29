@@ -10,8 +10,22 @@ import Navigation from "./components/Navigation";
 import { AuthProvider } from "context/auth";
 import StatusBar from "components/StatusBar";
 import { useLocation } from "react-router-dom";
+import { FetchError } from "util/helpers";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error) => {
+        // Disable retries for 403 errors
+        if (error instanceof FetchError && error.response.error_code === 403) {
+          return false;
+        }
+        // Retry other errors up to 3 times
+        return failureCount < 3;
+      },
+    },
+  },
+});
 
 const Root: FC = () => {
   const location = useLocation() as QueuedNotification;

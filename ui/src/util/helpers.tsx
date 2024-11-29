@@ -5,10 +5,19 @@ interface ErrorResponse {
   error: string;
 }
 
+export class FetchError extends Error {
+  response: ErrorResponse;
+
+  constructor(response: ErrorResponse) {
+    super(response.error);
+    this.response = response;
+  }
+}
+
 export const handleResponse = async (response: Response) => {
   if (!response.ok) {
     const result = (await response.json()) as ErrorResponse;
-    throw Error(result.error);
+    throw new FetchError(result);
   }
   return response.json() as unknown;
 };
