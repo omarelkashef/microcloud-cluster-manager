@@ -1,0 +1,41 @@
+# ========================================================================
+# build the UI static assets
+FROM node:21 AS builder-ui
+WORKDIR /app
+COPY ui/package.json ui/yarn.lock ./
+RUN yarn install
+COPY ui ./
+RUN yarn build
+
+# ========================================================================
+# build the GO binaries for dev and debug versions
+FROM golang:1.22.7 AS builder-backend
+ARG BUILD_REF
+WORKDIR /app
+
+# install dependencies first for optimised build caching
+COPY go.mod go.sum ./
+RUN go mod download
+
+# copy the built UI into the backend container
+COPY --from=builder-ui /app/build /ui/build
+
+# copy the source code into the container.
+COPY . ./
+
+# pull UI static assets over for binary embedding later
+WORKDIR /app/internal/app/management-api/api/v1/
+RUN go generate
+
+WORKDIR /app/cmd
+
+# compile dev binary which is more optimised
+RUN CGO_ENABLED=0 go build -ldflags "-X main.build=${BUILD_REF}" -o app.dev
+
+# ========================================================================
+# development stage to be run as normal dev target
+FROM alpine:3.20 as dev
+# copy the dev binary from the builder stage
+COPY --from=builder-backend /app/cmd/app.dev /app/app.dev
+# this specifies the default binary to execute when the container starts
+ENTRYPOINT [ "/app/app.dev" ]

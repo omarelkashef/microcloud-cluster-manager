@@ -8,7 +8,6 @@ ui/playwright-report
 ui/keys
 ui/tests/.auth
 tests/
-internal/app/management-api/api/v1/static
 test/e2e/data
 test-results
 haproxy-local.cfg
