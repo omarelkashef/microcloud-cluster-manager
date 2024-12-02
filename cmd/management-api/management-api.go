@@ -1,4 +1,4 @@
-package management_api
+package managementapi
 
 import (
 	"context"
@@ -11,9 +11,6 @@ import (
 	"syscall"
 	"time"
 
-	"go.uber.org/automaxprocs/maxprocs"
-	"go.uber.org/zap"
-
 	"github.com/canonical/lxd-cluster-manager/config"
 	routes "github.com/canonical/lxd-cluster-manager/internal/app/management-api/api"
 	"github.com/canonical/lxd-cluster-manager/internal/app/management-api/core/auth"
@@ -22,11 +19,12 @@ import (
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/middleware"
 	"github.com/canonical/lxd/lxd/util"
+	"go.uber.org/automaxprocs/maxprocs"
+	"go.uber.org/zap"
 )
 
-// Run will initialise and start the management-api service API
-func Run() error {
-
+// Run will initialise and start the management-api service API.
+func Run() (err error) {
 	// =========================================================================
 	// GOMAXPROCS
 
@@ -64,7 +62,7 @@ func Run() error {
 		cfg.OIDCIssuer,
 		cfg.OIDCClientID,
 		cfg.OIDCAudience,
-		cfg.ManagementApiCert,
+		cfg.ManagementAPICert,
 		cfg.Version == "development",
 	)
 
@@ -92,7 +90,7 @@ func Run() error {
 	}
 	defer func() {
 		logger.Log.Infow("shutdown", "status", "stopping database support", "host", cfg.DBHost)
-		db.Close()
+		err = db.Close()
 	}()
 
 	// =========================================================================
@@ -105,7 +103,7 @@ func Run() error {
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
-	a := api.NewApi(api.ApiConfig{
+	a := api.NewAPI(api.APIConfig{
 		Shutdown:  shutdown,
 		DB:        db,
 		Auth:      oidcVerifier,
@@ -120,9 +118,9 @@ func Run() error {
 	a.RegisterRoutes(routes.APIRoutes)
 
 	// Construct a TLS enabled server to service the requests against the mux.
-	tlsConfig := util.ServerTLSConfig(cfg.ManagementApiCert)
+	tlsConfig := util.ServerTLSConfig(cfg.ManagementAPICert)
 	server := http.Server{
-		Addr:         cfg.ServerHost + ":" + cfg.ManagementApiPort,
+		Addr:         cfg.ServerHost + ":" + cfg.ManagementAPIPort,
 		Handler:      a,
 		ReadTimeout:  time.Duration(cfg.ReadTimeout) * time.Second,
 		WriteTimeout: time.Duration(cfg.WriteTimeout) * time.Second,
@@ -159,7 +157,7 @@ func Run() error {
 
 		// Asking server to shutdown and shed load.
 		if err := server.Shutdown(ctx); err != nil {
-			server.Close()
+			err = server.Close()
 			return fmt.Errorf("could not stop server gracefully: %w", err)
 		}
 	}

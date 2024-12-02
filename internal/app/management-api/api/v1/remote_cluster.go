@@ -17,6 +17,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// RemoteCluster is the remote cluster endpoint group.
 var RemoteCluster = types.RouteGroup{
 	Prefix: "remote-cluster",
 	Middlewares: []types.RouteMiddleware{

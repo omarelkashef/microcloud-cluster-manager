@@ -16,7 +16,7 @@ var Log *zap.SugaredLogger
 
 // initializes the global logger for the application.
 func init() {
-	log, err := new()
+	log, err := newLogger()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -25,9 +25,9 @@ func init() {
 	Log = log
 }
 
-// New constructs a Sugared Logger that writes to stdout and
+// newLogger constructs a Sugared Logger that writes to stdout and
 // provides human readable timestamps.
-func new() (*zap.SugaredLogger, error) {
+func newLogger() (*zap.SugaredLogger, error) {
 	config := zap.NewProductionConfig()
 	config.OutputPaths = []string{"stdout"}
 	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
@@ -46,7 +46,7 @@ func SetService(service string) {
 	Log = Log.Named(service)
 }
 
-// Cleanup ensures that the logger is flushed and all messages are written
+// Cleanup ensures that the logger is flushed and all messages are written.
 func Cleanup() error {
 	if Log != nil {
 		return Log.Sync()

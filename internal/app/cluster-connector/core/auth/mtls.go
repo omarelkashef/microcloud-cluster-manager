@@ -12,6 +12,7 @@ import (
 	"github.com/canonical/lxd/lxd/util"
 )
 
+// CtxRemoteClusterID is the context key for the remote cluster ID.
 const CtxRemoteClusterID request.CtxKey = "remote-cluster-id"
 
 // MtlsAuthenticator is a mutual TLS authenticator.

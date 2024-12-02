@@ -13,7 +13,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// RemoteClusterToken represents a single join token associated with a remote LXD cluster
+// RemoteClusterToken represents a single join token associated with a remote LXD cluster.
 type RemoteClusterToken struct {
 	ID          int       `db:"id"`           // Primary key
 	ClusterName string    `db:"cluster_name"` // Name of the associated cluster
@@ -22,7 +22,7 @@ type RemoteClusterToken struct {
 	CreatedAt   time.Time `db:"created_at"`   // Creation timestamp
 }
 
-// GetRemoteClusterTokenID returns the ID of a remote cluster token by name
+// GetRemoteClusterTokenID returns the ID of a remote cluster token by name.
 func GetRemoteClusterTokenID(ctx context.Context, tx *sqlx.Tx, name string) (int, error) {
 	// Query to check if the entry exists
 	q := `
@@ -58,7 +58,7 @@ func RemoteClusterTokenExists(ctx context.Context, tx *sqlx.Tx, name string) (bo
 	return true, nil
 }
 
-// GetRemoteClusterTokens returns all remote cluster tokens
+// GetRemoteClusterTokens returns all remote cluster tokens.
 func GetRemoteClusterTokens(ctx context.Context, tx *sqlx.Tx) ([]RemoteClusterToken, error) {
 	q := `
         SELECT id, cluster_name, secret, expiry, created_at
@@ -92,7 +92,7 @@ func GetRemoteClusterTokens(ctx context.Context, tx *sqlx.Tx) ([]RemoteClusterTo
 	return objects, nil
 }
 
-// GetRemoteClusterToken returns a single remote cluster token by name
+// GetRemoteClusterToken returns a single remote cluster token by name.
 func GetRemoteClusterToken(ctx context.Context, tx *sqlx.Tx, name string) (*RemoteClusterToken, error) {
 	q := `
 		SELECT id, cluster_name, secret, expiry, created_at
@@ -120,7 +120,7 @@ func GetRemoteClusterToken(ctx context.Context, tx *sqlx.Tx, name string) (*Remo
 	return &result, nil
 }
 
-// CreateRemoteClusterToken creates a new remote cluster token
+// CreateRemoteClusterToken creates a new remote cluster token.
 func CreateRemoteClusterToken(ctx context.Context, tx *sqlx.Tx, data RemoteClusterToken) (*RemoteClusterToken, error) {
 	exists, err := RemoteClusterTokenExists(ctx, tx, data.ClusterName)
 	if err != nil {
@@ -158,7 +158,7 @@ func CreateRemoteClusterToken(ctx context.Context, tx *sqlx.Tx, data RemoteClust
 	return &result, nil
 }
 
-// DeleteRemoteClusterToken deletes a remote cluster token by name
+// DeleteRemoteClusterToken deletes a remote cluster token by name.
 func DeleteRemoteClusterToken(ctx context.Context, tx *sqlx.Tx, name string) error {
 	q := `
         DELETE FROM remote_cluster_tokens
@@ -184,7 +184,7 @@ func DeleteRemoteClusterToken(ctx context.Context, tx *sqlx.Tx, name string) err
 	return nil
 }
 
-// UpdateCoreRemoteClusterToken updates a remote cluster token by name
+// UpdateCoreRemoteClusterToken updates a remote cluster token by name.
 func UpdateCoreRemoteClusterToken(ctx context.Context, tx *sqlx.Tx, name string, data RemoteClusterToken) error {
 	id, err := GetRemoteClusterTokenID(ctx, tx, name)
 	if err != nil {

@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/canonical/lxd-cluster-manager/internal/app/management-api/core/auth"
@@ -9,6 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// Auth is the OIDC authentication endpoint group.
 var Auth = types.RouteGroup{
 	IsRoot: true,
 	Prefix: "oidc",
@@ -32,8 +34,12 @@ var Auth = types.RouteGroup{
 }
 
 func login(rc types.RouteConfig) types.EndpointHandler {
-	verifier := rc.Auth.(*auth.Verifier)
+	verifier, ok := rc.Auth.(*auth.Verifier)
 	return func(w http.ResponseWriter, r *http.Request) error {
+		if !ok {
+			return response.InternalError(fmt.Errorf("oidc authenticator missing")).Render(w, r)
+		}
+
 		redirectURL := r.URL.Query().Get("next")
 
 		stateToken := auth.StateToken{
@@ -56,8 +62,12 @@ func login(rc types.RouteConfig) types.EndpointHandler {
 }
 
 func callback(rc types.RouteConfig) types.EndpointHandler {
-	verifier := rc.Auth.(*auth.Verifier)
+	verifier, ok := rc.Auth.(*auth.Verifier)
 	return func(w http.ResponseWriter, r *http.Request) error {
+		if !ok {
+			return response.InternalError(fmt.Errorf("oidc authenticator missing")).Render(w, r)
+		}
+
 		state := r.URL.Query().Get("state")
 		stateToken, err := auth.DecodeStateToken(state)
 		if err != nil {
@@ -74,8 +84,12 @@ func callback(rc types.RouteConfig) types.EndpointHandler {
 }
 
 func logout(rc types.RouteConfig) types.EndpointHandler {
-	verifier := rc.Auth.(*auth.Verifier)
+	verifier, ok := rc.Auth.(*auth.Verifier)
 	return func(w http.ResponseWriter, r *http.Request) error {
+		if !ok {
+			return response.InternalError(fmt.Errorf("oidc authenticator missing")).Render(w, r)
+		}
+
 		redirectURL := r.URL.Query().Get("next")
 
 		logoutHandler := func(w http.ResponseWriter) error {

@@ -6,29 +6,29 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/canonical/lxd/lxd/response"
-	"github.com/gorilla/mux"
-
 	"github.com/canonical/lxd-cluster-manager/config"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
+	"github.com/canonical/lxd/lxd/response"
+	"github.com/gorilla/mux"
 )
 
 // A Handler is a type that handles an http request within our own little mini
 // framework.
 type Handler func(ctx context.Context, w http.ResponseWriter, r *http.Request) error
 
-type ApiConfig struct {
+// APIConfig is used to configure the API which represents the entry point of any service in the application.
+type APIConfig struct {
 	Shutdown  chan os.Signal
 	DB        *database.DB
 	Auth      types.Authenticator
 	EnvConfig *config.Config
 }
 
-// Api is the entrypoint into our application and what configures our context
+// API is the entrypoint into our application and what configures our context
 // object for each of our http handlers.
-type Api struct {
+type API struct {
 	mux       *mux.Router
 	shutdown  chan os.Signal
 	db        *database.DB
@@ -36,14 +36,14 @@ type Api struct {
 	envConfig *config.Config
 }
 
-// NewApp creates an App value that handle a set of routes for the application.
-func NewApi(cfg ApiConfig) *Api {
+// NewAPI creates a new API.
+func NewAPI(cfg APIConfig) *API {
 	mux := mux.NewRouter()
 	mux.StrictSlash(false)
 	mux.SkipClean(true)
 	mux.UseEncodedPath()
 
-	return &Api{
+	return &API{
 		mux:       mux,
 		shutdown:  cfg.Shutdown,
 		db:        cfg.DB,
@@ -54,17 +54,17 @@ func NewApi(cfg ApiConfig) *Api {
 
 // SignalShutdown is used to gracefully shutdown the app when an integrity
 // issue is identified.
-func (a *Api) SignalShutdown() {
+func (a *API) SignalShutdown() {
 	a.shutdown <- syscall.SIGTERM
 }
 
 // UseGlobalMiddleWares adds global middlewares to the router.
-func (a *Api) UseGlobalMiddleWares(mw ...mux.MiddlewareFunc) {
+func (a *API) UseGlobalMiddleWares(mw ...mux.MiddlewareFunc) {
 	a.mux.Use(mw...)
 }
 
 // RegisterRoutes adds the routes to the router.
-func (a *Api) RegisterRoutes(routes []types.RouteGroup) {
+func (a *API) RegisterRoutes(routes []types.RouteGroup) {
 	rc := types.RouteConfig{
 		Auth: a.auth,
 		DB:   a.db,
@@ -92,11 +92,11 @@ func (a *Api) RegisterRoutes(routes []types.RouteGroup) {
 }
 
 // Mux returns the router.
-func (a *Api) Mux() *mux.Router {
+func (a *API) Mux() *mux.Router {
 	return a.mux
 }
 
 // ServeHTTP implements the http.Handler interface.
-func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (a *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	a.mux.ServeHTTP(w, r)
 }

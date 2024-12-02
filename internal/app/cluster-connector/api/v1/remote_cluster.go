@@ -7,18 +7,18 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/canonical/lxd/lxd/request"
-	"github.com/canonical/lxd/lxd/response"
-	"github.com/jmoiron/sqlx"
-
 	"github.com/canonical/lxd-cluster-manager/internal/app/cluster-connector/core/auth"
 	"github.com/canonical/lxd-cluster-manager/internal/app/cluster-connector/core/certificate"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models/v1"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/store"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
+	"github.com/canonical/lxd/lxd/request"
+	"github.com/canonical/lxd/lxd/response"
+	"github.com/jmoiron/sqlx"
 )
 
+// RemoteCluster is the API endpoint for managing remote clusters.
 var RemoteCluster = types.RouteGroup{
 	Prefix: "remote-cluster",
 	Endpoints: []types.Endpoint{
@@ -29,6 +29,7 @@ var RemoteCluster = types.RouteGroup{
 	},
 }
 
+// RemoteClusterProtected is the API endpoint for managing remote clusters with mtls authentication.
 var RemoteClusterProtected = types.RouteGroup{
 	Prefix: "remote-cluster",
 	Middlewares: []types.RouteMiddleware{
@@ -142,7 +143,7 @@ func remoteClustersPost(rc types.RouteConfig) types.EndpointHandler {
 	}
 }
 
-// apply mtls for this endpoint
+// apply mtls for this endpoint.
 func remoteClusterStatusPost(rc types.RouteConfig) types.EndpointHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		payload := models.RemoteClusterStatusPost{}

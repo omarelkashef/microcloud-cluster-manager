@@ -15,7 +15,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// RemoteClusterDetail represents detailed information about a remote LXD cluster
+// RemoteClusterDetail represents detailed information about a remote LXD cluster.
 type RemoteClusterDetail struct {
 	ID                int             `db:"id"`                  // Primary key
 	RemoteClusterID   int             `db:"remote_cluster_id"`   // Foreign key to remote_clusters
@@ -73,7 +73,7 @@ type RemoteClusterWithDetail struct {
 	ClusterUpdatedAt   time.Time       `db:"updated_at"`
 }
 
-// GetRemoteClusterDetailID returns the ID of the detail entry for a remote cluster
+// GetRemoteClusterDetailID returns the ID of the detail entry for a remote cluster.
 func GetRemoteClusterDetailID(ctx context.Context, tx *sqlx.Tx, remoteClusterID int) (int, error) {
 	// Query to check if the entry exists
 	q := `
@@ -95,7 +95,7 @@ func GetRemoteClusterDetailID(ctx context.Context, tx *sqlx.Tx, remoteClusterID 
 	return id, nil
 }
 
-// RemoteClusterDetailExists checks detail exists for a given remote cluster id
+// RemoteClusterDetailExists checks detail exists for a given remote cluster id.
 func RemoteClusterDetailExists(ctx context.Context, tx *sqlx.Tx, remoteClusterID int) (bool, error) {
 	_, err := GetRemoteClusterDetailID(ctx, tx, remoteClusterID)
 	if err != nil {
@@ -109,7 +109,7 @@ func RemoteClusterDetailExists(ctx context.Context, tx *sqlx.Tx, remoteClusterID
 	return true, nil
 }
 
-// GetAllRemoteClusterDetails returns all remote cluster details
+// GetAllRemoteClusterDetails returns all remote cluster details.
 func GetAllRemoteClusterDetails(ctx context.Context, tx *sqlx.Tx) ([]RemoteClusterDetail, error) {
 	q := `
         SELECT 
@@ -158,7 +158,7 @@ func GetAllRemoteClusterDetails(ctx context.Context, tx *sqlx.Tx) ([]RemoteClust
 	return objects, nil
 }
 
-// GetRemoteClusterDetail returns the detail for a remote cluster
+// GetRemoteClusterDetail returns the detail for a remote cluster.
 func GetRemoteClusterDetail(ctx context.Context, tx *sqlx.Tx, remoteClusterID int) (*RemoteClusterDetail, error) {
 	q := `
         SELECT 
@@ -201,7 +201,7 @@ func GetRemoteClusterDetail(ctx context.Context, tx *sqlx.Tx, remoteClusterID in
 	return &result, nil
 }
 
-// CreateRemoteClusterDetail creates a new detail entry for a remote cluster
+// CreateRemoteClusterDetail creates a new detail entry for a remote cluster.
 func CreateRemoteClusterDetail(ctx context.Context, tx *sqlx.Tx, data RemoteClusterDetail) (*RemoteClusterDetail, error) {
 	exists, err := RemoteClusterDetailExists(ctx, tx, data.RemoteClusterID)
 	if err != nil {
@@ -262,7 +262,7 @@ func CreateRemoteClusterDetail(ctx context.Context, tx *sqlx.Tx, data RemoteClus
 	return &result, nil
 }
 
-// DeleteRemoteClusterDetail deletes a detail entry for a remote cluster
+// DeleteRemoteClusterDetail deletes a detail entry for a remote cluster.
 func DeleteRemoteClusterDetail(ctx context.Context, tx *sqlx.Tx, remoteClusterID int) error {
 	q := `
         DELETE FROM remote_cluster_details
@@ -288,7 +288,7 @@ func DeleteRemoteClusterDetail(ctx context.Context, tx *sqlx.Tx, remoteClusterID
 	return nil
 }
 
-// UpdateRemoteClusterDetail updates a detail entry for a remote cluster
+// UpdateRemoteClusterDetail updates a detail entry for a remote cluster.
 func UpdateRemoteClusterDetail(ctx context.Context, tx *sqlx.Tx, remoteClusterID int, data RemoteClusterDetail) error {
 	id, err := GetRemoteClusterDetailID(ctx, tx, remoteClusterID)
 	if err != nil {

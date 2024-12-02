@@ -4,11 +4,10 @@ import (
 	"net/http"
 	"path"
 
-	"github.com/canonical/lxd/lxd/response"
-	"github.com/gorilla/mux"
-
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
+	"github.com/canonical/lxd/lxd/response"
+	"github.com/gorilla/mux"
 )
 
 func registerRoutes(mux *mux.Router, routes []types.RouteGroup, rc types.RouteConfig) {
@@ -21,7 +20,7 @@ func registerRoutes(mux *mux.Router, routes []types.RouteGroup, rc types.RouteCo
 func registerRouteGroup(mux *mux.Router, rg types.RouteGroup, rc types.RouteConfig) {
 	routeGroupPath := path.Join("/", rg.Prefix)
 	if !rg.IsRoot {
-		routeGroupPath = path.Join("/", rc.Env.ApiVersion, rg.Prefix)
+		routeGroupPath = path.Join("/", rc.Env.APIVersion, rg.Prefix)
 	}
 
 	// apply middlewares at route group level

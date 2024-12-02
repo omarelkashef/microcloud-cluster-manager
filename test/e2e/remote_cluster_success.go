@@ -230,13 +230,13 @@ func approveJoinRequest(env *helpers.Environment, remoteClusterName string) erro
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	managemenApiCert := env.ManagementApiCert()
-	managemenApiCertPublicKey, err := managemenApiCert.PublicKeyX509()
+	managemenAPICert := env.ManagementAPICert()
+	managemenAPICertPublicKey, err := managemenAPICert.PublicKeyX509()
 	if err != nil {
 		return err
 	}
 
-	tlsClient, err := helpers.NewTLSHTTPClient(api.URL{}, nil, managemenApiCertPublicKey)
+	tlsClient, err := helpers.NewTLSHTTPClient(api.URL{}, nil, managemenAPICertPublicKey)
 	if err != nil {
 		return err
 	}
@@ -245,7 +245,7 @@ func approveJoinRequest(env *helpers.Environment, remoteClusterName string) erro
 		Status: models.ACTIVE,
 	}
 
-	path := api.NewURL().Scheme("https").Host(env.ManagementApiHost()).Path("1.0", "remote-cluster", remoteClusterName)
+	path := api.NewURL().Scheme("https").Host(env.ManagementAPIHost()).Path("1.0", "remote-cluster", remoteClusterName)
 	return tlsClient.Query(ctx, http.MethodPatch, path, input, nil, nil)
 }
 

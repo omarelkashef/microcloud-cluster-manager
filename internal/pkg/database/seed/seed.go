@@ -8,11 +8,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jmoiron/sqlx"
-	"golang.org/x/exp/rand"
-
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/store"
+	"github.com/jmoiron/sqlx"
+	"golang.org/x/exp/rand"
 )
 
 // SeedDatabase seeds the database with sample data.
@@ -162,7 +161,7 @@ func generateRandomStatuses(status1, status2, status3, status4 string, maxCount 
 	count3 := rand.Intn(maxCount - count1 - count2)
 	count4 := maxCount - count1 - count2 - count3
 
-	statuses := []map[string]interface{}{
+	statuses := []map[string]any{
 		{"status": status1, "count": count1},
 		{"status": status2, "count": count2},
 		{"status": status3, "count": count3},

@@ -9,7 +9,8 @@ import (
 	"github.com/canonical/lxd/lxd/response"
 )
 
-var ApiRoot = types.RouteGroup{
+// APIRoot is the API root endpoint.
+var APIRoot = types.RouteGroup{
 	Prefix: "",
 	Middlewares: []types.RouteMiddleware{
 		auth.AuthMiddleware,

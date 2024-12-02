@@ -10,12 +10,14 @@ import (
 	"github.com/canonical/lxd/lxd/response"
 )
 
+// UIFS represents the embedded file system for the user interface.
 // UI files are copied to the static directory. Then embed the static directory in go binary.
 //
 //go:generate cp -r ../../../../../ui/build/ui ./static
 //go:embed static
-var UI_FS embed.FS
+var UIFS embed.FS
 
+// UI is the user interface endpoint group.
 var UI = types.RouteGroup{
 	IsRoot: true,
 	Prefix: "",
@@ -28,6 +30,7 @@ var UI = types.RouteGroup{
 	},
 }
 
+// UIRoot is responsible for redirecting to the /ui path.
 var UIRoot = types.RouteGroup{
 	IsRoot: true,
 	Prefix: "",
@@ -58,7 +61,7 @@ func redirectToUI(rc types.RouteConfig) types.EndpointHandler {
 
 func serveUI(rc types.RouteConfig) types.EndpointHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
-		uiFS, err := fs.Sub(UI_FS, "static")
+		uiFS, err := fs.Sub(UIFS, "static")
 		if err != nil {
 			return response.InternalError(err).Render(w, r)
 		}

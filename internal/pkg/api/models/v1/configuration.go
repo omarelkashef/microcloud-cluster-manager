@@ -7,9 +7,9 @@ type ConfigData struct {
 	Title       string `json:"title"`
 }
 
-// Configuration represents application environment data shown to users
+// Configuration represents application environment data shown to users.
 type Configuration struct {
-	ApiVersion              ConfigData `json:"api_version"`
+	APIVersion              ConfigData `json:"api_version"`
 	ClusterConnectorAddress ConfigData `json:"cluster_connector_address"`
 	OIDCClientID            ConfigData `json:"oidc_client_id"`
 	OIDCIssuer              ConfigData `json:"oidc_issuer"`

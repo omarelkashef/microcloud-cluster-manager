@@ -5,19 +5,18 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/canonical/lxd/lxd/response"
-	"github.com/google/uuid"
-
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/request"
+	"github.com/canonical/lxd/lxd/response"
+	"github.com/google/uuid"
 )
 
-// RequestTrace is a middleware that adds a trace ID and timestamp to the request context
+// RequestTrace is a middleware that adds a trace ID and timestamp to the request context.
 func RequestTrace(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id, err := uuid.NewUUID()
 		if err != nil {
-			response.InternalError(err).Render(w, r)
+			_ = response.InternalError(err).Render(w, r)
 			return
 		}
 
@@ -31,14 +30,14 @@ func RequestTrace(next http.Handler) http.Handler {
 	})
 }
 
-// LogRequest is a middleware that logs a request/response cycle
+// LogRequest is a middleware that logs a request/response cycle.
 func LogRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		// If the context is missing this value, we can't log anything
 		v, err := request.GetValues(ctx)
 		if err != nil {
-			response.InternalError(err).Render(w, r)
+			_ = response.InternalError(err).Render(w, r)
 			return
 		}
 
@@ -67,13 +66,13 @@ func LogRequest(next http.Handler) http.Handler {
 	})
 }
 
-// Custom response writer to capture status code
+// Custom response writer to capture status code.
 type responseWriter struct {
 	http.ResponseWriter
 	statusCode int
 }
 
-// WriteHeader captures the status code
+// WriteHeader captures the status code.
 func (rw *responseWriter) WriteHeader(code int) {
 	rw.statusCode = code
 	rw.ResponseWriter.WriteHeader(code)

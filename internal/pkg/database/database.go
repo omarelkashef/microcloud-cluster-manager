@@ -102,7 +102,6 @@ func isRetriableError(err error) bool {
 // StatusCheck returns nil if it can successfully talk to the database. It
 // returns a non-nil error otherwise.
 func (db *DB) StatusCheck(ctx context.Context) error {
-
 	// First check we can ping the database.
 	var pingError error
 	for attempts := 1; ; attempts++ {
@@ -205,8 +204,8 @@ func (db *DB) Transaction(ctx context.Context, fn func(context.Context, *sqlx.Tx
 }
 
 // Close closes the database connection.
-func (db *DB) Close() {
-	db.conn.Close()
+func (db *DB) Close() error {
+	return db.conn.Close()
 }
 
 // Conn returns the sqlx database connection.

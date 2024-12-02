@@ -1,16 +1,17 @@
 package routes
 
 import (
-	v1 "github.com/canonical/lxd-cluster-manager/internal/app/management-api/api/v1"
+	apiV1 "github.com/canonical/lxd-cluster-manager/internal/app/management-api/api/v1"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
 )
 
+// APIRoutes defines the API routes for the management API.
 var APIRoutes = []types.RouteGroup{
-	v1.UI,
-	v1.UIRoot,
-	v1.ApiRoot,
-	v1.Auth,
-	v1.Configuration,
-	v1.RemoteCluster,
-	v1.RemoteClusterJoinToken,
+	apiV1.UI,
+	apiV1.UIRoot,
+	apiV1.APIRoot,
+	apiV1.Auth,
+	apiV1.Configuration,
+	apiV1.RemoteCluster,
+	apiV1.RemoteClusterJoinToken,
 }

@@ -13,7 +13,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// RemoteCluster represents a single remote LXD cluster
+// RemoteCluster represents a single remote LXD cluster.
 type RemoteCluster struct {
 	ID                 int       `db:"id"`                  // Primary key
 	Name               string    `db:"name"`                // Cluster name
@@ -24,7 +24,7 @@ type RemoteCluster struct {
 	UpdatedAt          time.Time `db:"updated_at"`          // Update timestamp
 }
 
-// GetRemoteClusterID returns the ID of a remote cluster by name
+// GetRemoteClusterID returns the ID of a remote cluster by name.
 func GetRemoteClusterID(ctx context.Context, tx *sqlx.Tx, name string) (int, error) {
 	// Query to check if the entry exists
 	q := `
@@ -60,7 +60,7 @@ func RemoteClusterExists(ctx context.Context, tx *sqlx.Tx, name string) (bool, e
 	return true, nil
 }
 
-// GetRemoteClusters returns all remote clusters
+// GetRemoteClusters returns all remote clusters.
 func GetRemoteClusters(ctx context.Context, tx *sqlx.Tx) ([]RemoteCluster, error) {
 	q := `
         SELECT id, name, status, cluster_certificate, joined_at, created_at, updated_at
@@ -96,7 +96,7 @@ func GetRemoteClusters(ctx context.Context, tx *sqlx.Tx) ([]RemoteCluster, error
 	return objects, nil
 }
 
-// GetRemoteCluster returns a single remote cluster by name
+// GetRemoteCluster returns a single remote cluster by name.
 func GetRemoteCluster(ctx context.Context, tx *sqlx.Tx, name string) (*RemoteCluster, error) {
 	q := `
 		SELECT id, name, status, cluster_certificate, joined_at, created_at, updated_at
@@ -126,7 +126,7 @@ func GetRemoteCluster(ctx context.Context, tx *sqlx.Tx, name string) (*RemoteClu
 	return &result, nil
 }
 
-// CreateRemoteCluster creates a new remote cluster
+// CreateRemoteCluster creates a new remote cluster.
 func CreateRemoteCluster(ctx context.Context, tx *sqlx.Tx, data RemoteCluster) (*RemoteCluster, error) {
 	exists, err := RemoteClusterExists(ctx, tx, data.Name)
 	if err != nil {
@@ -167,7 +167,7 @@ func CreateRemoteCluster(ctx context.Context, tx *sqlx.Tx, data RemoteCluster) (
 	return &result, nil
 }
 
-// DeleteRemoteCluster deletes a remote cluster by name
+// DeleteRemoteCluster deletes a remote cluster by name.
 func DeleteRemoteCluster(ctx context.Context, tx *sqlx.Tx, name string) error {
 	q := `
         DELETE FROM remote_clusters
@@ -193,7 +193,7 @@ func DeleteRemoteCluster(ctx context.Context, tx *sqlx.Tx, name string) error {
 	return nil
 }
 
-// UpdateRemoteCluster updates a remote cluster by name
+// UpdateRemoteCluster updates a remote cluster by name.
 func UpdateRemoteCluster(ctx context.Context, tx *sqlx.Tx, name string, data RemoteCluster) error {
 	id, err := GetRemoteClusterID(ctx, tx, name)
 	if err != nil {

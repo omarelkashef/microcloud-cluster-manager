@@ -12,11 +12,12 @@ import (
 	"github.com/canonical/lxd/shared"
 )
 
+// Config represents the configurable environment variables for all services within the application.
 type Config struct {
 	// system configs
 	Version                 string
-	ApiVersion              string
-	ManagementApiCert       *shared.CertInfo
+	APIVersion              string
+	ManagementAPICert       *shared.CertInfo
 	ClusterConnectorCert    *shared.CertInfo
 	ClusterConnectorAddress string
 	TestMode                bool
@@ -24,7 +25,7 @@ type Config struct {
 	database.DBConfig
 	// api configs
 	ServerHost           string
-	ManagementApiPort    string
+	ManagementAPIPort    string
 	ClusterConnectorPort string
 	AllowedOrigins       []string
 	ReadTimeout          int
@@ -108,9 +109,9 @@ func LoadConfig() (*Config, error) {
 
 	return &Config{
 		Version:                 getEnvOrDefault("VERSION", "development"),
-		ApiVersion:              getEnvOrDefault("API_VERSION", "1.0"),
+		APIVersion:              getEnvOrDefault("API_VERSION", "1.0"),
 		ServerHost:              getEnvOrDefault("SERVER_HOST", "localhost"),
-		ManagementApiPort:       getEnvOrDefault("MANAGEMENT_API_PORT", "9000"),
+		ManagementAPIPort:       getEnvOrDefault("MANAGEMENT_API_PORT", "9000"),
 		ClusterConnectorPort:    getEnvOrDefault("CLUSTER_CONNECTOR_PORT", "9001"),
 		TestMode:                getEnvOrDefault("TEST_MODE", "false") == "true",
 		AllowedOrigins:          []string{"*"},
@@ -137,7 +138,7 @@ func LoadConfig() (*Config, error) {
 // LoadCertificates loads the TLS certificates from the environment.
 func (c *Config) LoadCertificates() error {
 	// service certificates
-	managementApiCert, err := getServiceCert("management-api")
+	managementAPICert, err := getServiceCert("management-api")
 	if err != nil {
 		return fmt.Errorf("failed to load management-api certificate: %w", err)
 	}
@@ -147,7 +148,7 @@ func (c *Config) LoadCertificates() error {
 		return fmt.Errorf("failed to load cluster-connector certificate: %w", err)
 	}
 
-	c.ManagementApiCert = managementApiCert
+	c.ManagementAPICert = managementAPICert
 	c.ClusterConnectorCert = clusterConnectorCert
 
 	return nil

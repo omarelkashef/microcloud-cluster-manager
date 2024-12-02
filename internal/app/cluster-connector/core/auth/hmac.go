@@ -11,6 +11,7 @@ import (
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models/v1"
 )
 
+// VerifyHMAC verifies the HMAC signature of a request.
 func VerifyHMAC(payload models.RemoteClusterPost, r *http.Request, secret string) (bool, error) {
 	reqBody, err := json.Marshal(payload)
 	if err != nil {

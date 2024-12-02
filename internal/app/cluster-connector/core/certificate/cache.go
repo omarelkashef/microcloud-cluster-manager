@@ -6,12 +6,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/canonical/lxd/shared"
-	"github.com/jmoiron/sqlx"
-
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/store"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
+	"github.com/canonical/lxd/shared"
+	"github.com/jmoiron/sqlx"
 )
 
 // CertificateCacheEntry represents a cache entry mapped to a certificate fingerprint.

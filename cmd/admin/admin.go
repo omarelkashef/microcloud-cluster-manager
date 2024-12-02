@@ -12,12 +12,12 @@ import (
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
 )
 
-// Run will execute all the admin jobs
+// Run will execute all the admin jobs.
 func Run() error {
 	return admin()
 }
 
-func admin() error {
+func admin() (err error) {
 	logger.Log.Infow("admin", "message", "Starting admin jobs")
 
 	// =========================================================================
@@ -47,7 +47,7 @@ func admin() error {
 	}
 	defer func() {
 		logger.Log.Infow("shutdown", "status", "stopping database", "host", cfg.DBHost)
-		db.Close()
+		err = db.Close()
 	}()
 
 	// time out the database connection after 5 minutes

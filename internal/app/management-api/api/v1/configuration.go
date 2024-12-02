@@ -55,8 +55,8 @@ func generateConnString(config database.DBConfig) string {
 // mapEnvToConfig maps application environment values to config data exposed via the API.
 func mapEnvToConfig(cfg config.Config) models.Configuration {
 	return models.Configuration{
-		ApiVersion: models.ConfigData{
-			Value:       cfg.ApiVersion,
+		APIVersion: models.ConfigData{
+			Value:       cfg.APIVersion,
 			Title:       "API Version",
 			Description: "The version of the API being used.",
 		},

@@ -1,4 +1,4 @@
-package cluster_connector
+package clusterconnector
 
 import (
 	"context"
@@ -11,9 +11,6 @@ import (
 	"syscall"
 	"time"
 
-	"go.uber.org/automaxprocs/maxprocs"
-	"go.uber.org/zap"
-
 	"github.com/canonical/lxd-cluster-manager/config"
 	routes "github.com/canonical/lxd-cluster-manager/internal/app/cluster-connector/api"
 	"github.com/canonical/lxd-cluster-manager/internal/app/cluster-connector/core/auth"
@@ -22,11 +19,12 @@ import (
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/middleware"
 	"github.com/canonical/lxd/lxd/util"
+	"go.uber.org/automaxprocs/maxprocs"
+	"go.uber.org/zap"
 )
 
-// Run will initialise and start the cluster-connector service API
-func Run() error {
-
+// Run will initialise and start the cluster-connector service API.
+func Run() (err error) {
 	// =========================================================================
 	// GOMAXPROCS
 
@@ -77,7 +75,7 @@ func Run() error {
 	}
 	defer func() {
 		logger.Log.Infow("shutdown", "status", "stopping database support", "host", cfg.DBHost)
-		db.Close()
+		err = db.Close()
 	}()
 
 	// =========================================================================
@@ -95,7 +93,7 @@ func Run() error {
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
-	a := api.NewApi(api.ApiConfig{
+	a := api.NewAPI(api.APIConfig{
 		Shutdown:  shutdown,
 		DB:        db,
 		EnvConfig: cfg,
@@ -149,7 +147,7 @@ func Run() error {
 
 		// Asking server to shutdown and shed load.
 		if err := server.Shutdown(ctx); err != nil {
-			server.Close()
+			err = server.Close()
 			return fmt.Errorf("could not stop server gracefully: %w", err)
 		}
 	}

@@ -8,17 +8,17 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/canonical/lxd/lxd/response"
-	"github.com/canonical/lxd/shared"
-	"github.com/gorilla/mux"
-	"github.com/jmoiron/sqlx"
-
 	"github.com/canonical/lxd-cluster-manager/internal/app/management-api/core/auth"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models/v1"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/store"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
+	"github.com/canonical/lxd/lxd/response"
+	"github.com/canonical/lxd/shared"
+	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
 )
 
+// RemoteClusterJoinToken is the remote cluster join token endpoint group.
 var RemoteClusterJoinToken = types.RouteGroup{
 	Prefix: "remote-cluster-join-token",
 	Middlewares: []types.RouteMiddleware{

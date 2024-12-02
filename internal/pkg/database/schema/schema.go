@@ -11,8 +11,8 @@ import (
 //go:embed migrations/*.sql
 var migrations embed.FS
 
-// VERSION_MAP is a map of version strings to their corresponding version number.
-var VERSION_MAP = map[string]int64{
+// VersionMap is a map of version strings to their corresponding version number.
+var VersionMap = map[string]int64{
 	"development": -1,
 	"0.1.0":       1,
 	"0.1.1":       2,
@@ -30,7 +30,7 @@ func Migrate(ctx context.Context, db *sql.DB, version string) (bool, error) {
 
 	// TODO: test this!!!
 	// for production, we will apply the migrations up to the specified version
-	environmentVersion, ok := VERSION_MAP[version]
+	environmentVersion, ok := VersionMap[version]
 	if !ok {
 		return false, goose.ErrVersionNotFound
 	}

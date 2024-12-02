@@ -12,7 +12,7 @@ import (
 
 	"github.com/canonical/lxd/shared"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
@@ -32,9 +32,9 @@ type Environment struct {
 	certDir              string
 	processIDs           []int
 	kClient              *kubernetes.Clientset
-	managementApiCert    *shared.CertInfo
+	managementAPICert    *shared.CertInfo
 	clusterConnectorCert *shared.CertInfo
-	managementApiHost    string
+	managementAPIHost    string
 	clusterConnectorHost string
 	remoteClusters       []string
 	remoteClusterTokens  []string
@@ -46,7 +46,7 @@ func NewEnv() *Environment {
 		rootDir:              getProjectRoot(),
 		testDir:              "",
 		certDir:              "",
-		managementApiHost:    "localhost:9000",
+		managementAPIHost:    "localhost:9000",
 		clusterConnectorHost: "localhost:9001",
 	}
 }
@@ -56,7 +56,7 @@ func (e *Environment) RootDir() string {
 	return e.rootDir
 }
 
-// TestDir returns the test directory.
+// DataDir returns the data directory for tests.
 func (e *Environment) DataDir() string {
 	return e.rootDir + "/test/e2e/data"
 }
@@ -76,12 +76,12 @@ func (e *Environment) ProcessIDs() []int {
 	return e.processIDs
 }
 
-// AddRemoteCluster mark a remote cluster for removal during test cleanup.
+// RemoveRemoteCluster mark a remote cluster for removal during test cleanup.
 func (e *Environment) RemoveRemoteCluster(name string) {
 	e.remoteClusters = append(e.remoteClusters, name)
 }
 
-// AddRemoteClusterToken mark a remote cluster join token for removal during test cleanup.
+// RemoveRemoteClusterToken mark a remote cluster join token for removal during test cleanup.
 func (e *Environment) RemoveRemoteClusterToken(token string) {
 	e.remoteClusterTokens = append(e.remoteClusterTokens, token)
 }
@@ -149,9 +149,9 @@ func (e *Environment) Cleanup() error {
 	return nil
 }
 
-// ManagementApiCert returns the management-api certificate.
-func (e *Environment) ManagementApiCert() *shared.CertInfo {
-	return e.managementApiCert
+// ManagementAPICert returns the management-api certificate.
+func (e *Environment) ManagementAPICert() *shared.CertInfo {
+	return e.managementAPICert
 }
 
 // ClusterConnectorCert returns the cluster-connector certificate.
@@ -159,9 +159,9 @@ func (e *Environment) ClusterConnectorCert() *shared.CertInfo {
 	return e.clusterConnectorCert
 }
 
-// ManagementApiHost returns the management-api host.
-func (e *Environment) ManagementApiHost() string {
-	return e.managementApiHost
+// ManagementAPIHost returns the management-api host.
+func (e *Environment) ManagementAPIHost() string {
+	return e.managementAPIHost
 }
 
 // ClusterConnectorHost returns the cluster-connector host.
@@ -174,7 +174,7 @@ func (e *Environment) setTestMode(val string) error {
 	containerName := "management-api"
 
 	// Get the Deployment
-	deployment, err := e.kClient.AppsV1().Deployments("default").Get(context.TODO(), deploymentName, v1.GetOptions{})
+	deployment, err := e.kClient.AppsV1().Deployments("default").Get(context.TODO(), deploymentName, metav1.GetOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to get deployment: %v", err)
 	}
@@ -211,7 +211,7 @@ func (e *Environment) setTestMode(val string) error {
 	}
 
 	// Update the deployment with the new environment variable
-	_, err = e.kClient.AppsV1().Deployments("default").Update(context.TODO(), deployment, v1.UpdateOptions{})
+	_, err = e.kClient.AppsV1().Deployments("default").Update(context.TODO(), deployment, metav1.UpdateOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to update deployment: %v", err)
 	}
@@ -228,7 +228,7 @@ func (e *Environment) setTestMode(val string) error {
 			return fmt.Errorf("timed out waiting for deployment to be ready")
 		case <-ticker.C:
 			// Get the latest status of the deployment
-			deployment, err := e.kClient.AppsV1().Deployments("default").Get(context.TODO(), deploymentName, v1.GetOptions{})
+			deployment, err := e.kClient.AppsV1().Deployments("default").Get(context.TODO(), deploymentName, metav1.GetOptions{})
 			if err != nil {
 				return fmt.Errorf("failed to get deployment: %v", err)
 			}
@@ -245,7 +245,7 @@ func (e *Environment) setTestMode(val string) error {
 func (e *Environment) setCertificates() error {
 	// Helper function to retrieve and validate certificate data from a secret
 	getCertificateData := func(secretName string) (cert, key, ca []byte, err error) {
-		secret, err := e.kClient.CoreV1().Secrets("default").Get(context.TODO(), secretName, v1.GetOptions{})
+		secret, err := e.kClient.CoreV1().Secrets("default").Get(context.TODO(), secretName, metav1.GetOptions{})
 		if err != nil {
 			return nil, nil, nil, fmt.Errorf("could not get secret %q: %w", secretName, err)
 		}
@@ -277,16 +277,16 @@ func (e *Environment) setCertificates() error {
 	}
 
 	// Fetch management-api and cluster-connector certificate data
-	managementApiCert, managementApiKey, managementApiCA, err := getCertificateData("management-api-cert-secret")
+	managementAPICert, managementAPIKey, managementAPICA, err := getCertificateData("management-api-cert-secret")
 	if err != nil {
 		return err
 	}
 
-	certInfo, err := getCertInfo(managementApiCert, managementApiKey, managementApiCA)
+	certInfo, err := getCertInfo(managementAPICert, managementAPIKey, managementAPICA)
 	if err != nil {
 		return err
 	}
-	e.managementApiCert = certInfo
+	e.managementAPICert = certInfo
 
 	clusterConnectorCert, clusterConnectorKey, clusterConnectorCA, err := getCertificateData("cluster-connector-cert-secret")
 	if err != nil {
@@ -302,14 +302,12 @@ func (e *Environment) setCertificates() error {
 }
 
 func (e *Environment) setKubeClient() error {
-	var kubeconfig string
 	home := homedir.HomeDir()
-	if home != "" {
-		kubeconfig = filepath.Join(home, ".kube", "config")
-	} else {
+	if home == "" {
 		return fmt.Errorf("could not find home directory for kubeconfig")
 	}
 
+	kubeconfig := filepath.Join(home, ".kube", "config")
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
 		return fmt.Errorf("could not build kubeconfig: %v", err)

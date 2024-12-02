@@ -5,11 +5,12 @@ import (
 	"os"
 
 	"github.com/canonical/lxd-cluster-manager/cmd/admin"
-	cluster_connector "github.com/canonical/lxd-cluster-manager/cmd/cluster-connector"
-	management_api "github.com/canonical/lxd-cluster-manager/cmd/management-api"
+	clusterconnector "github.com/canonical/lxd-cluster-manager/cmd/cluster-connector"
+	managementapi "github.com/canonical/lxd-cluster-manager/cmd/management-api"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
 )
 
+// SERVICES is a list of valid service names within the cluster manager application.
 var SERVICES = []string{
 	"management-api",
 	"cluster-connector",
@@ -21,11 +22,11 @@ func main() {
 	err := run()
 	if err != nil {
 		logger.Log.Errorw("startup", "ERROR", err)
-		logger.Log.Sync()
+		_ = logger.Log.Sync()
 		os.Exit(1)
 	}
 
-	logger.Cleanup()
+	_ = logger.Cleanup()
 }
 
 func run() error {
@@ -39,11 +40,11 @@ func run() error {
 	logger.SetService(service)
 
 	if service == "management-api" {
-		return management_api.Run()
+		return managementapi.Run()
 	}
 
 	if service == "cluster-connector" {
-		return cluster_connector.Run()
+		return clusterconnector.Run()
 	}
 
 	if service == "admin" {
