@@ -1,4 +1,3 @@
-# TODO: split this into separate configmaps
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -15,7 +14,7 @@ data:
   DB_USER: admin
   DB_PASSWORD: admin
   DB_NAME: cm
-  DB_HOST: localhost
+  DB_HOST: db-svc
   DB_MAX_OPEN: "5"
   DB_MAX_IDLE: "2"
   DB_DISABLE_TLS: "true"

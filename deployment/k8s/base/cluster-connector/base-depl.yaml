@@ -11,8 +11,6 @@ spec:
       labels:
         app: cluster-connector
     spec:
-      dnsPolicy: ClusterFirstWithHostNet
-      hostNetwork: true
       terminationGracePeriodSeconds: 60
       containers:
       - name: cluster-connector
@@ -20,7 +18,6 @@ spec:
         ports:
         - name: cluster-conn
           containerPort: 9001
-        # TODO: more ports for readiness and liveness probes
         envFrom:
         - configMapRef:
             name: config

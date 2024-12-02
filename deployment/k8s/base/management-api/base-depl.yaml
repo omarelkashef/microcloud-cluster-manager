@@ -11,8 +11,6 @@ spec:
       labels:
         app: management-api
     spec:
-      dnsPolicy: ClusterFirstWithHostNet
-      hostNetwork: true
       terminationGracePeriodSeconds: 60
       initContainers:
       - name: init
@@ -23,14 +21,12 @@ spec:
         env:
         - name: SERVICE
           value: "admin"
-      # TODO: use init containers to do db migration and seeding
       containers:
       - name: management-api
         image: cluster-manager-img
         ports:
         - name: management-api
           containerPort: 9000
-        # TODO: more ports for readiness and liveness probes
         envFrom:
         - configMapRef:
             name: config

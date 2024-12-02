@@ -63,8 +63,6 @@ type RemoteClusterStatusPost struct {
 	DiskUsage         int                  `json:"disk_usage"`
 	MemberStatuses    []StatusDistribution `json:"member_statuses"`
 	InstanceStatuses  []StatusDistribution `json:"instance_status"`
-	// TODO: remove this after mtls logic is in place
-	ClusterName string `json:"cluster_name"`
 }
 
 // RemoteClusterStatusPostResponse is sent to LXD in response to a remote cluster status update.

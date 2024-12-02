@@ -123,7 +123,7 @@ func LoadConfig() (*Config, error) {
 			DBPort:         getEnvOrDefault("DB_PORT", "5432"),
 			DBUser:         getEnvOrDefault("DB_USER", "admin"),
 			DBPassword:     getEnvOrDefault("DB_PASSWORD", "admin"),
-			DBHost:         getEnvOrDefault("DB_HOST", "localhost"),
+			DBHost:         getEnvOrDefault("DB_HOST", "db-svc"),
 			DBName:         getEnvOrDefault("DB_NAME", "cm"),
 			DBMaxIdleConns: dbMaxIdleConns,
 			DBMaxOpenConns: dbMaxOpenConns,

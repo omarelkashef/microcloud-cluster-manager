@@ -12,6 +12,9 @@ spec:
   # domains that the certificate will cover
   dnsNames:
     - "localhost"
+  # for local development only, we setup the self-signed certificate to function as a CA
+  isCA: true
+  commonName: dev-ca
   issuerRef:
     name: cert-issuer
     kind: ClusterIssuer

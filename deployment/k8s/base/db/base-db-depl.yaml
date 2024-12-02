@@ -1,4 +1,4 @@
-# TODO: no point in setting up patches for this as these configs are most likely going to change
+# NOTE: no point in setting up patches for this as these configs are most likely going to change
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -13,9 +13,6 @@ spec:
       labels:
         app: db
     spec:
-      # TODO: these network settings are not the best
-      dnsPolicy: ClusterFirstWithHostNet
-      hostNetwork: true
       containers:
       - name: db
         image: 'postgres:17-alpine'
