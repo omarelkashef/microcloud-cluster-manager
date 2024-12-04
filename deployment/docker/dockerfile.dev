@@ -3,7 +3,7 @@
 FROM golang:1.23.4 AS builder-backend
 ARG BUILD_REF
 ARG DEBUG=false
-WORKDIR /app
+WORKDIR /usr/bin
 
 # install dependencies first for optimised build caching
 COPY go.mod go.sum ./
@@ -11,25 +11,25 @@ RUN go mod download
 
 # copy the source code into the container.
 COPY . ./
-WORKDIR /app/cmd
+WORKDIR /usr/bin/cmd
 
 # compile debug binary which is less optimised, only if debug is enabled
 RUN if [ "$DEBUG" = "true" ]; then \ 
-        CGO_ENABLED=0 go build -gcflags 'all=-N -l' -ldflags "-X main.build=${BUILD_REF}" -o app.debug; \
+        CGO_ENABLED=0 go build -gcflags 'all=-N -l' -ldflags "-X main.build=${BUILD_REF}" -o lxd-cluster-manager; \
     fi
 
 # compile dev binary which is more optimised
 RUN if [ "$DEBUG" != "true" ]; then \ 
-        CGO_ENABLED=0 go build -ldflags "-X main.build=${BUILD_REF}" -o app.dev; \
+        CGO_ENABLED=0 go build -ldflags "-X main.build=${BUILD_REF}" -o lxd-cluster-manager; \
     fi
 
 # ========================================================================
 # development stage to be run as normal dev target
 FROM alpine:3.20 as dev
 # copy the dev binary from the builder stage
-COPY --from=builder-backend /app/cmd/app.dev /app/app.dev
+COPY --from=builder-backend /usr/bin/cmd/lxd-cluster-manager /usr/bin/lxd-cluster-manager
 # this specifies the default binary to execute when the container starts
-ENTRYPOINT [ "/app/app.dev" ]
+ENTRYPOINT [ "/usr/bin/lxd-cluster-manager" ]
 
 # ========================================================================
 # debug stage to be run as debug target
@@ -37,9 +37,9 @@ FROM golang:1.23.4 as debug
 # Install Delve for debugging go
 RUN go install github.com/go-delve/delve/cmd/dlv@v1.23.1
 # copy the debug binary from the builder stage
-COPY --from=builder-backend /app/cmd/app.debug /app/app.debug
+COPY --from=builder-backend /usr/bin/cmd/lxd-cluster-manager /usr/bin/lxd-cluster-manager
 
-WORKDIR /app
+WORKDIR /usr/bin
 
 EXPOSE 40000
-ENTRYPOINT ["/go/bin/dlv", "--listen=:40000", "--headless=true", "--api-version=2", "--accept-multiclient", "exec", "/app/app.debug"]
+ENTRYPOINT ["/go/bin/dlv", "--listen=:40000", "--headless=true", "--api-version=2", "--accept-multiclient", "exec", "/usr/bin/lxd-cluster-manager"]

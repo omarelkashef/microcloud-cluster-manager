@@ -13,7 +13,8 @@ spec:
     spec:
       initContainers:
       - name: init
-        image: cluster-manager-img
+        image: lxd-cluster-manager
+        command: ["/usr/bin/lxd-cluster-manager"]
         envFrom:
         - configMapRef:
             name: config
@@ -22,7 +23,8 @@ spec:
           value: "admin"
       containers:
       - name: management-api
-        image: cluster-manager-img
+        image: lxd-cluster-manager
+        command: ["/usr/bin/lxd-cluster-manager"]
         ports:
         - name: management-api
           containerPort: 9000

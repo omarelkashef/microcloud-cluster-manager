@@ -1,5 +1,9 @@
+# system
 .vscode
 .idea
+*__debug*
+
+# ui
 ui/build
 ui/.dotrun.json
 ui/.env.local
@@ -8,7 +12,11 @@ ui/playwright-report
 ui/keys
 ui/tests/.auth
 tests/
-test/e2e/data
-test-results
 haproxy-local.cfg
-*__debug*
+test-results
+
+# backend
+test/e2e/data
+
+# rockcraft
+*.rock

@@ -13,7 +13,8 @@ spec:
     spec:
       containers:
       - name: cluster-connector
-        image: cluster-connector-img
+        image: lxd-cluster-manager
+        command: ["/usr/bin/lxd-cluster-manager"]
         ports:
         - name: cluster-conn
           containerPort: 9000

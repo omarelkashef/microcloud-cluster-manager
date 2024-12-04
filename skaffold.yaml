@@ -2,22 +2,6 @@ apiVersion: skaffold/v4beta11
 kind: Config
 metadata:
   name: cluster-manager-dev
-build:
-  artifacts:
-  - image: cluster-manager-img
-    context: .
-    docker:
-      dockerfile: deployment/docker/dockerfile.dev
-      target: dev
-      buildArgs:
-        BUILD_REF: "development"
-    sync:
-      infer:
-      - 'cmd/'
-      - 'config/'
-      - 'internal/'
-      - 'go.mod'
-      - 'go.sum'
 
 manifests:
   kustomize:
@@ -36,26 +20,43 @@ deploy:
   tolerateFailuresUntilDeadline: true
   kubectl: {}
 
-portForward:
-- resourceType: service
-  resourceName: management-api-svc
-  port: management-api
-  localPort: 9000
-- resourceType: service
-  resourceName: cluster-connector-svc
-  port: cluster-conn
-  localPort: 9001
-# For debugging purposes, we can connect via pgadmin here
-- resourceType: service
-  resourceName: db-svc
-  port: db
-  localPort: 5432
-
 profiles:
+- name: docker
+  build:
+    artifacts:
+    - image: lxd-cluster-manager
+      context: .
+      docker:
+        dockerfile: deployment/docker/dockerfile.dev
+        target: dev
+        buildArgs:
+          BUILD_REF: "development"
+      sync:
+        infer:
+        - 'cmd/'
+        - 'config/'
+        - 'internal/'
+        - 'go.mod'
+        - 'go.sum'
+  portForward:
+  - resourceType: service
+    resourceName: management-api-svc
+    port: management-api
+    localPort: 9000
+  - resourceType: service
+    resourceName: cluster-connector-svc
+    port: cluster-conn
+    localPort: 9001
+  # For debugging purposes, we can connect via pgadmin here
+  - resourceType: service
+    resourceName: db-svc
+    port: db
+    localPort: 5432
+
 - name: debug
   build:
     artifacts:
-    - image: cluster-manager-img
+    - image: lxd-cluster-manager
       context: .
       docker:
         dockerfile: deployment/docker/dockerfile.dev
@@ -82,5 +83,38 @@ profiles:
     localPort: 40001
   - resourceType: StatefulSet
     resourceName: db-ss
+    port: db
+    localPort: 5432
+
+# NOTE: this profile is for testing builds with rocks, use the docker profile for local development
+- name: rock
+  build:
+    artifacts:
+    - image: "lxd-cluster-manager"
+      sync:
+        infer:
+        - 'cmd/'
+        - 'config/'
+        - 'internal/'
+        - 'go.mod'
+        - 'go.sum'
+      custom:
+        buildCommand: ./deployment/rock/build.sh
+        dependencies:
+          paths:
+            - rockcraft.yaml
+      platforms: ["linux/amd64"]
+  portForward:
+  - resourceType: service
+    resourceName: management-api-svc
+    port: management-api
+    localPort: 9000
+  - resourceType: service
+    resourceName: cluster-connector-svc
+    port: cluster-conn
+    localPort: 9001
+  # For debugging purposes, we can connect via pgadmin here
+  - resourceType: service
+    resourceName: db-svc
     port: db
     localPort: 5432

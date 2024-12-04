@@ -13,7 +13,6 @@ import (
 // UIFS represents the embedded file system for the user interface.
 // UI files are copied to the static directory. Then embed the static directory in go binary.
 //
-//go:generate cp -r ../../../../../ui/build/ui ./static
 //go:embed static
 var UIFS embed.FS
 
@@ -61,7 +60,7 @@ func redirectToUI(rc types.RouteConfig) types.EndpointHandler {
 
 func serveUI(rc types.RouteConfig) types.EndpointHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
-		uiFS, err := fs.Sub(UIFS, "static")
+		uiFS, err := fs.Sub(UIFS, "static/ui")
 		if err != nil {
 			return response.InternalError(err).Render(w, r)
 		}

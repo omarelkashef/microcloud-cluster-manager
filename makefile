@@ -1,4 +1,13 @@
 GOMIN=1.23.4
+CGO_ENABLED?=0 # create statically linked binary
+GOOS?=linux
+GO_BIN?=app # name of the output application binary
+GO?=go # name of the go binary
+GOFLAGS?=-ldflags=-w -ldflags=-s -a -buildvcs # remove debug info, strip symbol table, force packages rebuild, includes version control metadata in binary
+GO_UI_FOLDER?=internal/app/management-api/api/v1/static
+
+# export all variables defined as environment variables
+.EXPORT_ALL_VARIABLES:
 
 .PHONY: default
 default: all
@@ -7,19 +16,7 @@ default: all
 # Static code linting utility targets.
 
 .PHONY: check
-check: check-static check-unit check-system
-
-.PHONY: check-unit
-check-unit:
-ifeq "$(GOCOVERDIR)" ""
-	go test ./...
-else
-	go test ./... -cover -test.gocoverdir="${GOCOVERDIR}"
-endif
-
-.PHONY: check-system
-check-system:
-	true
+check: check-static
 
 .PHONY: check-static
 check-static:
@@ -62,38 +59,37 @@ start-cluster:
 delete-cluster:
 	kind delete cluster --name $(KIND_CLUSTER)
 
-# Check status for all resources in the cluster (across all name spaces)
-.PHONY: cluster-status
-cluster-status:
-	kubectl get nodes -o wide
-	kubectl get svc -o wide
-	kubectl get pods -o wide --watch --all-namespaces
-
 .PHONY: dev-k8s-configs
 dev-k8s-configs:
 	kubectl kustomize deployment/k8s/dev
 
 .PHONY: dev-k8s-deploy
 dev-k8s-deploy:
-	skaffold dev --no-prune=false
+	skaffold dev --no-prune=false -p docker
 
 .PHONY: debug-k8s-deploy
 debug-k8s-deploy:
 	skaffold dev --no-prune=false -p debug
 
+.PHONY: rock-k8s-deploy
+rock-k8s-deploy:
+	skaffold dev --no-prune=false --cache-artifacts=false -p rock
+
 # unfortunately necessary as skaffold does not automatically remove images after removing k8s cluster objects
 .PHONY: clean-dev
 clean-dev:
-	skaffold delete
 	docker container prune -f
 	docker images -f "dangling=true" -q | xargs -r docker rmi
-	docker images --filter=reference='cluster-manager-img:*' -q | xargs -I {} docker rmi {} -f
+	docker images --filter=reference='lxd-cluster-manager:*' -q | xargs -I {} docker rmi {} -f
 
 .PHONY: dev
 dev: start-cluster dev-k8s-deploy
 
 .PHONY: debug
 debug: start-cluster debug-k8s-deploy
+
+.PHONY: dev-rock
+dev-rock: start-cluster rock-k8s-deploy
 
 .PHONY: nuke
 nuke: clean-dev delete-cluster
@@ -133,3 +129,23 @@ test-e2e:
 .PHONY: test-ui-e2e
 test-ui-e2e:
 	cd ui && npx playwright test
+
+# ====================================================================
+# production build utilities for rockcraft
+
+.PHONY: build-ui
+build-ui:
+	cd ui && yarn install --frozen=lockfile
+	rm -rf ui/build
+	cd ui && yarn build
+
+.PHONY: copy-ui
+copy-ui:
+	rm -rf $(GO_UI_FOLDER)
+	mkdir -p $(GO_UI_FOLDER)
+	cp -r ui/build/ui $(GO_UI_FOLDER)
+
+# create a binary "app" located in project root
+.PHONY: build
+build: build-ui copy-ui
+	$(GO) build -C cmd -o $(GO_BIN) ./
