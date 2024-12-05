@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: management-api-svc
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: management-api
   ports:

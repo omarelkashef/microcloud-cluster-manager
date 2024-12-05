@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/canonical/lxd-cluster-manager/config"
+	"github.com/canonical/lxd-cluster-manager/internal/pkg/config"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/schema"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/seed"

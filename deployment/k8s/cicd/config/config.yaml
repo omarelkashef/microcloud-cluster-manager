@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: config
+  name: config
+data:
+  CLUSTER_CONNECTOR_ADDRESS: localhost:9001
+  CLUSTER_CONNECTOR_TLS_PATH: /etc/ssl/cluster-connector
+  MANAGEMENT_API_TLS_PATH: /etc/ssl/management-api
+  DB_DISABLE_TLS: "true"
+  DB_HOST: db-svc
+  DB_MAX_IDLE: "2"
+  DB_MAX_OPEN: "5"
+  DB_NAME: cm
+  DB_PASSWORD: admin
+  DB_PORT: "5432"
+  DB_USER: admin
+  OIDC_AUDIENCE: https://dev-xjrvvfikbsv4jxn7.us.auth0.com/api/v2/
+  OIDC_CLIENT_ID: NBXrnTZUrulBYNPuc4raZySTEWDTuvM2
+  OIDC_ISSUER: https://dev-xjrvvfikbsv4jxn7.us.auth0.com/
+  SERVER_HOST: localhost
+  SERVER_PORT: "9000"
+  TEST_MODE: "false"
+  VERSION: "development"

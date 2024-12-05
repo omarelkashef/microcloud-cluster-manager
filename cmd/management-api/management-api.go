@@ -11,10 +11,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/canonical/lxd-cluster-manager/config"
 	routes "github.com/canonical/lxd-cluster-manager/internal/app/management-api/api"
 	"github.com/canonical/lxd-cluster-manager/internal/app/management-api/core/auth"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/api"
+	"github.com/canonical/lxd-cluster-manager/internal/pkg/config"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/middleware"

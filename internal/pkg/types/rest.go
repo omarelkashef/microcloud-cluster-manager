@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/canonical/lxd-cluster-manager/config"
+	"github.com/canonical/lxd-cluster-manager/internal/pkg/config"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/gorilla/mux"
 )

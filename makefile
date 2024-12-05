@@ -3,7 +3,7 @@ CGO_ENABLED?=0 # create statically linked binary
 GOOS?=linux
 GO_BIN?=app # name of the output application binary
 GO?=go # name of the go binary
-GOFLAGS?=-ldflags=-w -ldflags=-s -a -buildvcs # remove debug info, strip symbol table, force packages rebuild, includes version control metadata in binary
+GOFLAGS?=-ldflags=-w -ldflags=-s -a # remove debug info, strip symbol table, force packages rebuild
 GO_UI_FOLDER?=internal/app/management-api/api/v1/static
 
 # export all variables defined as environment variables
@@ -128,7 +128,7 @@ test-e2e:
 
 .PHONY: test-ui-e2e
 test-ui-e2e:
-	cd ui && npx playwright test
+	cd ui && CI=$(CI) npx playwright test
 
 # ====================================================================
 # production build utilities for rockcraft

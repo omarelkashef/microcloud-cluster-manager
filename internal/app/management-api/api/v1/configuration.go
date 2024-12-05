@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/canonical/lxd-cluster-manager/config"
 	"github.com/canonical/lxd-cluster-manager/internal/app/management-api/core/auth"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models/v1"
+	"github.com/canonical/lxd-cluster-manager/internal/pkg/config"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
 	"github.com/canonical/lxd/lxd/response"

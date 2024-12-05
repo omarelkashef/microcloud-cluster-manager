@@ -14,8 +14,8 @@ var migrations embed.FS
 // VersionMap is a map of version strings to their corresponding version number.
 var VersionMap = map[string]int64{
 	"development": -1,
-	"0.1.0":       1,
-	"0.1.1":       2,
+	"1.0.0":       1,
+	"1.0.1":       2,
 }
 
 // Migrate runs the database migrations.
