@@ -17,6 +17,7 @@ test-results
 
 # backend
 test/e2e/data
+tmp
 
 # rockcraft
 *.rock

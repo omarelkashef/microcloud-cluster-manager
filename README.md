@@ -4,8 +4,12 @@ The LXD Cluster Manager is a tool for viewing and managing multiple LXD installa
 
 # Development Setup
 
-For local development, please see the [guide](HACKING.md) for installing dependencies, running backend/frontend development servers and running e2e test suites.
+For local development, please see the [guide](HACKING.md) for:
+- Installing dependencies
+- Running backend development Kubernetes cluster
+- Running frontend UI
+- Running e2e test suites
 
 # Architecture
 
-LXD Cluster Manager is a web application with a Go backend and React (Typescript) used for the UI. You can get an overview of how the system works from its [architecture](ARCHITECTURE.md).
+LXD Cluster Manager is a distributed web application with a Go backend and React (Typescript) used for the UI. The application is deployed using Kubernetes. You can get an overview of how the system works from its [architecture documentation](ARCHITECTURE.md).

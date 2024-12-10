@@ -1,4 +1,3 @@
-GOMIN=1.23.4
 CGO_ENABLED?=0 # create statically linked binary
 GOOS?=linux
 GO_BIN?=app # name of the output application binary
@@ -6,6 +5,7 @@ GO?=go # name of the go binary
 GOFLAGS?=-ldflags=-w -ldflags=-s -a # remove debug info, strip symbol table, force packages rebuild
 GO_UI_FOLDER?=internal/app/management-api/api/v1/static
 MAKEFLAGS += --no-print-directory
+SHELL := /bin/bash # use bash shell
 
 # export all variables defined as environment variables
 .EXPORT_ALL_VARIABLES:
@@ -37,11 +37,11 @@ lint-ui-js:
 .PHONY: update-gomod
 update-gomod:
 	go get -t -v -d -u ./...
-	go mod tidy -go=$(GOMIN)
+	go mod tidy
 
 .PHONY: tidy-gomod
 tidy-gomod:
-	go mod tidy -go=$(GOMIN)
+	go mod tidy
 
 # ====================================================================
 # Local dev cluster utility targets. (k8s, kustomize, kind, skaffold)
@@ -67,19 +67,30 @@ delete-cluster:
 
 .PHONY: dev-k8s-deploy
 dev-k8s-deploy:
-	skaffold dev --no-prune=false -p docker
+	# create custom tmp directory for skaffold to store build artifacts
+	@if [ ! -d "./tmp" ]; then \
+		mkdir tmp; \
+	fi
+	TMPDIR=tmp skaffold dev --no-prune=false -p docker
 
 .PHONY: debug-k8s-deploy
 debug-k8s-deploy:
-	skaffold dev --no-prune=false -p debug
+	@if [ ! -d "./tmp" ]; then \
+		mkdir tmp; \
+	fi
+	TMPDIR=tmp skaffold dev --no-prune=false -p debug
 
 .PHONY: rock-k8s-deploy
 rock-k8s-deploy:
-	skaffold dev --no-prune=false --cache-artifacts=false -p rock
+	@if [ ! -d "./tmp" ]; then \
+		mkdir tmp; \
+	fi
+	TMPDIR=tmp skaffold dev --no-prune=false --cache-artifacts=false -p rock
 
 # unfortunately necessary as skaffold does not automatically remove images after removing k8s cluster objects
 .PHONY: clean-dev
 clean-dev:
+	rm -rf tmp
 	docker container prune -f
 	docker images -f "dangling=true" -q | xargs -r docker rmi
 	docker images --filter=reference='lxd-cluster-manager:*' -q | xargs -I {} docker rmi {} -f
@@ -254,3 +265,116 @@ deploy-ci-k8s-cluster:
 	$(MAKE) deploy-management-api IMAGE_NAME=$(IMAGE_NAME)
 	$(MAKE) deploy-cluster-connector IMAGE_NAME=$(IMAGE_NAME)
 	$(MAKE) expose-services
+
+# ====================================================================
+# Development dependencies
+
+.PHONY: install-deps
+install-deps: install-go install-docker install-kubectl \
+							install-kind install-skaffold install-nvm \
+							install-dotrun
+
+# install golang based on version in go.mod if it does not exist
+.PHONY: install-go
+install-go:
+	@if ! command -v go >/dev/null 2>&1; then \
+		if [ -f "go.mod" ]; then \
+			GO_VERSION=$$(grep -m1 "^go " go.mod | awk '{print $$2}'); \
+			echo "\n---------> Installing Go version $$GO_VERSION from go.mod..."; \
+			curl -OL https://go.dev/dl/go$${GO_VERSION}.linux-amd64.tar.gz && \
+			sudo tar -C /usr/local -xzf go$${GO_VERSION}.linux-amd64.tar.gz && \
+			rm go$${GO_VERSION}.linux-amd64.tar.gz; \
+			if ! grep -q "/usr/local/go/bin" $$HOME/.bashrc; then \
+				echo "Adding Go to PATH..."; \
+				echo 'export PATH=$$PATH:/usr/local/go/bin' >> $$HOME/.bashrc; \
+				source $$HOME/.bashrc; \
+			fi; \
+		else \
+			echo "No go.mod found and Go not installed. Please specify a Go version."; \
+			exit 1; \
+		fi; \
+	else \
+		echo "Go is already installed."; \
+	fi
+
+# install docker if it does not exist
+.PHONY: install-docker
+install-docker:
+	@if ! command -v docker >/dev/null 2>&1; then \
+		echo "\n---------> Installing Docker..."; \
+		sudo snap install docker; \
+		echo "Configuring Docker for user $$USER..."; \
+		sudo addgroup --system docker; \
+		sudo adduser $$USER docker; \
+		newgrp docker; \
+		sudo snap disable docker; \
+		sudo snap enable docker; \
+		if ! grep -q "/snap/bin" $$HOME/.bashrc; then \
+			echo "Adding /snap/bin to PATH..."; \
+			echo 'export PATH=$$PATH:/snap/bin' >> $$HOME/.bashrc; \
+			source $$HOME/.bashrc; \
+		fi; \
+	else \
+		echo "Docker is already installed."; \
+	fi
+
+# install kubernetes controller if it does not exist
+.PHONY: install-kubectl
+install-kubectl:
+	@if ! command -v kubectl >/dev/null 2>&1; then \
+		echo "\n---------> Installing kubectl..."; \
+		KUBECTL_VERSION=$$(curl -L -s https://dl.k8s.io/release/stable.txt); \
+		curl -LO "https://dl.k8s.io/release/$${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
+		sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
+		rm kubectl; \
+	else \
+		echo "kubectl is already installed."; \
+	fi
+
+# install kind if it does not exist
+.PHONY: install-kind
+install-kind:
+	@if ! command -v kind >/dev/null 2>&1; then \
+		echo "\n---------> Installing Kind..."; \
+		curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.24.0/kind-linux-amd64; \
+		chmod +x ./kind; \
+		sudo mv ./kind /usr/local/bin/kind; \
+	else \
+		echo "Kind is already installed."; \
+	fi
+
+# install skaffold if it does not exist
+.PHONY: install-skaffold
+install-skaffold:
+	@if ! command -v skaffold >/dev/null 2>&1; then \
+		echo "\n---------> Installing Skaffold..."; \
+		curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
+		chmod +x skaffold && sudo mv skaffold /usr/local/bin; \
+	else \
+		echo "Skaffold is already installed."; \
+	fi
+
+# install nvm if it does not exist
+.PHONY: install-nvm
+install-nvm:
+	@if [ ! -d "$$HOME/.nvm" ]; then \
+		echo "\n---------> Installing NVM..."; \
+		curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash; \
+		export NVM_DIR="$$HOME/.nvm"; \
+		[ -s "$$NVM_DIR/nvm.sh" ] && . "$$NVM_DIR/nvm.sh"; \
+		nvm install 22; \
+		nvm use 22; \
+	else \
+		echo "NVM is already installed."; \
+	fi
+
+# install dotrun if it does not exist
+.PHONY: install-dotrun
+install-dotrun:
+	@if ! command -v dotrun >/dev/null 2>&1; then \
+		echo "\n---------> Installing dotrun..."; \
+		curl -sSL https://raw.githubusercontent.com/canonical/dotrun/main/scripts/install.sh | bash; \
+		source $$HOME/.bashrc; \
+	else \
+		echo "dotrun is already installed."; \
+	fi

@@ -21,9 +21,9 @@ spec:
       - name: management-api
         resources:
           limits:
-            cpu: "2000m" # Up to 2 full cores
+            cpu: "1000m"
           requests:
-            cpu: "1000m" # Use 1 full cores
+            cpu: "200m"
         image: lxd-cluster-manager
         ports:
         - name: debug
