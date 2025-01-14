@@ -44,8 +44,8 @@ func NewEnv() *Environment {
 		rootDir:              getProjectRoot(),
 		testDir:              "",
 		certDir:              "",
-		managementAPIHost:    "localhost:9000",
-		clusterConnectorHost: "localhost:9001",
+		managementAPIHost:    "0.0.0.0:9000",
+		clusterConnectorHost: "0.0.0.0:9001",
 	}
 }
 

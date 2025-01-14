@@ -5,7 +5,7 @@ metadata:
     app: config
   name: config
 data:
-  CLUSTER_CONNECTOR_ADDRESS: localhost:9001
+  CLUSTER_CONNECTOR_ADDRESS: "0.0.0.0:9001"
   CLUSTER_CONNECTOR_TLS_PATH: /etc/ssl/cluster-connector
   MANAGEMENT_API_TLS_PATH: /etc/ssl/management-api
   DB_DISABLE_TLS: "true"
@@ -19,7 +19,7 @@ data:
   OIDC_AUDIENCE: https://lxd-ui-demo.us.auth0.com/api/v2/
   OIDC_CLIENT_ID: OZSAeCbqAXZid3LL1gRQEkLXP9KlwZtJ
   OIDC_ISSUER: https://lxd-ui-demo.us.auth0.com/
-  SERVER_HOST: localhost
+  SERVER_HOST: "0.0.0.0"
   SERVER_PORT: "9000"
   TEST_MODE: "false"
   VERSION: "development"

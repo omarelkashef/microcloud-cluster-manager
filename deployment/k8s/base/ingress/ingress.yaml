@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cm-ingress
+  namespace: default
+  annotations:
+    ingress.kubernetes.io/ssl-passthrough: "true"
+spec:
+  ingressClassName: haproxy
+  rules:
+  - host: ma.lxd-cm.local
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: management-api-svc
+            port:
+              name: management-api
+  - host: cc.lxd-cm.local
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: cluster-connector-svc
+            port:
+              name: cluster-conn

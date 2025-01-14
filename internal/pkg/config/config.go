@@ -109,14 +109,14 @@ func LoadConfig() (*Config, error) {
 	return &Config{
 		Version:                 getEnvOrDefault("VERSION", "development"),
 		APIVersion:              getEnvOrDefault("API_VERSION", "1.0"),
-		ServerHost:              getEnvOrDefault("SERVER_HOST", "localhost"),
+		ServerHost:              getEnvOrDefault("SERVER_HOST", "0.0.0.0"),
 		ServerPort:              getEnvOrDefault("SERVER_PORT", "9000"),
 		TestMode:                getEnvOrDefault("TEST_MODE", "false") == "true",
 		AllowedOrigins:          []string{"*"},
 		ReadTimeout:             10,
 		WriteTimeout:            10,
 		IdleTimeout:             60,
-		ClusterConnectorAddress: getEnvOrDefault("CLUSTER_CONNECTOR_ADDRESS", "localhost:9001"),
+		ClusterConnectorAddress: getEnvOrDefault("CLUSTER_CONNECTOR_ADDRESS", "0.0.0.0:9001"),
 		DBConfig: database.DBConfig{
 			DBPort:         getEnvOrDefault("DB_PORT", "5432"),
 			DBUser:         getEnvOrDefault("DB_USER", "admin"),
