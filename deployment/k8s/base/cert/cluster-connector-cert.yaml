@@ -12,6 +12,7 @@ spec:
   # domains that the certificate will cover
   dnsNames:
     - localhost
+    - cc.lxd-cm.local
   # for local development only, we setup the self-signed certificate to function as a CA
   isCA: true
   commonName: localhost

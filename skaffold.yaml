@@ -43,17 +43,26 @@ profiles:
   portForward:
   - resourceType: service
     resourceName: management-api-svc
+    namespace: default
     port: management-api
     localPort: 9000
   - resourceType: service
     resourceName: cluster-connector-svc
+    namespace: default
     port: cluster-conn
     localPort: 9001
   # For debugging purposes, we can connect via pgadmin here
   - resourceType: service
     resourceName: db-svc
+    namespace: default
     port: db
     localPort: 5432
+  # ingress forwards
+  - resourceType: service
+    resourceName: haproxy-kubernetes-ingress
+    namespace: haproxy-controller
+    port: https
+    localPort: 9002
 
 - name: debug
   build:
@@ -69,22 +78,27 @@ profiles:
   portForward:
   - resourceType: deployment
     resourceName: management-api-depl
+    namespace: default
     port: management-api
     localPort: 9000
   - resourceType: deployment
     resourceName: cluster-connector-depl
+    namespace: default
     port: cluster-conn
     localPort: 9001
   - resourceType: deployment
     resourceName: management-api-depl
+    namespace: default
     port: debug  # Debug port exposed by Delve
     localPort: 40000
   - resourceType: deployment
     resourceName: cluster-connector-depl
+    namespace: default
     port: debug  # Debug port exposed by Delve
     localPort: 40001
   - resourceType: StatefulSet
     resourceName: db-ss
+    namespace: default
     port: db
     localPort: 5432
 
@@ -109,14 +123,23 @@ profiles:
   portForward:
   - resourceType: service
     resourceName: management-api-svc
+    namespace: default
     port: management-api
     localPort: 9000
   - resourceType: service
     resourceName: cluster-connector-svc
+    namespace: default
     port: cluster-conn
     localPort: 9001
   # For debugging purposes, we can connect via pgadmin here
   - resourceType: service
     resourceName: db-svc
+    namespace: default
     port: db
     localPort: 5432
+  # ingress forwards
+  - resourceType: service
+    resourceName: haproxy-kubernetes-ingress
+    namespace: haproxy-controller
+    port: https
+    localPort: 9002

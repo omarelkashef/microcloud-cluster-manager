@@ -6,6 +6,7 @@ resources:
 - ../base/db
 - ../base/management-api
 - ../base/cluster-connector
+- ../base/ingress
 
 patches:
 - path: ./config/dev-config.yaml
