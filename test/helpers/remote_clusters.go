@@ -19,13 +19,13 @@ func FindRemoteCluster(env *Environment, remoteClusterName string) (*models.Remo
 		return nil, err
 	}
 
-	tlsClient, err := NewTLSHTTPClient(api.URL{}, nil, certPublicKey)
+	tlsClient, err := NewTLSHTTPClient(api.URL{}, nil, certPublicKey, env.ManagementAPIHost())
 	if err != nil {
 		return nil, err
 	}
 
 	output := &models.RemoteCluster{}
-	path := api.NewURL().Scheme("https").Host(env.ManagementAPIHost()).Path("1.0", "remote-cluster", remoteClusterName)
+	path := api.NewURL().Scheme("https").Host(env.ManagementAPIHostPort()).Path("1.0", "remote-cluster", remoteClusterName)
 	err = tlsClient.Query(ctx, http.MethodGet, path, nil, output, nil)
 	if err != nil {
 		return nil, err
@@ -44,11 +44,11 @@ func DeleteRemoteCluster(env *Environment, remoteClusterName string) error {
 		return err
 	}
 
-	tlsClient, err := NewTLSHTTPClient(api.URL{}, nil, certPublicKey)
+	tlsClient, err := NewTLSHTTPClient(api.URL{}, nil, certPublicKey, env.ManagementAPIHost())
 	if err != nil {
 		return err
 	}
 
-	path := api.NewURL().Scheme("https").Host(env.ManagementAPIHost()).Path("1.0", "remote-cluster", remoteClusterName)
+	path := api.NewURL().Scheme("https").Host(env.ManagementAPIHostPort()).Path("1.0", "remote-cluster", remoteClusterName)
 	return tlsClient.Query(ctx, http.MethodDelete, path, nil, nil, nil)
 }

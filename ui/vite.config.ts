@@ -24,11 +24,11 @@ export default defineConfig({
       // NOTE: the following paths will be directed to the cluster ingress for local development
       // Here we do not want to change the host header for oidc flow
       "/1.0": {
-        target: "https://ma.lxd-cm.local:9002/",
+        target: "https://ma.lxd-cm.local:30000/",
         secure: false,
       },
       "/oidc": {
-        target: "https://ma.lxd-cm.local:9002/",
+        target: "https://ma.lxd-cm.local:30000/",
         secure: false,
       },
     },

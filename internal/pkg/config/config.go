@@ -116,7 +116,7 @@ func LoadConfig() (*Config, error) {
 		ReadTimeout:             10,
 		WriteTimeout:            10,
 		IdleTimeout:             60,
-		ClusterConnectorAddress: getEnvOrDefault("CLUSTER_CONNECTOR_ADDRESS", "0.0.0.0:9001"),
+		ClusterConnectorAddress: getEnvOrDefault("CLUSTER_CONNECTOR_ADDRESS", "cc.lxd-cm.local:30000"),
 		DBConfig: database.DBConfig{
 			DBPort:         getEnvOrDefault("DB_PORT", "5432"),
 			DBUser:         getEnvOrDefault("DB_USER", "admin"),

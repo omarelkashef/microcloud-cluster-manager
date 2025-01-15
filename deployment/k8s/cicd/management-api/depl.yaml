@@ -6,7 +6,7 @@ spec:
   selector:
     matchLabels:
       app: management-api
-  replicas: 1
+  replicas: 2
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -60,6 +60,10 @@ spec:
         env:
         - name: SERVICE
           value: management-api
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         resources:
           limits:
             cpu: 1000m

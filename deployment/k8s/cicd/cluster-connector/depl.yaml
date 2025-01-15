@@ -48,6 +48,10 @@ spec:
         env:
         - name: SERVICE
           value: cluster-connector
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         resources:
           limits:
             cpu: 1000m
