@@ -42,7 +42,7 @@ func testRemoteClusterSuccess(env *helpers.Environment) (testName string, testFu
 				helpers.LogTestOutcome(t, condition, err)
 			}
 
-			if tokenData.Address != env.ClusterConnectorHost() {
+			if tokenData.Address != env.ClusterConnectorHostPort() {
 				err = fmt.Errorf("invalid address")
 				helpers.LogTestOutcome(t, condition, err)
 			}
@@ -123,9 +123,11 @@ func testRemoteClusterSuccess(env *helpers.Environment) (testName string, testFu
 				helpers.LogTestOutcome(t, condition, err)
 			}
 
-			expected := env.ClusterConnectorHost()
+			expected := env.ClusterConnectorHostPort()
 
 			if !reflect.DeepEqual(response.ClusterManagerAddress, expected) {
+				fmt.Println(response.ClusterManagerAddress)
+				fmt.Println(expected)
 				err = fmt.Errorf("invalid Cluster Manager address")
 				helpers.LogTestOutcome(t, condition, err)
 			}
@@ -196,7 +198,7 @@ func sendJoinRequest(env *helpers.Environment, tokenData models.RemoteClusterTok
 		return err
 	}
 
-	tlsClient, err := helpers.NewTLSHTTPClient(api.URL{}, clientCert, clusterConnectorCertPublicKey)
+	tlsClient, err := helpers.NewTLSHTTPClient(api.URL{}, clientCert, clusterConnectorCertPublicKey, env.ClusterConnectorHost())
 	if err != nil {
 		return err
 	}
@@ -236,7 +238,7 @@ func approveJoinRequest(env *helpers.Environment, remoteClusterName string) erro
 		return err
 	}
 
-	tlsClient, err := helpers.NewTLSHTTPClient(api.URL{}, nil, managemenAPICertPublicKey)
+	tlsClient, err := helpers.NewTLSHTTPClient(api.URL{}, nil, managemenAPICertPublicKey, env.ManagementAPIHost())
 	if err != nil {
 		return err
 	}
@@ -245,7 +247,7 @@ func approveJoinRequest(env *helpers.Environment, remoteClusterName string) erro
 		Status: models.ACTIVE,
 	}
 
-	path := api.NewURL().Scheme("https").Host(env.ManagementAPIHost()).Path("1.0", "remote-cluster", remoteClusterName)
+	path := api.NewURL().Scheme("https").Host(env.ManagementAPIHostPort()).Path("1.0", "remote-cluster", remoteClusterName)
 	return tlsClient.Query(ctx, http.MethodPatch, path, input, nil, nil)
 }
 
@@ -265,7 +267,7 @@ func sendStatusUpdate(env *helpers.Environment, tokenData models.RemoteClusterTo
 		return nil, err
 	}
 
-	tlsClient, err := helpers.NewTLSHTTPClient(api.URL{}, clientCert, clusterConnectorCertPublicKey)
+	tlsClient, err := helpers.NewTLSHTTPClient(api.URL{}, clientCert, clusterConnectorCertPublicKey, env.ClusterConnectorHost())
 	if err != nil {
 		return nil, err
 	}

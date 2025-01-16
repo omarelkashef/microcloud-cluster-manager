@@ -34,6 +34,7 @@ type Environment struct {
 	clusterConnectorCert *shared.CertInfo
 	managementAPIHost    string
 	clusterConnectorHost string
+	ingressPort          int
 	remoteClusters       []string
 	remoteClusterTokens  []string
 }
@@ -44,8 +45,9 @@ func NewEnv() *Environment {
 		rootDir:              getProjectRoot(),
 		testDir:              "",
 		certDir:              "",
-		managementAPIHost:    "0.0.0.0:9000",
-		clusterConnectorHost: "0.0.0.0:9001",
+		ingressPort:          30000,
+		managementAPIHost:    "ma.lxd-cm.local",
+		clusterConnectorHost: "cc.lxd-cm.local",
 	}
 }
 
@@ -154,6 +156,21 @@ func (e *Environment) ManagementAPIHost() string {
 // ClusterConnectorHost returns the cluster-connector host.
 func (e *Environment) ClusterConnectorHost() string {
 	return e.clusterConnectorHost
+}
+
+// IngressPort returns the ingress port.
+func (e *Environment) IngressPort() int {
+	return e.ingressPort
+}
+
+// ManagementAPIHostPort returns the management-api host and port.
+func (e *Environment) ManagementAPIHostPort() string {
+	return fmt.Sprintf("%s:%d", e.managementAPIHost, e.ingressPort)
+}
+
+// ClusterConnectorHostPort returns the cluster-connector host and port.
+func (e *Environment) ClusterConnectorHostPort() string {
+	return fmt.Sprintf("%s:%d", e.clusterConnectorHost, e.ingressPort)
 }
 
 func (e *Environment) setCertificates() error {

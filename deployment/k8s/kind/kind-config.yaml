@@ -8,5 +8,5 @@ nodes:
     containerPath: /data/postgresql
   extraPortMappings:
   - containerPort: 30000
-    hostPort: 9002
+    hostPort: 30000
     protocol: TCP

@@ -8,7 +8,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"time"
 
 	"github.com/canonical/lxd/shared"
 	"github.com/canonical/lxd/shared/api"
@@ -22,7 +24,7 @@ type Client struct {
 }
 
 // NewTLSHTTPClient creates a new http client for TLS connections with Cluster Manager.
-func NewTLSHTTPClient(url api.URL, clientCert *shared.CertInfo, serverCert *x509.Certificate) (*Client, error) {
+func NewTLSHTTPClient(url api.URL, clientCert *shared.CertInfo, serverCert *x509.Certificate, sniHost string) (*Client, error) {
 	var tlsConfig *tls.Config
 	// if a server cert is provided, we need to setup the client to trust it
 	if serverCert != nil {
@@ -44,13 +46,18 @@ func NewTLSHTTPClient(url api.URL, clientCert *shared.CertInfo, serverCert *x509
 		serverCert.KeyUsage = x509.KeyUsageCertSign
 		tlsConfig.RootCAs.AddCert(serverCert)
 
-		// Always use public key DNS name rather than server cert, so that it matches.
-		if len(serverCert.DNSNames) > 0 {
-			tlsConfig.ServerName = serverCert.DNSNames[0]
+		// Since we are mapping multiple hostnames to the same IP, we need to set the SNI
+		if sniHost != "" {
+			tlsConfig.ServerName = sniHost
 		}
 	}
 
+	dialer := &net.Dialer{
+		Timeout: 30 * time.Second,
+	}
+
 	transport := &http.Transport{
+		DialContext:       dialer.DialContext,
 		TLSClientConfig:   tlsConfig,
 		DisableKeepAlives: true,
 	}

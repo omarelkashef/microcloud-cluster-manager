@@ -17,7 +17,7 @@ data:
   TEST_MODE: "false"
   # TODO: define proper versioning strategy
   VERSION: "development"
-  CLUSTER_CONNECTOR_ADDRESS: "0.0.0.0:9001"
+  CLUSTER_CONNECTOR_ADDRESS: "cc.lxd-cm.local:30000"
   # oidc configs
   OIDC_CLIENT_ID: OZSAeCbqAXZid3LL1gRQEkLXP9KlwZtJ
   OIDC_ISSUER: https://lxd-ui-demo.us.auth0.com/

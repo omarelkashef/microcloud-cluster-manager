@@ -21,13 +21,13 @@ func FindToken(env *Environment, remoteClusterName string) (models.RemoteCluster
 		return models.RemoteClusterToken{}, err
 	}
 
-	tlsClient, err := NewTLSHTTPClient(api.URL{}, nil, certPublicKey)
+	tlsClient, err := NewTLSHTTPClient(api.URL{}, nil, certPublicKey, env.ManagementAPIHost())
 	if err != nil {
 		return models.RemoteClusterToken{}, err
 	}
 
 	output := &[]models.RemoteClusterToken{}
-	path := api.NewURL().Scheme("https").Host(env.ManagementAPIHost()).Path("1.0", "remote-cluster-join-token")
+	path := api.NewURL().Scheme("https").Host(env.ManagementAPIHostPort()).Path("1.0", "remote-cluster-join-token")
 	err = tlsClient.Query(ctx, http.MethodGet, path, nil, output, nil)
 	if err != nil {
 		return models.RemoteClusterToken{}, err
@@ -83,7 +83,7 @@ func createRemoteClusterJoinToken(env *Environment, remoteClusterName string, ex
 		return "", err
 	}
 
-	tlsClient, err := NewTLSHTTPClient(api.URL{}, nil, certPublicKey)
+	tlsClient, err := NewTLSHTTPClient(api.URL{}, nil, certPublicKey, env.ManagementAPIHost())
 	if err != nil {
 		return "", err
 	}
@@ -95,7 +95,7 @@ func createRemoteClusterJoinToken(env *Environment, remoteClusterName string, ex
 
 	output := &models.RemoteClusterTokenPostResponse{}
 
-	path := api.NewURL().Scheme("https").Host(env.ManagementAPIHost()).Path("1.0", "remote-cluster-join-token")
+	path := api.NewURL().Scheme("https").Host(env.ManagementAPIHostPort()).Path("1.0", "remote-cluster-join-token")
 	err = tlsClient.Query(ctx, http.MethodPost, path, input, output, nil)
 	if err != nil {
 		return "", err
@@ -114,11 +114,11 @@ func DeleteRemoteClusterJoinToken(env *Environment, remoteClusterName string) er
 		return err
 	}
 
-	tlsClient, err := NewTLSHTTPClient(api.URL{}, nil, certPublicKey)
+	tlsClient, err := NewTLSHTTPClient(api.URL{}, nil, certPublicKey, env.ManagementAPIHost())
 	if err != nil {
 		return err
 	}
 
-	path := api.NewURL().Scheme("https").Host(env.ManagementAPIHost()).Path("1.0", "remote-cluster-join-token", remoteClusterName)
+	path := api.NewURL().Scheme("https").Host(env.ManagementAPIHostPort()).Path("1.0", "remote-cluster-join-token", remoteClusterName)
 	return tlsClient.Query(ctx, http.MethodDelete, path, nil, nil, nil)
 }

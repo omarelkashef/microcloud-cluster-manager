@@ -130,7 +130,7 @@ func sendStatusUpdateNoCert(env *helpers.Environment, tokenData models.RemoteClu
 		return err
 	}
 
-	tlsClient, err := helpers.NewTLSHTTPClient(api.URL{}, nil, clusterConnectorCertPublicKey)
+	tlsClient, err := helpers.NewTLSHTTPClient(api.URL{}, nil, clusterConnectorCertPublicKey, env.ClusterConnectorHost())
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,7 @@ func sendStatusUpdateInvalidCert(env *helpers.Environment, tokenData models.Remo
 	}
 
 	// send cluster cert as client cert, this should cause clsuter manager to not find the remote clsuter
-	tlsClient, err := helpers.NewTLSHTTPClient(api.URL{}, clusterConnectorCert, clusterConnectorCertPublicKey)
+	tlsClient, err := helpers.NewTLSHTTPClient(api.URL{}, clusterConnectorCert, clusterConnectorCertPublicKey, env.ClusterConnectorHost())
 	if err != nil {
 		return err
 	}

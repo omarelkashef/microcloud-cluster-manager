@@ -235,27 +235,13 @@ deploy-cluster-connector:
 	kubectl rollout status --watch --timeout=600s deployment/cluster-connector-depl
 	@echo "Cluster-connector is ready!"
 
-.PHONY: expose-services
-expose-services:
-	@echo "Exposing management-api and cluster-connector..."
-	@( \
-		services="svc/management-api-svc:9000:management-api svc/cluster-connector-svc:9001:cluster-conn"; \
-		while true; do \
-			for svc in $$services; do \
-				svc_name=$$(echo $$svc | cut -d':' -f1); \
-				local_port=$$(echo $$svc | cut -d':' -f2); \
-				target_port=$$(echo $$svc | cut -d':' -f3); \
-				\
-				# Check if port-forwarding is already active \
-				if ! lsof -i :$$local_port > /dev/null; then \
-					echo "Reconnecting to $$svc_name..."; \
-					kubectl port-forward $$svc_name $$local_port:$$target_port & \
-				fi; \
-			done; \
-			sleep 5; \
-		done; \
-	) &
-	@echo "management-api and cluster-connector are exposed on localhost:9000 and localhost:9001 respectively"
+.PHONY: deploy-ingress
+deploy-ingress:
+	@echo "Deploying HAProxy ingress..."
+	kubectl apply -f deployment/k8s/cicd/ingress/ingress.yaml
+	kubectl apply -f deployment/k8s/cicd/ingress/haproxy.yaml
+	kubectl rollout status --watch --timeout=600s -n haproxy-controller deployment/haproxy-kubernetes-ingress
+	@echo "Ingress is ready!"
 
 .PHONY: deploy-ci-k8s-cluster
 deploy-ci-k8s-cluster:
@@ -264,7 +250,8 @@ deploy-ci-k8s-cluster:
 	$(MAKE) deploy-configs
 	$(MAKE) deploy-management-api IMAGE_NAME=$(IMAGE_NAME)
 	$(MAKE) deploy-cluster-connector IMAGE_NAME=$(IMAGE_NAME)
-	$(MAKE) expose-services
+	$(MAKE) deploy-ingress
+	$(MAKE) add-hosts
 
 # ====================================================================
 # Development dependencies
@@ -379,6 +366,7 @@ install-dotrun:
 		echo "dotrun is already installed."; \
 	fi
 
+# add local host entries to /etc/hosts
 .PHONY: add-hosts
 add-hosts:
 	@echo "Adding lxd-cluster-manager local entries to /etc/hosts..."
