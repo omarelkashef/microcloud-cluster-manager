@@ -96,13 +96,13 @@ clean-dev:
 	docker images --filter=reference='lxd-cluster-manager:*' -q | xargs -I {} docker rmi {} -f
 
 .PHONY: dev
-dev: start-cluster dev-juju-setup dev-cos-deploy dev-k8s-deploy
+dev: start-cluster dev-juju-setup dev-k8s-deploy
 
 .PHONY: debug
-debug: start-cluster dev-juju-setup dev-cos-deploy debug-k8s-deploy
+debug: start-cluster dev-juju-setup debug-k8s-deploy
 
 .PHONY: dev-rock
-dev-rock: start-cluster dev-juju-setup dev-cos-deploy rock-k8s-deploy
+dev-rock: start-cluster dev-juju-setup rock-k8s-deploy
 
 .PHONY: nuke
 nuke: clean-dev delete-cluster dev-clean-juju
@@ -372,7 +372,7 @@ install-dotrun:
 install-juju:
 	@if ! command -v juju >/dev/null 2>&1; then \
 		echo "\n---------> Installing Juju..."; \
-		snap install juju --channel=3.6/stable; \
+		sudo snap install juju --channel=3.6/stable; \
 	else \
 		echo "Juju is already installed."; \
 	fi
@@ -411,7 +411,7 @@ dev-cos-deploy:
 		echo "Applying DNS configuration..."; \
 		kubectl apply -f deployment/k8s/dev/dns; \
 		@echo "Installing MetalLB for COS-Lite ingress..."; \
-		kubectl apply -f deployment/k8s/dev/metallb/metallb.yaml; \
+		kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml; \
 		kubectl wait --for=condition=available --timeout=300s deployment --all -n metallb-system; \
 		kubectl rollout status daemonset speaker -n metallb-system --timeout 120s; \
 		echo "Setting MetalLB address pool..."; \
