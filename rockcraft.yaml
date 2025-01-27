@@ -28,6 +28,7 @@ parts:
     plugin: nil
     stage-packages:
       - ca-certificates
+      - protobuf-compiler
 
   app-build:
     plugin: go

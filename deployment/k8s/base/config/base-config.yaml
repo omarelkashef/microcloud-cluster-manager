@@ -25,3 +25,5 @@ data:
   OIDC_CLIENT_ID: base
   OIDC_ISSUER: base
   OIDC_AUDIENCE: base
+  GRAFANA_BASE_URL: http://base
+  PROMETHEUS_BASE_URL: http://base

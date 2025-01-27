@@ -95,5 +95,15 @@ func mapEnvToConfig(cfg config.Config) models.Configuration {
 			Title:       "Database Max Open Connections",
 			Description: "The maximum number of open connections in the database pool.",
 		},
+		GrafanaBaseURL: models.ConfigData{
+			Value:       cfg.GrafanaBaseURL,
+			Title:       "Grafana base URL",
+			Description: "The base url for grafana.",
+		},
+		PrometheusBaseURL: models.ConfigData{
+			Value:       cfg.PrometheusBaseURL,
+			Title:       "Prometheus base URL",
+			Description: "The base url for prometheus.",
+		},
 	}
 }

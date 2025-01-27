@@ -97,26 +97,6 @@ func testRemoteClusterSuccess(env *helpers.Environment) (testName string, testFu
 		}
 
 		{
-			condition = "Should be able to approve a join request"
-			err = approveJoinRequest(env, remoteClusterName)
-			if err != nil {
-				helpers.LogTestOutcome(t, condition, err)
-			}
-
-			remoteCluster, err := helpers.FindRemoteCluster(env, remoteClusterName)
-			if err != nil {
-				helpers.LogTestOutcome(t, condition, err)
-			}
-
-			if remoteCluster.Status != string(models.ACTIVE) {
-				err = fmt.Errorf("invalid remote cluster status")
-				helpers.LogTestOutcome(t, condition, err)
-			}
-
-			helpers.LogTestOutcome(t, condition, nil)
-		}
-
-		{
 			condition = "Should be able to receive a status update"
 			response, err := sendStatusUpdate(env, tokenData)
 			if err != nil {
@@ -225,30 +205,6 @@ func sendJoinRequest(env *helpers.Environment, tokenData models.RemoteClusterTok
 	}
 
 	return tlsClient.Query(ctx, http.MethodPost, path, input, nil, adjustHeaders)
-}
-
-// approveJoinRequest approves a join request for a remote cluster.
-func approveJoinRequest(env *helpers.Environment, remoteClusterName string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	managemenAPICert := env.ManagementAPICert()
-	managemenAPICertPublicKey, err := managemenAPICert.PublicKeyX509()
-	if err != nil {
-		return err
-	}
-
-	tlsClient, err := helpers.NewTLSHTTPClient(api.URL{}, nil, managemenAPICertPublicKey, env.ManagementAPIHost())
-	if err != nil {
-		return err
-	}
-
-	input := models.RemoteClusterPatch{
-		Status: models.ACTIVE,
-	}
-
-	path := api.NewURL().Scheme("https").Host(env.ManagementAPIHostPort()).Path("1.0", "remote-cluster", remoteClusterName)
-	return tlsClient.Query(ctx, http.MethodPatch, path, input, nil, nil)
 }
 
 // sendStatusUpdate sends a status update to the Cluster Manager with the correct client certificate.

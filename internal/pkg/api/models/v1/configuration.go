@@ -17,4 +17,6 @@ type Configuration struct {
 	DBConnectionString      ConfigData `json:"db_connection_string"`
 	DBMaxIdleConns          ConfigData `json:"db_max_idle_conns"`
 	DBMaxOpenConns          ConfigData `json:"db_max_open_conns"`
+	GrafanaBaseURL          ConfigData `json:"grafana_base_url"`
+	PrometheusBaseURL       ConfigData `json:"prometheus_base_url"`
 }

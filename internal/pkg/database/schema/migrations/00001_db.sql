@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS remote_cluster_details (
     instance_statuses JSONB NOT NULL DEFAULT '[]'::JSONB,
     member_count INTEGER NOT NULL DEFAULT 0,
     member_statuses JSONB NOT NULL DEFAULT '[]'::JSONB,
+    ui_url TEXT NOT NULL DEFAULT '',
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

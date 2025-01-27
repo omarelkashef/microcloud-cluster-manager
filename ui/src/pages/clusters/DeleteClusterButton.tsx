@@ -38,7 +38,7 @@ const DeleteClusterButton: FC<Props> = ({ clusterName }) => {
     <ConfirmationButton
       appearance=""
       loading={isLoading}
-      className="u-no-margin--bottom has-icon"
+      className="p-segmented-control__button u-no-margin--bottom has-icon"
       confirmationModalProps={{
         title: "Confirm delete",
         children: (

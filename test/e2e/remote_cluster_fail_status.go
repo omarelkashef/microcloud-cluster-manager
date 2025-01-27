@@ -29,48 +29,10 @@ func testRemoteClusterStatusNoCert(env *helpers.Environment) (testName string, t
 				helpers.LogTestOutcome(t, condition, err)
 			}
 
-			err = approveJoinRequest(env, remoteClusterName)
-			if err != nil {
-				helpers.LogTestOutcome(t, condition, err)
-			}
-
 			err = sendStatusUpdateNoCert(env, tokenData)
 			if err != nil && err.Error() == "not authorized" {
 				err = nil
 			}
-
-			helpers.LogTestOutcome(t, condition, err)
-		}
-
-		env.RemoveRemoteClusterToken(remoteClusterName)
-		env.RemoveRemoteCluster(remoteClusterName)
-	}
-}
-
-func testRemoteClusterStatusInactive(env *helpers.Environment) (testName string, testFunc func(t *testing.T)) {
-	return "lxd remote cluster status update with an inactive remote cluster", func(t *testing.T) {
-		remoteClusterName := "remote_cluster_status_inactive"
-		var condition string
-
-		{
-			condition = "Should fail status update request with an inactive remote cluster"
-
-			tokenData, err := helpers.CreateAndReturnRemoteClusterJoinToken(env, remoteClusterName, time.Time{})
-			if err != nil {
-				helpers.LogTestOutcome(t, condition, err)
-			}
-
-			err = sendJoinRequest(env, tokenData)
-			if err != nil {
-				helpers.LogTestOutcome(t, condition, err)
-			}
-
-			err = approveJoinRequest(env, remoteClusterName)
-			if err != nil {
-				helpers.LogTestOutcome(t, condition, err)
-			}
-
-			_, err = sendStatusUpdate(env, tokenData)
 
 			helpers.LogTestOutcome(t, condition, err)
 		}
@@ -94,11 +56,6 @@ func testRemoteClusterStatusInvalidCert(env *helpers.Environment) (testName stri
 			}
 
 			err = sendJoinRequest(env, tokenData)
-			if err != nil {
-				helpers.LogTestOutcome(t, condition, err)
-			}
-
-			err = approveJoinRequest(env, remoteClusterName)
 			if err != nil {
 				helpers.LogTestOutcome(t, condition, err)
 			}

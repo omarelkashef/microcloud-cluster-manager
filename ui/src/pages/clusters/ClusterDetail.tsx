@@ -2,7 +2,7 @@ import { Notification, List, Row, Strip } from "@canonical/react-components";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCluster } from "api/clusters";
 import BaseLayout from "components/BaseLayout";
-import { FC } from "react";
+import React, { FC } from "react";
 import { Link, useParams } from "react-router-dom";
 import { queryKeys } from "util/queryKeys";
 import ClusterDetailInstanceGraph from "./metrics/ClusterDetailInstanceGraph";
@@ -12,6 +12,8 @@ import ClusterDetailMetrics from "./metrics/ClusterDetailMetrics";
 import Loader from "components/Loader";
 import BreadCrumbHeader from "components/BreadcrumbHeader";
 import DeleteClusterButton from "pages/clusters/DeleteClusterButton";
+import ClusterMetricsButton from "pages/clusters/ClusterMetricsButton";
+import ClusterUiButton from "pages/clusters/ClusterUiButton";
 
 const ClusterDetail: FC = () => {
   const { name } = useParams<{ name: string }>();
@@ -46,7 +48,15 @@ const ClusterDetail: FC = () => {
           ]}
         />
       }
-      controls={<DeleteClusterButton clusterName={cluster.name} />}
+      controls={
+        <div className="p-segmented-control">
+          <div className="p-segmented-control__list">
+            <ClusterUiButton uiUrl={cluster.ui_url} />
+            <ClusterMetricsButton clusterName={cluster.name} />
+            <DeleteClusterButton clusterName={cluster.name} />
+          </div>
+        </div>
+      }
     >
       {isLoading && <Loader text="Loading cluster details..." />}
       {!isLoading && !cluster && !error && <>Loading cluster failed</>}

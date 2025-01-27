@@ -1,10 +1,13 @@
 package v1
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/canonical/lxd-cluster-manager/internal/app/cluster-connector/core/auth"
@@ -15,7 +18,10 @@ import (
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
 	"github.com/canonical/lxd/lxd/request"
 	"github.com/canonical/lxd/lxd/response"
+	"github.com/golang/snappy"
 	"github.com/jmoiron/sqlx"
+	"github.com/prometheus/common/expfmt"
+	"github.com/prometheus/prometheus/prompb"
 )
 
 // RemoteCluster is the API endpoint for managing remote clusters.
@@ -191,6 +197,22 @@ func remoteClusterStatusPost(rc types.RouteConfig) types.EndpointHandler {
 				return err
 			}
 
+			if payload.Metrics == "" {
+				return nil
+			}
+
+			timeSeries, err := parsePrometheusMetrics(payload.Metrics, dbRemoteCluster.Name)
+			if err != nil {
+				logger.Log.Warnw("Failed to parse metrics", "remote cluster", remoteClusterID, "err", err)
+				return fmt.Errorf("failed to parse Prometheus metrics: %w", err)
+			}
+
+			err = forwardMetricsToPrometheus(timeSeries, rc)
+			if err != nil {
+				logger.Log.Warnw("Failed to forward metrics to Prometheus", "remote cluster", remoteClusterID, "err", err)
+				return fmt.Errorf("failed to forward metrics to Prometheus: %w", err)
+			}
+
 			return nil
 		})
 
@@ -205,6 +227,96 @@ func remoteClusterStatusPost(rc types.RouteConfig) types.EndpointHandler {
 			ClusterManagerAddress: rc.Env.ClusterConnectorAddress,
 		}).Render(w, r)
 	}
+}
+
+// Parse the incoming Prometheus metrics (text format).
+func parsePrometheusMetrics(metricsText string, jobName string) ([]prompb.TimeSeries, error) {
+	var parser expfmt.TextParser
+	metricFamilies, err := parser.TextToMetricFamilies(bytes.NewReader([]byte(metricsText)))
+	if err != nil {
+		return nil, err
+	}
+
+	var timeSeries []prompb.TimeSeries
+	for _, family := range metricFamilies {
+		for _, sample := range family.GetMetric() {
+			labels := make([]prompb.Label, 0, len(sample.GetLabel())+2)
+			for _, label := range sample.GetLabel() {
+				labels = append(labels, prompb.Label{
+					Name:  label.GetName(),
+					Value: label.GetValue(),
+				})
+			}
+
+			// name of the metric e.g. lxd_cpu_seconds_total
+			labels = append(labels, prompb.Label{Name: "__name__", Value: *family.Name})
+			// allocate each metric to a job which maps to a remote cluster in this case
+			labels = append(labels, prompb.Label{Name: "job", Value: strings.ReplaceAll(jobName, "-", "_")})
+
+			// Get the metric value, lxd sends only counter and gauge metrics
+			var metricValue float64
+			if gauge := sample.GetGauge(); gauge != nil {
+				metricValue = gauge.GetValue()
+			} else if counter := sample.GetCounter(); counter != nil {
+				metricValue = counter.GetValue()
+			} else {
+				return nil, fmt.Errorf("unsupported metric type for sample %v", sample)
+			}
+
+			timeSeries = append(timeSeries, prompb.TimeSeries{
+				Labels: labels,
+				Samples: []prompb.Sample{
+					{
+						Value:     metricValue,
+						Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
+					},
+				},
+			})
+		}
+	}
+
+	return timeSeries, nil
+}
+
+// Forward the metrics to Prometheus using remote-write.
+func forwardMetricsToPrometheus(timeSeries []prompb.TimeSeries, rc types.RouteConfig) error {
+	writeRequest := prompb.WriteRequest{
+		Timeseries: timeSeries,
+	}
+
+	// Encode the WriteRequest as protobuf
+	data, err := writeRequest.Marshal()
+	if err != nil {
+		return fmt.Errorf("failed to marshal write request: %w", err)
+	}
+
+	// NOTE: prometheus requires the data to be compressed with snappy
+	// ref: https://prometheus.io/docs/specs/remote_write_spec/
+	compressedData := snappy.Encode(nil, data)
+
+	remoteWriteURL := rc.Env.PrometheusBaseURL + "/cos-prometheus-0/api/v1/write"
+	req, err := http.NewRequest("POST", remoteWriteURL, bytes.NewReader(compressedData))
+	if err != nil {
+		return fmt.Errorf("failed to create HTTP request: %w", err)
+	}
+
+	req.Header.Set("User-Agent", "lxd-cluster-manager")
+	req.Header.Set("X-Prometheus-Remote-Write-Version", "0.1.0")
+	req.Header.Set("Content-Type", "application/x-protobuf")
+	req.Header.Set("Content-Encoding", "snappy")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send metrics to Prometheus: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode > 299 {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("failed to send metrics to Prometheus, status: %s, response: %s", resp.Status, string(body))
+	}
+
+	return nil
 }
 
 func remoteClusterDelete(rc types.RouteConfig) types.EndpointHandler {

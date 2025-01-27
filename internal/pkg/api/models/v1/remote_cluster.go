@@ -33,6 +33,7 @@ type RemoteCluster struct {
 	MemberStatuses     []StatusDistribution `json:"member_statuses"`
 	InstanceCount      int                  `json:"instance_count"`
 	InstanceStatuses   []StatusDistribution `json:"instance_statuses"`
+	UIURL              string               `json:"ui_url"`
 	JoinedAt           time.Time            `json:"joined_at"`
 	CreatedAt          time.Time            `json:"created_at"`
 	LastStatusUpdateAt time.Time            `json:"last_status_update_at"`
@@ -61,6 +62,8 @@ type RemoteClusterStatusPost struct {
 	DiskUsage         int                  `json:"disk_usage"`
 	MemberStatuses    []StatusDistribution `json:"member_statuses"`
 	InstanceStatuses  []StatusDistribution `json:"instance_status"`
+	Metrics           string               `json:"metrics"`
+	UIURL             string               `json:"ui_url"`
 }
 
 // RemoteClusterStatusPostResponse is sent to LXD in response to a remote cluster status update.

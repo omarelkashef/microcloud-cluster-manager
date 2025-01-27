@@ -23,6 +23,9 @@ deploy:
       after:
         - host:
             command: ["make", "dev-cos-deploy"]
+        - host:
+            # expose traefik nodeport from kind cluster container so we can access
+            command: ["make", "update-traefik-port"]
 
 profiles:
 - name: docker
@@ -73,6 +76,8 @@ profiles:
         buildArgs:
           BUILD_REF: "development" 
           DEBUG: "true"
+        cliFlags:
+        - "--rm=true"
   portForward:
   - resourceType: deployment
     resourceName: management-api-depl

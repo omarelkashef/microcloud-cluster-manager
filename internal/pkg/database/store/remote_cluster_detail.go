@@ -31,6 +31,7 @@ type RemoteClusterDetail struct {
 	InstanceStatuses  json.RawMessage `db:"instance_statuses"`   // JSON array of instance statuses
 	MemberCount       int             `db:"member_count"`        // Number of members
 	MemberStatuses    json.RawMessage `db:"member_statuses"`     // JSON array of member statuses
+	UIURL             string          `db:"ui_url"`              // UI URL
 	CreatedAt         time.Time       `db:"created_at"`          // Creation timestamp
 	UpdatedAt         time.Time       `db:"updated_at"`          // Update timestamp
 }
@@ -47,6 +48,7 @@ func (r *RemoteClusterDetail) Put(payload models.RemoteClusterStatusPost) {
 	r.MemberCount, r.MemberStatuses = parseStatusDistribution(payload.MemberStatuses)
 	r.MemoryTotalAmount = payload.MemoryTotalAmount
 	r.MemoryUsage = payload.MemoryUsage
+	r.UIURL = payload.UIURL
 	r.UpdatedAt = time.Now()
 }
 
@@ -69,6 +71,7 @@ type RemoteClusterWithDetail struct {
 	InstanceStatuses   json.RawMessage `db:"instance_statuses"`
 	MemberCount        int             `db:"member_count"`
 	MemberStatuses     json.RawMessage `db:"member_statuses"`
+	UIURL              string          `db:"ui_url"`
 	ClusterJoinedAt    time.Time       `db:"joined_at"`
 	ClusterUpdatedAt   time.Time       `db:"updated_at"`
 }
@@ -138,6 +141,7 @@ func GetAllRemoteClusterDetails(ctx context.Context, tx *sqlx.Tx) ([]RemoteClust
 			&c.InstanceStatuses,
 			&c.MemberCount,
 			&c.MemberStatuses,
+			&c.UIURL,
 			&c.CreatedAt,
 			&c.UpdatedAt,
 		)
@@ -165,7 +169,7 @@ func GetRemoteClusterDetail(ctx context.Context, tx *sqlx.Tx, remoteClusterID in
 			id, remote_cluster_id, cpu_total_count, cpu_load_1, cpu_load_5, 
 			cpu_load_15, memory_total_amount, memory_usage, disk_total_size, 
 			disk_usage, instance_count, instance_statuses, member_count, 
-			member_statuses, created_at, updated_at
+			member_statuses, ui_url, created_at, updated_at
         FROM remote_cluster_details
 		WHERE remote_cluster_id = $1;
     `
@@ -186,6 +190,7 @@ func GetRemoteClusterDetail(ctx context.Context, tx *sqlx.Tx, remoteClusterID in
 		&result.InstanceStatuses,
 		&result.MemberCount,
 		&result.MemberStatuses,
+		&result.UIURL,
 		&result.CreatedAt,
 		&result.UpdatedAt,
 	)
@@ -214,11 +219,11 @@ func CreateRemoteClusterDetail(ctx context.Context, tx *sqlx.Tx, data RemoteClus
 
 	q := `
         INSERT INTO remote_cluster_details 
-			(remote_cluster_id, cpu_total_count, cpu_load_1, cpu_load_5, cpu_load_15, memory_total_amount, memory_usage, disk_total_size, disk_usage, instance_count, instance_statuses, member_count, member_statuses)
+			(remote_cluster_id, cpu_total_count, cpu_load_1, cpu_load_5, cpu_load_15, memory_total_amount, memory_usage, disk_total_size, disk_usage, instance_count, instance_statuses, member_count, member_statuses, ui_url)
         VALUES 
-			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
         RETURNING 
-			id, remote_cluster_id, cpu_total_count, cpu_load_1, cpu_load_5, cpu_load_15, memory_total_amount, memory_usage, disk_total_size, disk_usage, instance_count, instance_statuses, member_count, member_statuses, created_at, updated_at;
+			id, remote_cluster_id, cpu_total_count, cpu_load_1, cpu_load_5, cpu_load_15, memory_total_amount, memory_usage, disk_total_size, disk_usage, instance_count, instance_statuses, member_count, member_statuses, ui_url, created_at, updated_at;
     `
 
 	var result RemoteClusterDetail
@@ -236,6 +241,7 @@ func CreateRemoteClusterDetail(ctx context.Context, tx *sqlx.Tx, data RemoteClus
 		data.InstanceStatuses,
 		data.MemberCount,
 		data.MemberStatuses,
+		data.UIURL,
 	).Scan(
 		&result.ID,
 		&result.RemoteClusterID,
@@ -251,6 +257,7 @@ func CreateRemoteClusterDetail(ctx context.Context, tx *sqlx.Tx, data RemoteClus
 		&result.InstanceStatuses,
 		&result.MemberCount,
 		&result.MemberStatuses,
+		&result.UIURL,
 		&result.CreatedAt,
 		&result.UpdatedAt,
 	)
@@ -297,8 +304,8 @@ func UpdateRemoteClusterDetail(ctx context.Context, tx *sqlx.Tx, remoteClusterID
 
 	q := `
         UPDATE remote_cluster_details
-        SET cpu_total_count = $1, cpu_load_1 = $2, cpu_load_5 = $3, cpu_load_15 = $4, memory_total_amount = $5, memory_usage = $6, disk_total_size = $7, disk_usage = $8, instance_count = $9, instance_statuses = $10, member_count = $11, member_statuses = $12
-        WHERE id = $13;
+        SET cpu_total_count = $1, cpu_load_1 = $2, cpu_load_5 = $3, cpu_load_15 = $4, memory_total_amount = $5, memory_usage = $6, disk_total_size = $7, disk_usage = $8, instance_count = $9, instance_statuses = $10, member_count = $11, member_statuses = $12, ui_url = $13
+        WHERE id = $14;
     `
 
 	result, err := tx.ExecContext(ctx, q,
@@ -314,6 +321,7 @@ func UpdateRemoteClusterDetail(ctx context.Context, tx *sqlx.Tx, remoteClusterID
 		data.InstanceStatuses,
 		data.MemberCount,
 		data.MemberStatuses,
+		data.UIURL,
 		id,
 	)
 	if err != nil {
@@ -337,7 +345,7 @@ var baseDetailQuery = `
 		remote_clusters.id, remote_clusters.name, remote_clusters.status, remote_clusters.cluster_certificate, remote_clusters.joined_at, remote_clusters.created_at,
 		remote_cluster_details.cpu_total_count, remote_cluster_details.cpu_load_1, remote_cluster_details.cpu_load_5, remote_cluster_details.cpu_load_15, remote_cluster_details.memory_total_amount, remote_cluster_details.memory_usage, 
 		remote_cluster_details.disk_total_size, remote_cluster_details.disk_usage, remote_cluster_details.instance_count, remote_cluster_details.instance_statuses, 
-		remote_cluster_details.member_count, remote_cluster_details.member_statuses, remote_cluster_details.updated_at
+		remote_cluster_details.member_count, remote_cluster_details.member_statuses, remote_cluster_details.ui_url, remote_cluster_details.updated_at
 	FROM remote_cluster_details
 	JOIN remote_clusters ON remote_cluster_details.remote_cluster_id = remote_clusters.id
 `
@@ -365,6 +373,7 @@ func getRemoteClusterWithDetails(ctx context.Context, tx *sqlx.Tx, sql string, a
 			&c.InstanceStatuses,
 			&c.MemberCount,
 			&c.MemberStatuses,
+			&c.UIURL,
 			&c.ClusterUpdatedAt,
 		)
 		if err != nil {
