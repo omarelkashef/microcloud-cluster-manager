@@ -74,9 +74,9 @@ const ClusterListActive: FC<Props> = ({ clusters, isLoading }) => {
         },
       ],
       sortData: {
-          name: cluster.name,
-          status: cluster.status,
-          lastHeartbeat: cluster.last_status_update_at,
+        name: cluster.name,
+        status: cluster.status,
+        lastHeartbeat: cluster.last_status_update_at,
       },
     };
   });

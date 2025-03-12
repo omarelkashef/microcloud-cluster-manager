@@ -32,10 +32,12 @@ const Settings: FC = () => {
           "aria-label": "Configuration",
         },
         {
-          content: <>
-            <div>{config.value}</div>
-            <div className="u-text--muted">{config.description}</div>
-          </>,
+          content: (
+            <>
+              <div>{config.value}</div>
+              <div className="u-text--muted">{config.description}</div>
+            </>
+          ),
           role: "cell",
           title: config.value,
           className: "u-truncate value",

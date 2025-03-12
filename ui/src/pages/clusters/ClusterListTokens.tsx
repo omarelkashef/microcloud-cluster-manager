@@ -51,7 +51,7 @@ const ClusterListTokens: FC = () => {
         clusterName: token.cluster_name,
         expiry: token.expiry,
         createdAt: token.created_at,
-      }
+      },
     };
   });
 
