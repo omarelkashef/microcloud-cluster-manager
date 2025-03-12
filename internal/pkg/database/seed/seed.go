@@ -6,12 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand/v2"
 	"time"
 
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/store"
 	"github.com/jmoiron/sqlx"
-	"golang.org/x/exp/rand"
 )
 
 // SeedDatabase seeds the database with sample data.
@@ -36,12 +36,10 @@ func SeedDatabase(ctx context.Context, db *database.DB) error {
 
 // generateRemoteClusters generates a slice of remote clusters with the given count.
 func generateRemoteClusters(count int) []store.RemoteCluster {
-	rand.Seed(uint64(time.Now().UnixNano()))
-	statusOptions := []string{"ACTIVE"}
 	clusters := make([]store.RemoteCluster, count)
 
 	for i := 0; i < count; i++ {
-		status := statusOptions[rand.Intn(len(statusOptions))] // Randomly select status
+		status := "ACTIVE"
 		clusters[i] = store.RemoteCluster{
 			Name:               fmt.Sprintf("cluster-%02d", i+1),
 			Status:             status,
@@ -156,9 +154,9 @@ func seedRemoteClusterTokens(ctx context.Context, db *database.DB) error {
 // generateRandomStatuses generates a JSON array of statuses with random counts.
 func generateRandomStatuses(status1, status2, status3, status4 string, maxCount int) []byte {
 	// Generate random values for the first three statuses
-	count1 := rand.Intn(maxCount / 2) // Max is half to balance distribution
-	count2 := rand.Intn(maxCount - count1)
-	count3 := rand.Intn(maxCount - count1 - count2)
+	count1 := rand.IntN(maxCount / 2) // Max is half to balance distribution
+	count2 := rand.IntN(maxCount - count1)
+	count3 := rand.IntN(maxCount - count1 - count2)
 	count4 := maxCount - count1 - count2 - count3
 
 	statuses := []map[string]any{
@@ -174,20 +172,19 @@ func generateRandomStatuses(status1, status2, status3, status4 string, maxCount 
 
 // GenerateRemoteClusterDetails generates a slice of RemoteClusterDetail with the specified number of entries.
 func generateRemoteClusterDetails(count int) []store.RemoteClusterDetail {
-	rand.Seed(uint64(time.Now().UnixNano()))
 	clusters := make([]store.RemoteClusterDetail, count)
 
 	for i := 0; i < count; i++ {
-		totalMemory := (rand.Intn(16) + 1) * 1024 // Random memory in multiples of 1024
-		memoryUsage := rand.Intn(totalMemory + 1)
-		totalDisk := (rand.Intn(200) + 1) * 1000 // Random disk size in multiples of 1000
-		diskUsage := rand.Intn(totalDisk + 1)
-		totalInstances := rand.Intn(50) + 2
-		totalMembers := rand.Intn(20) + 2
+		totalMemory := (rand.IntN(16) + 1) * 1024 // Random memory in multiples of 1024
+		memoryUsage := rand.IntN(totalMemory + 1)
+		totalDisk := (rand.IntN(200) + 1) * 1000 // Random disk size in multiples of 1000
+		diskUsage := rand.IntN(totalDisk + 1)
+		totalInstances := rand.IntN(50) + 2
+		totalMembers := rand.IntN(20) + 2
 
 		clusters[i] = store.RemoteClusterDetail{
 			RemoteClusterID:   i + 1,
-			CPUTotalCount:     rand.Intn(32) + 1, // Random CPU count between 1 and 32
+			CPUTotalCount:     rand.IntN(32) + 1, // Random CPU count between 1 and 32
 			CPULoad1:          fmt.Sprintf("%.1f", rand.Float64()),
 			CPULoad5:          fmt.Sprintf("%.1f", rand.Float64()),
 			CPULoad15:         fmt.Sprintf("%.1f", rand.Float64()),

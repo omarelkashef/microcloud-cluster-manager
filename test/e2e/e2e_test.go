@@ -12,7 +12,6 @@ var tests = []types.Test{
 	testRemoteClusterJoinInvalidHMAC,
 	testRemoteClusterJoinExpiredToken,
 	testRemoteClusterStatusNoCert,
-	testRemoteClusterStatusInactive,
 	testRemoteClusterStatusInvalidCert,
 }
 

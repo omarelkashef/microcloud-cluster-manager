@@ -22,6 +22,7 @@ export interface Cluster {
   memory_usage: number;
   cluster_certificate: string;
   status: string;
+  ui_url: string;
 }
 
 export interface MultiMeterValue {

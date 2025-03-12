@@ -34,6 +34,9 @@ type Config struct {
 	OIDCClientID string
 	OIDCIssuer   string
 	OIDCAudience string
+	// cos configs
+	GrafanaBaseURL    string
+	PrometheusBaseURL string
 }
 
 // getEnvOrDefault retrieves an environment variable or returns the default value if not set.
@@ -106,6 +109,9 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("OIDC_CLIENT_ID, OIDC_ISSUER, and OIDC_AUDIENCE are required")
 	}
 
+	grafanaBaseURL := os.Getenv("GRAFANA_BASE_URL")
+	prometheusBaseURL := os.Getenv("PROMETHEUS_BASE_URL")
+
 	return &Config{
 		Version:                 getEnvOrDefault("VERSION", "development"),
 		APIVersion:              getEnvOrDefault("API_VERSION", "1.0"),
@@ -127,9 +133,11 @@ func LoadConfig() (*Config, error) {
 			DBMaxOpenConns: dbMaxOpenConns,
 			DBDisableTLS:   getEnvOrDefault("DB_DISABLE_TLS", "true") == "true",
 		},
-		OIDCClientID: oidcClientID,
-		OIDCIssuer:   oidcIssuer,
-		OIDCAudience: oidcAudience,
+		OIDCClientID:      oidcClientID,
+		OIDCIssuer:        oidcIssuer,
+		OIDCAudience:      oidcAudience,
+		GrafanaBaseURL:    grafanaBaseURL,
+		PrometheusBaseURL: prometheusBaseURL,
 	}, nil
 }
 

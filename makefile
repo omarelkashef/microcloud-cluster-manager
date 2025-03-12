@@ -430,3 +430,25 @@ dev-cos-deploy:
 dev-clean-juju:
 	juju unregister cm-controller --no-prompt
 	juju remove-cloud cluster-manager
+
+.PHONY: update-traefik-port
+update-traefik-port:
+	@SERVICE_NAME="traefik-lb"; \
+	NAMESPACE="cos"; \
+	TIMEOUT=120; \
+	START_TIME=$$(date +%s); \
+	echo "Waiting for service $$SERVICE_NAME to exist in namespace $$NAMESPACE..."; \
+	while true; do \
+	    if kubectl get service "$$SERVICE_NAME" -n "$$NAMESPACE" > /dev/null 2>&1; then \
+	        echo "Service $$SERVICE_NAME exists!"; \
+	        break; \
+	    fi; \
+	    CURRENT_TIME=$$(date +%s); \
+	    ELAPSED_TIME=$$((CURRENT_TIME - START_TIME)); \
+	    if [ "$$ELAPSED_TIME" -ge "$$TIMEOUT" ]; then \
+	        echo "Timed out waiting for service $$SERVICE_NAME to exist."; \
+	        exit 1; \
+	    fi; \
+	    sleep 2; \
+	done
+	kubectl patch svc/traefik-lb -n cos -p '{"spec":{"ports":[{"port":80, "nodePort":30001}]}}'

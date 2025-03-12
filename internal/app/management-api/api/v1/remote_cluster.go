@@ -195,6 +195,7 @@ func toRemoteClustersAPI(dbEntries []store.RemoteClusterWithDetail) ([]models.Re
 			MemberStatuses:     ms,
 			InstanceCount:      e.InstanceCount,
 			InstanceStatuses:   is,
+			UIURL:              e.UIURL,
 			JoinedAt:           e.ClusterJoinedAt,
 			CreatedAt:          e.ClusterCreatedAt,
 			LastStatusUpdateAt: e.ClusterUpdatedAt,
