@@ -71,6 +71,14 @@ func tokenPost(rc types.RouteConfig) types.EndpointHandler {
 		// store token details in the database
 		err = rc.DB.Transaction(r.Context(), func(ctx context.Context, tx *sqlx.Tx) error {
 			var err error
+			isNameTaken, err := store.RemoteClusterExists(ctx, tx, payload.ClusterName)
+			if err != nil {
+				return err
+			}
+			if isNameTaken {
+				return fmt.Errorf("cluster name already exists")
+			}
+
 			tokenData := store.RemoteClusterToken{
 				ClusterName: payload.ClusterName,
 				Secret:      secret,
