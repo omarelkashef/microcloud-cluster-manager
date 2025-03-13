@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { Cluster } from "types/cluster";
-import { getMinutesSinceLastHeartbeat } from "util/helpers";
+import { getMinutesSinceLastHeartbeat, isoTimeToString } from "util/helpers";
 
 interface Props {
   cluster: Cluster;
@@ -9,7 +9,7 @@ interface Props {
 const ClusterHeartbeat: FC<Props> = ({ cluster }: Props) => {
   const lastHeartbeatMins = getMinutesSinceLastHeartbeat(cluster);
   const lastHeartbeatHrs = Math.floor(lastHeartbeatMins / 3600000);
-  let returnStr = "";
+  let returnStr;
 
   if (lastHeartbeatMins <= 1) {
     returnStr = `< 1 minute ago`;
@@ -24,7 +24,11 @@ const ClusterHeartbeat: FC<Props> = ({ cluster }: Props) => {
           : `${lastHeartbeatHrs} hours ago`;
   }
 
-  return <div>{returnStr}</div>;
+  return (
+    <div title={isoTimeToString(cluster.last_status_update_at)}>
+      {returnStr}
+    </div>
+  );
 };
 
 export default ClusterHeartbeat;
