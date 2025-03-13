@@ -14,15 +14,15 @@ const ClusterDetailNodeGraph: FC<Props> = ({ cluster }: Props) => {
   const evacuatedMembers = statusCount(cluster.member_statuses, "Evacuated");
   const blockedMembers = statusCount(cluster.member_statuses, "Blocked");
 
-  const totalNodes =
+  const totalMembers =
     onlineMembers + offlineMembers + evacuatedMembers + blockedMembers;
 
   function getPercentageString(portion: number): ReactNode {
     return (
       <>
         <b>{portion}</b>{" "}
-        {totalNodes > 0
-          ? `(${Math.floor((portion / totalNodes) * 100)}%) `
+        {totalMembers > 0
+          ? `(${Math.floor((portion / totalMembers) * 100)}%) `
           : ""}
       </>
     );
@@ -56,7 +56,7 @@ const ClusterDetailNodeGraph: FC<Props> = ({ cluster }: Props) => {
       />
       <ul className="doughnut-chart__legend u-no-margin--left">
         <li className="u-no-margin p-heading--5 u-no-padding">
-          {totalNodes} Nodes
+          {totalMembers} Members
         </li>
         <li>
           <Icon name="status-succeeded-small" />
