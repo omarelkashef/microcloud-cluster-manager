@@ -7,7 +7,7 @@ interface Props {
   cluster: Cluster;
 }
 
-export const ClusterNodes: FC<Props> = ({ cluster }: Props) => {
+export const ClusterMembers: FC<Props> = ({ cluster }: Props) => {
   const onlineMembers = cluster.member_statuses.find(
     (item) => item.status === "Online",
   ) ?? { count: 0 };

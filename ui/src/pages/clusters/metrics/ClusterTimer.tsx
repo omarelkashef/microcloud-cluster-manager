@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { Cluster } from "types/cluster";
-import { getSecondsSinceLastHeartbeat } from "util/helpers";
+import { getSecondsSinceLastHeartbeat, isoTimeToString } from "util/helpers";
 
 interface Props {
   cluster: Cluster;
@@ -25,7 +25,10 @@ const ClusterTimer: FC<Props> = ({ cluster }: Props) => {
 
   return (
     <div className="cluster-detail-countdown">
-      <div className="u-no-margin u-no-padding p-heading--3">
+      <div
+        className="u-no-margin u-no-padding p-heading--3"
+        title={isoTimeToString(cluster.last_status_update_at)}
+      >
         {getFormattedTimeLeft()}
       </div>
       <div>Since last heartbeat</div>

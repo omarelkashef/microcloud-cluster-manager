@@ -6,7 +6,7 @@ import { ClusterInstances } from "./metrics/ClusterInstances";
 import { ClusterCpu } from "./metrics/ClusterCpu";
 import { ClusterMemory } from "./metrics/ClusterMemory";
 import { ClusterDisk } from "./metrics/ClusterDisk";
-import { ClusterNodes } from "./metrics/ClusterNodes";
+import { ClusterMembers } from "./metrics/ClusterMembers";
 import ClusterHeartbeat from "./metrics/ClusterHeartbeat";
 import ClusterStatus from "./metrics/ClusterStatus";
 import { Cluster } from "types/cluster";
@@ -31,7 +31,7 @@ const ClusterListActive: FC<Props> = ({ clusters, isLoading }) => {
       sortKey: "lastHeartbeat",
     },
     {
-      content: "Nodes",
+      content: "Members",
     },
     {
       content: "Instances",
@@ -58,7 +58,7 @@ const ClusterListActive: FC<Props> = ({ clusters, isLoading }) => {
         { content: <ClusterStatus cluster={cluster} /> },
         { content: <ClusterHeartbeat cluster={cluster} /> },
         {
-          content: <ClusterNodes cluster={cluster} />,
+          content: <ClusterMembers cluster={cluster} />,
         },
         {
           content: <ClusterInstances cluster={cluster} />,
@@ -75,7 +75,7 @@ const ClusterListActive: FC<Props> = ({ clusters, isLoading }) => {
       ],
       sortData: {
         name: cluster.name,
-        status: cluster.status,
+        status: cluster.last_status_update_at,
         lastHeartbeat: cluster.last_status_update_at,
       },
     };
