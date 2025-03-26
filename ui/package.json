@@ -72,10 +72,10 @@
     "stylelint-prettier": "5.0.2",
     "stylelint-scss": "6.10.0",
     "typescript": "5.7.3",
-    "vite": "6.1.2",
+    "vite": "6.2.3",
     "vite-plugin-istanbul": "6.0.2",
     "vite-tsconfig-paths": "5.1.4",
-    "vitest": "2.1.9"
+    "vitest": "3.0.9"
   },
   "lint-staged": {
     "src/**/*.{json,jsx,ts,tsx}": [
