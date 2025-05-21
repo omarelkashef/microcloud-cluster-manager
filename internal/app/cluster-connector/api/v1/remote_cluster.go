@@ -201,6 +201,11 @@ func remoteClusterStatusPost(rc types.RouteConfig) types.EndpointHandler {
 				return nil
 			}
 
+			if rc.Env.PrometheusBaseURL == "" || rc.Env.PrometheusBaseURL == "http://base" {
+				logger.Log.Infow("Prometheus base URL is not configured, metrics received by cluster are discarded.", "remote cluster", remoteClusterID)
+				return nil
+			}
+
 			timeSeries, err := parsePrometheusMetrics(payload.Metrics, dbRemoteCluster.Name)
 			if err != nil {
 				logger.Log.Warnw("Failed to parse metrics", "remote cluster", remoteClusterID, "err", err)
