@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
 	"github.com/canonical/lxd/lxd/response"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/types"
 )
 
 // UIFS represents the embedded file system for the user interface.

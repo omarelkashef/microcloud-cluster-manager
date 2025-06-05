@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/canonical/lxd/shared"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/database"
 )
 
 // Config represents the configurable environment variables for all services within the application.

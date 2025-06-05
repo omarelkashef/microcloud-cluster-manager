@@ -1,8 +1,8 @@
 package routes
 
 import (
-	apiV1 "github.com/canonical/lxd-cluster-manager/internal/app/cluster-connector/api/v1"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
+	apiV1 "github.com/canonical/microcloud-cluster-manager/internal/app/cluster-connector/api/v1"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/types"
 )
 
 // APIRoutes is the list of all the API routes for the cluster-connector service.

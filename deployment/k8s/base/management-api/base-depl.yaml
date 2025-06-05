@@ -13,8 +13,8 @@ spec:
     spec:
       initContainers:
       - name: init
-        image: lxd-cluster-manager
-        command: ["/usr/bin/lxd-cluster-manager"]
+        image: microcloud-cluster-manager
+        command: ["/usr/bin/microcloud-cluster-manager"]
         envFrom:
         - configMapRef:
             name: config
@@ -23,8 +23,8 @@ spec:
           value: "admin"
       containers:
       - name: management-api
-        image: lxd-cluster-manager
-        command: ["/usr/bin/lxd-cluster-manager"]
+        image: microcloud-cluster-manager
+        command: ["/usr/bin/microcloud-cluster-manager"]
         ports:
         - name: management-api
           containerPort: 9000

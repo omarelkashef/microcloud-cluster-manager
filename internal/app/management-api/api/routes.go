@@ -1,8 +1,8 @@
 package routes
 
 import (
-	apiV1 "github.com/canonical/lxd-cluster-manager/internal/app/management-api/api/v1"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
+	apiV1 "github.com/canonical/microcloud-cluster-manager/internal/app/management-api/api/v1"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/types"
 )
 
 // APIRoutes defines the API routes for the management API.

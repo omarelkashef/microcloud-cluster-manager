@@ -11,10 +11,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
 	"github.com/canonical/lxd/lxd/response"
 	"github.com/canonical/lxd/lxd/util"
 	"github.com/canonical/lxd/shared"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/types"
 	"github.com/google/uuid"
 	"github.com/gorilla/securecookie"
 	"github.com/zitadel/oidc/v3/pkg/client/rp"

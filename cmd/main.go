@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/canonical/lxd-cluster-manager/cmd/admin"
-	clusterconnector "github.com/canonical/lxd-cluster-manager/cmd/cluster-connector"
-	managementapi "github.com/canonical/lxd-cluster-manager/cmd/management-api"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
+	"github.com/canonical/microcloud-cluster-manager/cmd/admin"
+	clusterconnector "github.com/canonical/microcloud-cluster-manager/cmd/cluster-connector"
+	managementapi "github.com/canonical/microcloud-cluster-manager/cmd/management-api"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/logger"
 )
 
 // SERVICES is a list of valid service names within the cluster manager application.

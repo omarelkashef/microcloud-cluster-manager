@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/request"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/logger"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/request"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // Calls init function.
 )

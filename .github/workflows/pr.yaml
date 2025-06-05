@@ -99,7 +99,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: docker-image
-          path: lxd-cluster-manager.tar
+          path: microcloud-cluster-manager.tar
           retention-days: 1
 
   backend-e2e:

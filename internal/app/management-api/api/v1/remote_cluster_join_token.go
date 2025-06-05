@@ -9,12 +9,12 @@ import (
 	"sort"
 	"time"
 
-	"github.com/canonical/lxd-cluster-manager/internal/app/management-api/core/auth"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models/v1"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/store"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
 	"github.com/canonical/lxd/lxd/response"
 	"github.com/canonical/lxd/shared"
+	"github.com/canonical/microcloud-cluster-manager/internal/app/management-api/core/auth"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/api/models/v1"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/database/store"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/types"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
 )

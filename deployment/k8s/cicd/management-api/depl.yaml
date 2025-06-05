@@ -19,10 +19,10 @@ spec:
     spec:
       initContainers:
       - name: init
-        # replace image name with lxd-cluster-manager:<VERSION>
+        # replace image name with microcloud-cluster-manager:<VERSION>
         image: IMAGE_NAME
         command:
-        - /usr/bin/lxd-cluster-manager
+        - /usr/bin/microcloud-cluster-manager
         envFrom:
         - configMapRef:
             name: config
@@ -31,10 +31,10 @@ spec:
           value: admin
       containers:
       - name: management-api
-        # replace image name with lxd-cluster-manager:<VERSION>
+        # replace image name with microcloud-cluster-manager:<VERSION>
         image: IMAGE_NAME
         command:
-        - /usr/bin/lxd-cluster-manager
+        - /usr/bin/microcloud-cluster-manager
         ports:
         - name: management-api
           containerPort: 9000

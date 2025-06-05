@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/config"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/schema"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/seed"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/config"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/database"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/database/schema"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/database/seed"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/logger"
 )
 
 // Run will execute all the admin jobs.

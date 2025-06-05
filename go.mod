@@ -1,4 +1,4 @@
-module github.com/canonical/lxd-cluster-manager
+module github.com/canonical/microcloud-cluster-manager
 
 go 1.23.7
 

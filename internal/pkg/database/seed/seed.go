@@ -9,8 +9,8 @@ import (
 	"math/rand/v2"
 	"time"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/store"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/database"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/database/store"
 	"github.com/jmoiron/sqlx"
 )
 

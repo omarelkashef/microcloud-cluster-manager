@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/request"
 	"github.com/canonical/lxd/lxd/response"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/logger"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/request"
 	"github.com/google/uuid"
 )
 

@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/canonical/lxd-cluster-manager/internal/app/cluster-connector/core/certificate"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
 	"github.com/canonical/lxd/lxd/request"
 	"github.com/canonical/lxd/lxd/util"
+	"github.com/canonical/microcloud-cluster-manager/internal/app/cluster-connector/core/certificate"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/database"
 )
 
 // CtxRemoteClusterID is the context key for the remote cluster ID.

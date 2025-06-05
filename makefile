@@ -65,6 +65,17 @@ start-cluster:
 delete-cluster:
 	kind delete cluster --name $(KIND_CLUSTER)
 
+.PHONY: dev-juju-deploy
+dev-juju-deploy:
+	juju add-model cluster-manager-juju-dev
+	juju deploy ./microcloud-cluster-manager-k8s_amd64.charm --resource microcloud-cluster-manager-image=ghcr.io/edlerd/microcloud-cluster-manager:0.1
+	#juju deploy microcloud-cluster-manager-k8s --channel edge
+
+.PHONY: dev-juju-update
+dev-juju-update:
+	juju refresh --path="./microcloud-cluster-manager-k8s_amd64.charm" microcloud-cluster-manager-k8s --force-units --resource microcloud-cluster-manager-image=ghcr.io/edlerd/microcloud-cluster-manager:0.1
+	#juju refresh microcloud-cluster-manager-k8s --channel edge
+
 .PHONY: dev-k8s-deploy
 dev-k8s-deploy:
 	# create custom tmp directory for skaffold to store build artifacts
@@ -93,7 +104,7 @@ clean-dev:
 	rm -rf tmp
 	docker container prune -f --filter "label=io.x-k8s.kind.cluster=dev-cluster"
 	docker images -f "dangling=true" -q | xargs -r docker rmi
-	docker images --filter=reference='lxd-cluster-manager:*' -q | xargs -I {} docker rmi {} -f
+	docker images --filter=reference='microcloud-cluster-manager:*' -q | xargs -I {} docker rmi {} -f
 
 .PHONY: dev
 dev: start-cluster dev-juju-setup dev-k8s-deploy
@@ -106,6 +117,12 @@ dev-rock: start-cluster dev-juju-setup rock-k8s-deploy
 
 .PHONY: nuke
 nuke: clean-dev delete-cluster dev-clean-juju
+
+.PHONY: start-charm
+start-charm: start-cluster dev-juju-setup dev-juju-deploy
+
+.PHONY: update-charm
+start-charm: dev-juju-update
 
 # ====================================================================
 # UI utilities
@@ -145,11 +162,11 @@ rock-version:
 
 .PHONY: rock-name
 rock-name:
-	@echo "lxd-cluster-manager_$(shell $(MAKE) rock-version)_amd64.rock"
+	@echo "microcloud-cluster-manager_$(shell $(MAKE) rock-version)_amd64.rock"
 
 .PHONY: docker-image-name
 docker-image-name:
-	@echo "lxd-cluster-manager:$(shell $(MAKE) rock-version)"
+	@echo "microcloud-cluster-manager:$(shell $(MAKE) rock-version)"
 
 .PHONY: rock-to-docker
 rock-to-docker:
@@ -161,7 +178,7 @@ rock-to-docker:
 # https://microk8s.io/docs/registry-images
 .PHONY: docker-image-to-tarball
 docker-image-to-tarball:
-	docker save $(shell $(MAKE) docker-image-name) > lxd-cluster-manager.tar
+	docker save $(shell $(MAKE) docker-image-name) > microcloud-cluster-manager.tar
 
 .PHONY: build-ui
 build-ui:
@@ -380,9 +397,9 @@ install-juju:
 # add local host entries to /etc/hosts
 .PHONY: add-hosts
 add-hosts:
-	@echo "Adding lxd-cluster-manager local entries to /etc/hosts..."
-	@if ! grep -q "# lxd-cluster-manager local" /etc/hosts; then \
-		sudo sh -c 'echo "# lxd-cluster-manager local" >> /etc/hosts'; \
+	@echo "Adding microcloud-cluster-manager local entries to /etc/hosts..."
+	@if ! grep -q "# microcloud-cluster-manager local" /etc/hosts; then \
+		sudo sh -c 'echo "# microcloud-cluster-manager local" >> /etc/hosts'; \
 		sudo sh -c 'echo "127.0.0.1 ma.lxd-cm.local" >> /etc/hosts'; \
 		sudo sh -c 'echo "127.0.0.1 cc.lxd-cm.local" >> /etc/hosts'; \
 		echo "Entries added to /etc/hosts."; \

@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/canonical/lxd-cluster-manager/internal/app/management-api/core/auth"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models/v1"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/config"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
 	"github.com/canonical/lxd/lxd/response"
+	"github.com/canonical/microcloud-cluster-manager/internal/app/management-api/core/auth"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/api/models/v1"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/config"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/database"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/types"
 )
 
 // Configuration defines the API for the configuration endpoint.

@@ -1,30 +1,25 @@
 # product metadata
-name: lxd-cluster-manager
-version: "1.0.0"
+name: microcloud-cluster-manager
+version: "0.1"
 summary: Canonical MicroCloud Cluster Manager
 description: |
   The Canonical MicroCloud Cluster Manager is a tool that allows you to manage multiple MicroClouds from a single interface.
   It provides a REST API for managing MicroClouds, and a web interface for interacting with the API.
-license: Apache-2.0
+license: AGPL-3.0
 
 # build metadata
-# TODO: figure out why using base: bare causes final output to be empty
-# base: bare
-# build-base: ubuntu@24.04
 base: ubuntu@24.04
 platforms:
   amd64:
 
-# entrypoint
 services:
-  lxd-cluster-manager:
+  microcloud-cluster-manager:
     override: replace
-    command: /usr/bin/lxd-cluster-manager
+    command: /usr/bin/microcloud-cluster-manager
     startup: enabled
 
-# dependencies
 parts:
-  certificates:
+  deps:
     plugin: nil
     stage-packages:
       - ca-certificates
@@ -35,16 +30,10 @@ parts:
     source: .
     source-type: local
     build-snaps:
-      - go/1.23/stable
-      - node/22/stable # need to build ui assets for go embed
+      - go/1.23/stable # for go build
+      - node/22/stable # for ui assets
     build-packages:
       - make
-      - git
     override-build: |
       make build
-      install -D -m755 ./cmd/app ${CRAFT_PART_INSTALL}/opt/lxd-cluster-manager/bin/app
-    # map binary location in build environment to location in staging environment
-    organize:
-      opt/lxd-cluster-manager/bin/app: usr/bin/lxd-cluster-manager
-    stage-packages:
-      - base-files_var
+      install -D -m755 ./cmd/app ${CRAFT_PART_INSTALL}/usr/bin/microcloud-cluster-manager

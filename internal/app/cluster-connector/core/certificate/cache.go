@@ -6,10 +6,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/store"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
 	"github.com/canonical/lxd/shared"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/database"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/database/store"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/logger"
 	"github.com/jmoiron/sqlx"
 )
 

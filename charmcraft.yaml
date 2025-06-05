@@ -1,0 +1,33 @@
+name: microcloud-cluster-manager-k8s
+type: charm
+title: |
+  microcloud-cluster-manager-k8s
+description: |
+  This bundles the microcloud-cluster-manager charm for Kubernetes. MicroCloud Cluster Manager is a tool for viewing and managing multiple MicroCloud deployments
+summary: |
+  MicroCloud Cluster Manager is a tool for viewing and managing multiple MicroCloud deployments.
+
+base: ubuntu@24.04
+build-base: ubuntu@24.04
+platforms:
+  amd64:
+    build-on: [amd64]
+    build-for: [amd64]
+
+parts:
+  charm:
+    build-packages: [cargo, rustc]
+
+assumes:
+  - juju >= 3.6
+  - k8s-api
+
+containers:
+  microcloud-cluster-manager:
+    resource: microcloud-cluster-manager-image
+
+resources:
+  microcloud-cluster-manager-image:
+    type: oci-image
+    description: OCI image for MicroCloud Cluster Manager
+    upstream-source: ghcr.io/edlerd/microcloud-cluster-manager:0.1

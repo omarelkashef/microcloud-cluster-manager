@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/canonical/lxd-cluster-manager/test/helpers"
+	"github.com/canonical/microcloud-cluster-manager/test/helpers"
 )
 
 func testRemoteClusterJoinInvalid(env *helpers.Environment) (testName string, testFunc func(t *testing.T)) {
