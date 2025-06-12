@@ -139,7 +139,7 @@ func Run() (err error) {
 	}()
 
 	// setup status endpoint on different port
-	statusServer := a.GetStatusServer()
+	statusServer := a.GetStatusServer(cfg.StatusPort)
 	go func() {
 		logger.Log.Infow("startup", "status", "status server started", "host", statusServer.Addr)
 		serverErrors <- statusServer.ListenAndServe()

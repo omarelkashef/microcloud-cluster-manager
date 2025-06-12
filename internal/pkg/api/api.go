@@ -102,7 +102,7 @@ func (a *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetStatusServer sets up the status endpoint for liveliness and readiness checks.
-func (a *API) GetStatusServer() *http.Server {
+func (a *API) GetStatusServer(port string) *http.Server {
 	// Define the status server
 	statusRouter := mux.NewRouter()
 	statusRouter.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
@@ -118,7 +118,7 @@ func (a *API) GetStatusServer() *http.Server {
 	})
 
 	statusServer := &http.Server{
-		Addr:    ":10000", // Status server listens on a different port
+		Addr:    ":" + port, // Status server listens on a different port
 		Handler: statusRouter,
 	}
 

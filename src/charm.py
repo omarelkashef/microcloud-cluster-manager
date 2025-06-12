@@ -45,8 +45,9 @@ class ClusterManagerCharm(ops.CharmBase):
         framework.observe(self.database.on.endpoints_changed, self._on_database_created)
 
         # Main service
-        self.pebble_service_name = "microcloud-cluster-manager"
-        framework.observe(self.on.microcloud_cluster_manager_pebble_ready, self._on_microcloud_cluster_manager_pebble_ready)
+        self.pebble_service_name = "mcm-management-api"
+        framework.observe(self.on.microcloud_cluster_manager_pebble_ready,
+                          self._on_microcloud_cluster_manager_pebble_ready)
 
     def _on_database_created(self, event: DatabaseCreatedEvent) -> None:
         """Event is fired when postgres database is created."""
@@ -78,12 +79,16 @@ class ClusterManagerCharm(ops.CharmBase):
                 'db_port': port,
                 'db_username': data['username'],
                 'db_password': data['password'],
+                'db_name': data['database'],
             }
             return db_data
         return {}
 
     def _get_certificate_request_attributes(self) -> CertificateRequestAttributes:
-        return CertificateRequestAttributes(common_name="example.com")
+        return CertificateRequestAttributes(
+            common_name="cc.lxd-cm.local",
+            sans_dns=frozenset(["cc.lxd-cm.local"]),
+        )
 
     def _on_collect_status(self, event: ops.CollectStatusEvent):
         if not self._relation_created("certificates"):
@@ -205,9 +210,16 @@ class ClusterManagerCharm(ops.CharmBase):
     def _pebble_layer(self) -> ops.pebble.Layer:
         management_api_environment = self.app_environment
         management_api_environment['SERVICE'] = 'management-api'
+        management_api_environment['SERVER_PORT'] = '9100'
+        management_api_environment['STATUS_PORT'] = '11000'
 
         cluster_connector_environment = self.app_environment
         cluster_connector_environment['SERVICE'] = 'cluster-connector'
+
+        admin_environment = self.app_environment
+        admin_environment['SERVICE'] = 'admin'
+
+        logger.info("Pebble layer initialized")
 
         pebble_layer: ops.pebble.LayerDict = {
             'summary': 'management api service',
@@ -229,6 +241,10 @@ class ClusterManagerCharm(ops.CharmBase):
                 }
             },
         }
+
+        migrations = ops.pebble.ExecDict(command="microcloud-cluster-manager", environment=admin_environment)
+        ops.pebble.Check("db-migrations", ops.pebble.CheckDict(exec=migrations))
+
         return ops.pebble.Layer(pebble_layer)
 
     @property
@@ -238,7 +254,7 @@ class ClusterManagerCharm(ops.CharmBase):
         env = {
             key: value
             for key, value in {
-                "CLUSTER_CONNECTOR_ADDRESS": "cc.lxd-cm.local:30000",
+                "CLUSTER_CONNECTOR_ADDRESS": "cc.lxd-cm.local:32000",
                 "CLUSTER_CONNECTOR_TLS_PATH": CERTS_DIR_PATH,
                 "MANAGEMENT_API_TLS_PATH": CERTS_DIR_PATH,
                 "DB_DISABLE_TLS": "true",
@@ -246,9 +262,9 @@ class ClusterManagerCharm(ops.CharmBase):
                 "DB_PORT": db_data.get("db_port", None),
                 "DB_USER": db_data.get("db_username", None),
                 "DB_PASSWORD": db_data.get("db_password", None),
+                "DB_NAME": db_data.get("db_name", None),
                 "DB_MAX_IDLE": "2",
                 "DB_MAX_OPEN": "5",
-                "DB_NAME": "cm",
                 "OIDC_AUDIENCE": "https://lxd-ui-demo.us.auth0.com/api/v2/",
                 "OIDC_CLIENT_ID": "OZSAeCbqAXZid3LL1gRQEkLXP9KlwZtJ",
                 "OIDC_ISSUER": "https://lxd-ui-demo.us.auth0.com/",
@@ -257,7 +273,6 @@ class ClusterManagerCharm(ops.CharmBase):
                 "SERVER_PORT": "9000",
                 "TEST_MODE": "false",
                 "VERSION": "development",
-                "SERVICE": "management-api",
             }.items()
             if value is not None
         }

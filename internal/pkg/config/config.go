@@ -26,6 +26,7 @@ type Config struct {
 	// api configs
 	ServerHost     string
 	ServerPort     string
+	StatusPort     string
 	AllowedOrigins []string
 	ReadTimeout    int
 	WriteTimeout   int
@@ -117,6 +118,7 @@ func LoadConfig() (*Config, error) {
 		APIVersion:              getEnvOrDefault("API_VERSION", "1.0"),
 		ServerHost:              getEnvOrDefault("SERVER_HOST", "0.0.0.0"),
 		ServerPort:              getEnvOrDefault("SERVER_PORT", "9000"),
+		StatusPort:              getEnvOrDefault("STATUS_PORT", "10000"),
 		TestMode:                getEnvOrDefault("TEST_MODE", "false") == "true",
 		AllowedOrigins:          []string{"*"},
 		ReadTimeout:             10,
