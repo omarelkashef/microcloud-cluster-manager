@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"path"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
 	"github.com/canonical/lxd/lxd/response"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/logger"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/types"
 	"github.com/gorilla/mux"
 )
 

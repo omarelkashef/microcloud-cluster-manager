@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/query"
 	"github.com/canonical/lxd/shared/api"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/database/query"
 	"github.com/jmoiron/sqlx"
 )
 

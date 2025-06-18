@@ -6,11 +6,11 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/config"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
 	"github.com/canonical/lxd/lxd/response"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/config"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/database"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/logger"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/types"
 	"github.com/gorilla/mux"
 )
 
@@ -102,7 +102,7 @@ func (a *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetStatusServer sets up the status endpoint for liveliness and readiness checks.
-func (a *API) GetStatusServer() *http.Server {
+func (a *API) GetStatusServer(port string) *http.Server {
 	// Define the status server
 	statusRouter := mux.NewRouter()
 	statusRouter.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
@@ -118,7 +118,7 @@ func (a *API) GetStatusServer() *http.Server {
 	})
 
 	statusServer := &http.Server{
-		Addr:    ":10000", // Status server listens on a different port
+		Addr:    ":" + port, // Status server listens on a different port
 		Handler: statusRouter,
 	}
 

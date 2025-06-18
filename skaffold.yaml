@@ -31,7 +31,7 @@ profiles:
 - name: docker
   build:
     artifacts:
-    - image: lxd-cluster-manager
+    - image: microcloud-cluster-manager
       context: .
       docker:
         dockerfile: deployment/docker/dockerfile.dev
@@ -68,7 +68,7 @@ profiles:
 - name: debug
   build:
     artifacts:
-    - image: lxd-cluster-manager
+    - image: microcloud-cluster-manager
       context: .
       docker:
         dockerfile: deployment/docker/dockerfile.dev
@@ -109,7 +109,7 @@ profiles:
 - name: rock
   build:
     artifacts:
-    - image: "lxd-cluster-manager"
+    - image: "microcloud-cluster-manager"
       sync:
         infer:
         - 'cmd/'

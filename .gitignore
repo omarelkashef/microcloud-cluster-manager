@@ -21,3 +21,11 @@ tmp
 
 # rockcraft
 *.rock
+# charmcraft
+*.charm
+
+# build artefacts
+vendor
+cmd/app
+internal/app/management-api/api/v1/static/ui
+.coverage

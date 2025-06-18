@@ -24,7 +24,7 @@ spec:
             cpu: "1000m"
           requests:
             cpu: "200m"
-        image: lxd-cluster-manager
+        image: microcloud-cluster-manager
         ports:
         - name: debug
           containerPort: 40000

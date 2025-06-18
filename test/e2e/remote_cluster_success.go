@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models/v1"
-	"github.com/canonical/lxd-cluster-manager/test/helpers"
 	"github.com/canonical/lxd/shared"
 	"github.com/canonical/lxd/shared/api"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/api/models/v1"
+	"github.com/canonical/microcloud-cluster-manager/test/helpers"
 )
 
 func testRemoteClusterSuccess(env *helpers.Environment) (testName string, testFunc func(t *testing.T)) {

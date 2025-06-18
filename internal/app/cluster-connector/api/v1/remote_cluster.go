@@ -10,14 +10,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/canonical/lxd-cluster-manager/internal/app/cluster-connector/core/auth"
-	"github.com/canonical/lxd-cluster-manager/internal/app/cluster-connector/core/certificate"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models/v1"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database/store"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/types"
 	"github.com/canonical/lxd/lxd/request"
 	"github.com/canonical/lxd/lxd/response"
+	"github.com/canonical/microcloud-cluster-manager/internal/app/cluster-connector/core/auth"
+	"github.com/canonical/microcloud-cluster-manager/internal/app/cluster-connector/core/certificate"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/api/models/v1"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/database/store"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/logger"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/types"
 	"github.com/golang/snappy"
 	"github.com/jmoiron/sqlx"
 	"github.com/prometheus/common/expfmt"
@@ -299,13 +299,13 @@ func forwardMetricsToPrometheus(timeSeries []prompb.TimeSeries, rc types.RouteCo
 	// ref: https://prometheus.io/docs/specs/remote_write_spec/
 	compressedData := snappy.Encode(nil, data)
 
-	remoteWriteURL := rc.Env.PrometheusBaseURL + "/cos-prometheus-0/api/v1/write"
+	remoteWriteURL := rc.Env.PrometheusBaseURL
 	req, err := http.NewRequest("POST", remoteWriteURL, bytes.NewReader(compressedData))
 	if err != nil {
 		return fmt.Errorf("failed to create HTTP request: %w", err)
 	}
 
-	req.Header.Set("User-Agent", "lxd-cluster-manager")
+	req.Header.Set("User-Agent", "microcloud-cluster-manager")
 	req.Header.Set("X-Prometheus-Remote-Write-Version", "0.1.0")
 	req.Header.Set("Content-Type", "application/x-protobuf")
 	req.Header.Set("Content-Encoding", "snappy")

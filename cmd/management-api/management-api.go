@@ -11,14 +11,14 @@ import (
 	"syscall"
 	"time"
 
-	routes "github.com/canonical/lxd-cluster-manager/internal/app/management-api/api"
-	"github.com/canonical/lxd-cluster-manager/internal/app/management-api/core/auth"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/api"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/config"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/middleware"
 	"github.com/canonical/lxd/lxd/util"
+	routes "github.com/canonical/microcloud-cluster-manager/internal/app/management-api/api"
+	"github.com/canonical/microcloud-cluster-manager/internal/app/management-api/core/auth"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/api"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/config"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/database"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/logger"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/middleware"
 	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
 )
@@ -139,7 +139,7 @@ func Run() (err error) {
 	}()
 
 	// setup status endpoint on different port
-	statusServer := a.GetStatusServer()
+	statusServer := a.GetStatusServer(cfg.StatusPort)
 	go func() {
 		logger.Log.Infow("startup", "status", "status server started", "host", statusServer.Addr)
 		serverErrors <- statusServer.ListenAndServe()

@@ -11,14 +11,16 @@ import (
 	"syscall"
 	"time"
 
-	routes "github.com/canonical/lxd-cluster-manager/internal/app/cluster-connector/api"
-	"github.com/canonical/lxd-cluster-manager/internal/app/cluster-connector/core/auth"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/api"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/config"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/database"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/logger"
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/middleware"
 	"github.com/canonical/lxd/lxd/util"
+	routes "github.com/canonical/microcloud-cluster-manager/internal/app/cluster-connector/api"
+	"github.com/canonical/microcloud-cluster-manager/internal/app/cluster-connector/core/auth"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/api"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/config"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/database"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/database/schema"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/database/seed"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/logger"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/middleware"
 	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
 )
@@ -78,6 +80,49 @@ func Run() (err error) {
 		err = db.Close()
 	}()
 
+	// time out the database connection after 5 minutes
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
+	// ensure the database is ready
+	err = db.StatusCheck(ctx)
+	if err != nil {
+		logger.Log.Errorw("startup", "status", "database connection timeout", "ERROR", err)
+		return err
+	}
+
+	// =========================================================================
+	// Migrate the database
+
+	logger.Log.Infow("startup", "message", "Starting database migration")
+
+	applied, err := schema.Migrate(ctx, db.Conn().DB, cfg.Version)
+	if applied {
+		logger.Log.Infow("startup", "status", "Database version matches the environment version, no migration needed")
+	}
+
+	if err != nil {
+		logger.Log.Errorw("startup", "status", "Database migration failed", "ERROR", err)
+		return err
+	}
+
+	logger.Log.Infow("startup", "status", "Finished database migration")
+
+	// =========================================================================
+	// Seed the database
+
+	if cfg.Version == "development" {
+		logger.Log.Infow("startup", "message", "Starting database seeding")
+
+		err := seed.SeedDatabase(ctx, db)
+		if err != nil {
+			logger.Log.Errorw("startup", "status", "database seeding failed", "ERROR", err)
+			return err
+		}
+
+		logger.Log.Infow("startup", "status", "database seeding successful")
+	}
+
 	// =========================================================================
 	// Initialize authentication support
 
@@ -130,7 +175,7 @@ func Run() (err error) {
 	}()
 
 	// setup status endpoint on different port
-	statusServer := a.GetStatusServer()
+	statusServer := a.GetStatusServer(cfg.StatusPort)
 	go func() {
 		logger.Log.Infow("startup", "status", "status server started", "host", statusServer.Addr)
 		serverErrors <- statusServer.ListenAndServe()

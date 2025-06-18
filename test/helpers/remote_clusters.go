@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/canonical/lxd-cluster-manager/internal/pkg/api/models/v1"
 	"github.com/canonical/lxd/shared/api"
+	"github.com/canonical/microcloud-cluster-manager/internal/pkg/api/models/v1"
 )
 
 // FindRemoteCluster search for a remote cluster by name.
