@@ -4,7 +4,7 @@
 
 import logging
 import ops
-
+from typing import Optional
 from charms.data_platform_libs.v0.data_interfaces import DatabaseRequires
 from charms.grafana_k8s.v0.grafana_metadata import GrafanaMetadataAppData, GrafanaMetadataRequirer
 from charms.prometheus_k8s.v1.prometheus_remote_write import PrometheusRemoteWriteConsumer
@@ -15,7 +15,7 @@ from charms.tls_certificates_interface.v4.tls_certificates import (
     PrivateKey,
     TLSCertificatesRequiresV4,
 )
-from typing import Optional
+from charms.traefik_k8s.v2.ingress import IngressPerAppRequirer, IngressPerAppReadyEvent, IngressPerAppRevokedEvent
 
 CERTS_DIR_PATH = "/etc/ssl/management-api"
 PRIVATE_KEY_NAME = "tls.key"
@@ -52,17 +52,33 @@ class ClusterManagerCharm(ops.CharmBase):
         self.grafana_metadata = GrafanaMetadataRequirer(relation_mapping=self.model.relations)
         self.framework.observe(self.on["grafana-metadata"].relation_changed, self._on_grafana_metadata_changed)
 
+        # Ingress relation
+        self.ingress = IngressPerAppRequirer(self, relation_name="ingress", port=9100, strip_prefix=True,
+                                             redirect_https=False)
+        self.framework.observe(self.ingress.on.ready, self._on_ingress_ready)
+        self.framework.observe(self.ingress.on.revoked, self._on_ingress_revoked)
+
         # Main service
         self.pebble_service_name = "mcm-management-api"
         framework.observe(self.on.collect_unit_status, self._on_collect_status)
         framework.observe(self.on.microcloud_cluster_manager_pebble_ready,
                           self._on_microcloud_cluster_manager_pebble_ready)
+        framework.observe(self.on.config_changed, self._on_config_changed)
 
     def _get_certificate_request_attributes(self) -> CertificateRequestAttributes:
         return CertificateRequestAttributes(
             common_name="cc.lxd-cm.local",
             sans_dns=frozenset(["cc.lxd-cm.local"]),
         )
+
+    def _on_config_changed(self, _: ops.ConfigChangedEvent) -> None:
+        self.update_pebble_layer()
+
+    def _on_ingress_ready(self, event: IngressPerAppReadyEvent):
+        logger.info("This app's ingress URL: %s", event.url)
+
+    def _on_ingress_revoked(self, _: IngressPerAppRevokedEvent):
+        logger.info("This app no longer has ingress")
 
     def _on_collect_status(self, event: ops.CollectStatusEvent):
         if not self._is_relation_created("certificates"):
@@ -292,7 +308,7 @@ class ClusterManagerCharm(ops.CharmBase):
         env = {
             key: value
             for key, value in {
-                "CLUSTER_CONNECTOR_ADDRESS": "cc.lxd-cm.local:32000",
+                "CLUSTER_CONNECTOR_ADDRESS": self.config['cluster-connector-address'],
                 "CLUSTER_CONNECTOR_TLS_PATH": CERTS_DIR_PATH,
                 "MANAGEMENT_API_TLS_PATH": CERTS_DIR_PATH,
                 "DB_DISABLE_TLS": "true",
@@ -303,19 +319,19 @@ class ClusterManagerCharm(ops.CharmBase):
                 "DB_NAME": db_data.get("db_name", None),
                 "DB_MAX_IDLE": "2",
                 "DB_MAX_OPEN": "5",
-                "OIDC_AUDIENCE": "https://lxd-ui-demo.us.auth0.com/api/v2/",
-                "OIDC_CLIENT_ID": "OZSAeCbqAXZid3LL1gRQEkLXP9KlwZtJ",
-                "OIDC_ISSUER": "https://lxd-ui-demo.us.auth0.com/",
+                "OIDC_AUDIENCE": self.config['oidc-audience'],
+                "OIDC_CLIENT_ID": self.config['oidc-client-id'],
+                "OIDC_ISSUER": self.config['oidc-issuer'],
                 "PROMETHEUS_BASE_URL": prometheus_url or "",
                 "GRAFANA_BASE_URL": grafana_url or "",
                 "SERVER_HOST": "0.0.0.0",
                 "SERVER_PORT": "9000",
-                "TEST_MODE": "false",
-                "VERSION": "development",
+                "VERSION": self.config['version'],
             }.items()
             if value is not None
         }
         return env
+
 
 if __name__ == "__main__":  # pragma: nocover
     ops.main(ClusterManagerCharm)
