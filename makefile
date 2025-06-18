@@ -65,36 +65,6 @@ start-cluster:
 delete-cluster:
 	kind delete cluster --name $(KIND_CLUSTER)
 
-.PHONY: dev-juju-deploy
-dev-juju-deploy:
-	juju add-model cluster-manager-juju-dev
-
-	juju deploy self-signed-certificates --trust
-	juju deploy postgresql-k8s --channel 14/stable --trust
-
-	juju deploy ./microcloud-cluster-manager-k8s_amd64.charm --resource microcloud-cluster-manager-image=ghcr.io/edlerd/microcloud-cluster-manager:0.1 --debug
-	#juju deploy microcloud-cluster-manager-k8s --channel edge
-
-	juju integrate postgresql-k8s microcloud-cluster-manager-k8s
-	juju integrate self-signed-certificates:certificates microcloud-cluster-manager-k8s:certificates
-
-.PHONY: dev-juju-cos-deploy
-dev-juju-cos-deploy:
-	juju add-model cos
-	juju deploy cos-lite --trust
-	juju offer prometheus:receive-remote-write
-	juju offer grafana:grafana-metadata
-	juju switch cluster-manager-juju-dev
-	juju integrate microcloud-cluster-manager-k8s:send-remote-write admin/cos.prometheus
-	juju integrate microcloud-cluster-manager-k8s:grafana-metadata admin/cos.grafana
-
-.PHONY: dev-juju-update
-dev-juju-update:
-	juju remove-relation self-signed-certificates:certificates microcloud-cluster-manager-k8s:certificates
-	juju refresh --debug --path="./microcloud-cluster-manager-k8s_amd64.charm" microcloud-cluster-manager-k8s --force-units --resource microcloud-cluster-manager-image=ghcr.io/edlerd/microcloud-cluster-manager:0.1
-	juju integrate self-signed-certificates:certificates microcloud-cluster-manager-k8s:certificates
-	#juju refresh microcloud-cluster-manager-k8s --channel edge
-
 .PHONY: dev-k8s-deploy
 dev-k8s-deploy:
 	# create custom tmp directory for skaffold to store build artifacts
@@ -136,12 +106,6 @@ dev-rock: start-cluster dev-juju-setup rock-k8s-deploy
 
 .PHONY: nuke
 nuke: clean-dev delete-cluster dev-clean-juju
-
-.PHONY: start-charm
-start-charm: start-cluster dev-juju-setup dev-juju-deploy
-
-.PHONY: update-charm
-update-charm: dev-juju-update
 
 # ====================================================================
 # UI utilities
