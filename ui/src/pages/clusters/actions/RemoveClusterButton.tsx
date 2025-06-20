@@ -8,12 +8,19 @@ import { deleteCluster } from "api/clusters";
 import { FC, useState } from "react";
 import { queryKeys } from "util/queryKeys";
 import { useNavigate } from "react-router-dom";
+import classnames from "classnames";
 
 type Props = {
   clusterName: string;
+  appearance?: string;
+  className?: string;
 };
 
-const RemoveClusterButton: FC<Props> = ({ clusterName }) => {
+const RemoveClusterButton: FC<Props> = ({
+  clusterName,
+  appearance = "",
+  className,
+}) => {
   const queryClient = useQueryClient();
   const notify = useNotify();
   const navigate = useNavigate();
@@ -36,9 +43,9 @@ const RemoveClusterButton: FC<Props> = ({ clusterName }) => {
 
   return (
     <ConfirmationButton
-      appearance=""
+      appearance={appearance}
+      className={classnames("u-no-margin--bottom has-icon", className)}
       loading={isLoading}
-      className="p-segmented-control__button u-no-margin--bottom has-icon"
       confirmationModalProps={{
         title: "Confirm remove",
         children: (

@@ -1,10 +1,9 @@
-import { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { Row, usePortal } from "@canonical/react-components";
 import { useLocation, useParams, useSearchParams } from "react-router-dom";
 import TabLinks from "components/TabLinks";
 import ClusterListTokens from "./ClusterListTokens";
 import ClusterListActive from "./ClusterListActive";
-import EnrolClusterButton from "./EnrolClusterButton";
 import NotificationRow from "components/NotificationRow";
 import ClusterSearchFilter from "pages/clusters/ClusterSearchFilter";
 import CustomLayout from "components/CustomLayout";
@@ -23,13 +22,15 @@ import {
   ClusterNodeStatus,
   ClusterPercentiles,
 } from "types/cluster";
-import BulkRemoveClusterButton from "pages/clusters/BulkRemoveClusterButton";
 import EnrolClusterModal from "pages/clusters/EnrolClusterModal";
 import type { Location } from "react-router-dom";
-import BulkRevokeTokenButton from "pages/clusters/BulkRevokeTokenButton";
 import { fetchTokens } from "api/tokens";
 import usePanelParams, { panels } from "context/usePanelParams";
 import EnrolClusterPanel from "pages/clusters/EnrolClusterPanel";
+import BulkRemoveClusterButton from "pages/clusters/actions/BulkRemoveClusterButton";
+import BulkRevokeTokenButton from "pages/clusters/actions/BulkRevokeTokenButton";
+import EnrolClusterButton from "pages/clusters/actions/EnrolClusterButton";
+import ConfigureClusterPanel from "pages/clusters/ConfigureClusterPanel";
 
 interface ClusterToken {
   name: string;
@@ -230,6 +231,9 @@ const ClusterList: FC = () => {
       </CustomLayout>
 
       {panelParams.panel === panels.enrolCluster && <EnrolClusterPanel />}
+      {panelParams.panel === panels.configureCluster && (
+        <ConfigureClusterPanel />
+      )}
 
       {isOpen && createdCluster && (
         <Portal>

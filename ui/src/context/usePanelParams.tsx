@@ -2,12 +2,15 @@ import { useSearchParams } from "react-router-dom";
 
 export interface PanelHelper {
   panel: string | null;
+  cluster: string | null;
   clear: () => void;
   openEnrolCluster: () => void;
+  openConfigureCluster: (cluster?: string) => void;
 }
 
 export const panels = {
   enrolCluster: "enrol-cluster",
+  configureCluster: "configure-cluster",
 };
 
 type ParamMap = Record<string, string>;
@@ -36,12 +39,14 @@ const usePanelParams = (): PanelHelper => {
     // we only want to remove search params set when opening the panel
     // pre-existing search params should be kept e.g. params from the search bar
     newParams.delete("panel");
+    newParams.delete("cluster");
     setParams(newParams);
     craftResizeEvent();
   };
 
   return {
     panel: params.get("panel"),
+    cluster: params.get("cluster"),
 
     clear: () => {
       clearParams();
@@ -49,6 +54,14 @@ const usePanelParams = (): PanelHelper => {
 
     openEnrolCluster: () => {
       setPanelParams(panels.enrolCluster);
+    },
+
+    openConfigureCluster: (cluster?: string) => {
+      const params = { cluster: cluster || "" };
+      if (cluster) {
+        params.cluster = cluster;
+      }
+      setPanelParams(panels.configureCluster, params);
     },
   };
 };
