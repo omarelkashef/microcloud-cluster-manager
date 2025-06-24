@@ -4,6 +4,7 @@ import {
   Form,
   Input,
   useNotify,
+  useToastNotification,
 } from "@canonical/react-components";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { FC } from "react";
@@ -23,6 +24,7 @@ const ConfigureClusterPanel: FC = () => {
   const panelParams = usePanelParams();
   const queryClient = useQueryClient();
   const notify = useNotify();
+  const toastNotification = useToastNotification();
 
   const clusterName = panelParams.cluster ?? "";
   const focusField = panelParams.focusField ?? FIELD_DISK_THRESHOLD;
@@ -52,7 +54,11 @@ const ConfigureClusterPanel: FC = () => {
 
     updateCluster(clusterName, JSON.stringify(payload))
       .then(() => {
-        notify.success(`Successfully updated cluster ${clusterName}.`);
+        toastNotification.success(
+          <>
+            Updated cluster <strong>{clusterName}</strong>.
+          </>,
+        );
         closePanel();
       })
       .catch((e: Error) => {
