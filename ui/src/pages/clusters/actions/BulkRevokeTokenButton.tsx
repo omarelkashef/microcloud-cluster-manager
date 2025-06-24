@@ -48,7 +48,7 @@ const BulkDeleteClusterButton: FC<Props> = ({
       appearance=""
       className="p-segmented-control__button u-no-margin--bottom has-icon"
       confirmationModalProps={{
-        title: "Confirm remove",
+        title: "Confirm revoke",
         children: (
           <>
             <p>
@@ -60,7 +60,7 @@ const BulkDeleteClusterButton: FC<Props> = ({
             </p>
           </>
         ),
-        confirmButtonLabel: "Remove",
+        confirmButtonLabel: "Revoke",
         onConfirm: () => void handleDelete(),
       }}
       shiftClickEnabled

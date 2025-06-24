@@ -15,12 +15,17 @@ import SidePanel from "components/SidePanel";
 import usePanelParams from "context/usePanelParams";
 import { fetchCluster, updateCluster } from "api/clusters";
 
+export const FIELD_DISK_THRESHOLD = "diskThreshold";
+export const FIELD_MEMORY_THRESHOLD = "memoryThreshold";
+export const FIELD_DESCRIPTION = "description";
+
 const ConfigureClusterPanel: FC = () => {
   const panelParams = usePanelParams();
   const queryClient = useQueryClient();
   const notify = useNotify();
 
   const clusterName = panelParams.cluster ?? "";
+  const focusField = panelParams.focusField ?? FIELD_DISK_THRESHOLD;
 
   const { data: cluster } = useQuery({
     queryKey: [queryKeys.clusters, clusterName],
@@ -33,12 +38,14 @@ const ConfigureClusterPanel: FC = () => {
   };
 
   interface ConfigureClusterFormValues {
+    description: string;
     diskThreshold: number;
     memoryThreshold: number;
   }
 
   const handleSubmit = (values: ConfigureClusterFormValues) => {
     const payload = {
+      description: values.description,
       disk_threshold: values.diskThreshold,
       memory_threshold: values.memoryThreshold,
     };
@@ -64,6 +71,7 @@ const ConfigureClusterPanel: FC = () => {
 
   const formik = useFormik<ConfigureClusterFormValues>({
     initialValues: {
+      description: cluster?.description ?? "",
       diskThreshold: cluster?.disk_threshold ?? 80,
       memoryThreshold: cluster?.memory_threshold ?? 80,
     },
@@ -91,27 +99,38 @@ const ConfigureClusterPanel: FC = () => {
           >
             <Form onSubmit={() => void formik.submitForm()} className="form">
               <Input
-                name="diskThreshold"
+                name={FIELD_DISK_THRESHOLD}
                 type="number"
                 label="Disk threshold"
                 placeholder="Enter value"
                 min={1}
                 max={100}
-                autoFocus
+                autoFocus={focusField === FIELD_DISK_THRESHOLD}
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
                 value={formik.values.diskThreshold}
               />
               <Input
-                name="memoryThreshold"
+                name={FIELD_MEMORY_THRESHOLD}
                 type="number"
                 label="Memory threshold"
                 placeholder="Enter value"
                 min={1}
                 max={100}
+                autoFocus={focusField === FIELD_MEMORY_THRESHOLD}
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
                 value={formik.values.memoryThreshold}
+              />
+              <Input
+                name={FIELD_DESCRIPTION}
+                type="text"
+                label="Description"
+                placeholder="Enter description"
+                autoFocus={focusField === FIELD_DESCRIPTION}
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.description}
               />
             </Form>
           </ScrollableContainer>
