@@ -22,14 +22,14 @@ import {
   ClusterNodeStatus,
   ClusterPercentiles,
 } from "types/cluster";
-import EnrolClusterModal from "pages/clusters/EnrolClusterModal";
+import EnrollClusterModal from "pages/clusters/EnrollClusterModal";
 import type { Location } from "react-router-dom";
 import { fetchTokens } from "api/tokens";
 import usePanelParams, { panels } from "context/usePanelParams";
-import EnrolClusterPanel from "pages/clusters/EnrolClusterPanel";
+import EnrollClusterPanel from "pages/clusters/EnrollClusterPanel";
 import BulkRemoveClusterButton from "pages/clusters/actions/BulkRemoveClusterButton";
 import BulkRevokeTokenButton from "pages/clusters/actions/BulkRevokeTokenButton";
-import EnrolClusterButton from "pages/clusters/actions/EnrolClusterButton";
+import EnrollClusterButton from "pages/clusters/actions/EnrollClusterButton";
 import ConfigureClusterPanel from "pages/clusters/ConfigureClusterPanel";
 import BulkConfigureClusterButton from "pages/clusters/actions/BulkConfigureClusterButton";
 import BulkConfigureClusterPanel from "pages/clusters/BulkConfigureClusterPanel";
@@ -214,7 +214,7 @@ const ClusterList: FC = () => {
 
             <PageHeader.BaseActions>
               {hasCreateInHeader && (
-                <EnrolClusterButton className="u-float-right" />
+                <EnrollClusterButton className="u-float-right" />
               )}
             </PageHeader.BaseActions>
           </PageHeader>
@@ -245,7 +245,7 @@ const ClusterList: FC = () => {
         </Row>
       </CustomLayout>
 
-      {panelParams.panel === panels.enrolCluster && <EnrolClusterPanel />}
+      {panelParams.panel === panels.enrollCluster && <EnrollClusterPanel />}
       {panelParams.panel === panels.configureCluster && (
         <ConfigureClusterPanel />
       )}
@@ -255,7 +255,7 @@ const ClusterList: FC = () => {
 
       {isOpen && createdCluster && (
         <Portal>
-          <EnrolClusterModal
+          <EnrollClusterModal
             onClose={closePortal}
             token={createdCluster.token}
             name={createdCluster.name}

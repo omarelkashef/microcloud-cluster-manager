@@ -17,7 +17,7 @@ import SelectableMainTable from "components/SelectableMainTable";
 import SelectedTableNotification from "components/SelectedTableNotification";
 import ScrollableTable from "components/ScrollableTable";
 import ClusterActions from "pages/clusters/ClusterActions";
-import EnrolClusterButton from "pages/clusters/actions/EnrolClusterButton";
+import EnrollClusterButton from "pages/clusters/actions/EnrollClusterButton";
 import usePanelParams from "context/usePanelParams";
 
 type Props = {
@@ -146,7 +146,7 @@ const ClusterListActive: FC<Props> = ({
             title="No active clusters found"
           >
             <p>There are no active clusters. Enroll your first cluster!</p>
-            <EnrolClusterButton />
+            <EnrollClusterButton />
           </EmptyState>
         </div>
       ) : (

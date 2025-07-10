@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type cmdEnrol struct {
+type cmdEnroll struct {
 	CFG             *config.Config
 	DB              *database.DB
 	flagDescription string
@@ -22,12 +22,12 @@ type cmdEnrol struct {
 }
 
 // Command returns the subcommand for initializing a MicroCloud.
-func (c *cmdEnrol) Command() *cobra.Command {
+func (c *cmdEnroll) Command() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "enrol",
-		Short:   "Enrol a new remote cluster",
+		Use:     "enroll",
+		Short:   "Enroll a new remote cluster",
 		Long:    "Generates a join token to be consumed by MicroCloud",
-		Example: "microcloud-cluster-manager enrol my-cluster --expire 2042-05-23T17:00:00Z --description 'My Cluster in Quebec'",
+		Example: "microcloud-cluster-manager enroll my-cluster --expire 2042-05-23T17:00:00Z --description 'My Cluster in Quebec'",
 		RunE:    c.Run,
 	}
 
@@ -37,8 +37,8 @@ func (c *cmdEnrol) Command() *cobra.Command {
 	return cmd
 }
 
-// Run execs the enrol command to create a new remote cluster join token.
-func (c *cmdEnrol) Run(cmd *cobra.Command, args []string) error {
+// Run execs the enroll command to create a new remote cluster join token.
+func (c *cmdEnroll) Run(cmd *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return cmd.Help()
 	}

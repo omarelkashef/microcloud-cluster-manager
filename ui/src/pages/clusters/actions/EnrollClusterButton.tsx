@@ -7,19 +7,19 @@ interface Props {
   className?: string;
 }
 
-const EnrolClusterButton: FC<Props> = ({ className }) => {
+const EnrollClusterButton: FC<Props> = ({ className }) => {
   const panelParams = usePanelParams();
 
   return (
     <ActionButton
-      onClick={panelParams.openEnrolCluster}
+      onClick={panelParams.openEnrollCluster}
       appearance="positive"
       className={classnames("u-no-margin--bottom has-icon", className)}
     >
       <Icon name="plus" light />
-      <span>Enrol cluster</span>
+      <span>Enroll cluster</span>
     </ActionButton>
   );
 };
 
-export default EnrolClusterButton;
+export default EnrollClusterButton;

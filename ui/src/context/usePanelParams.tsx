@@ -6,13 +6,13 @@ export interface PanelHelper {
   clusters: string | null;
   focusField: string | null;
   clear: () => void;
-  openEnrolCluster: () => void;
+  openEnrollCluster: () => void;
   openConfigureCluster: (cluster?: string, focusField?: string) => void;
   openBulkConfigureCluster: (clusterNames: string[]) => void;
 }
 
 export const panels = {
-  enrolCluster: "enrol-cluster",
+  enrollCluster: "enroll-cluster",
   configureCluster: "configure-cluster",
   bulkConfigureCluster: "configure-cluster-bulk",
 };
@@ -60,8 +60,8 @@ const usePanelParams = (): PanelHelper => {
       clearParams();
     },
 
-    openEnrolCluster: () => {
-      setPanelParams(panels.enrolCluster);
+    openEnrollCluster: () => {
+      setPanelParams(panels.enrollCluster);
     },
 
     openConfigureCluster: (cluster?: string, focusField?: string) => {

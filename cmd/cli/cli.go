@@ -61,11 +61,11 @@ func Run() (err error) {
 
 	app.PersistentFlags().BoolVarP(&commonCmd.FlagHelp, "help", "h", false, "Print help")
 
-	var cmdEnrol = cmdEnrol{
+	var cmdEnroll = cmdEnroll{
 		CFG: cfg,
 		DB:  db,
 	}
-	app.AddCommand(cmdEnrol.Command())
+	app.AddCommand(cmdEnroll.Command())
 
 	err = app.Execute()
 	if err != nil {

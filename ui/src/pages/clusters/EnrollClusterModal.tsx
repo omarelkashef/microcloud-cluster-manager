@@ -16,7 +16,7 @@ interface Props {
   expiry: string;
 }
 
-const EnrolClusterModal: FC<Props> = ({ onClose, token, name, expiry }) => {
+const EnrollClusterModal: FC<Props> = ({ onClose, token, name, expiry }) => {
   const [copied, setCopied] = useState(false);
   const command = `microcloud cluster-manager join ${token}`;
 
@@ -104,4 +104,4 @@ const EnrolClusterModal: FC<Props> = ({ onClose, token, name, expiry }) => {
   );
 };
 
-export default EnrolClusterModal;
+export default EnrollClusterModal;

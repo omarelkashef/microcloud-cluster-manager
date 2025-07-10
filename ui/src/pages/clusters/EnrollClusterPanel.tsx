@@ -23,7 +23,7 @@ import SidePanel from "components/SidePanel";
 import usePanelParams from "context/usePanelParams";
 import { fetchClusters } from "api/clusters";
 
-const EnrolClusterPanel: FC = () => {
+const EnrollClusterPanel: FC = () => {
   const panelParams = usePanelParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -97,7 +97,7 @@ const EnrolClusterPanel: FC = () => {
     <>
       <SidePanel isOverlay loading={false} hasError={false}>
         <SidePanel.Header>
-          <SidePanel.HeaderTitle>Enrol cluster</SidePanel.HeaderTitle>
+          <SidePanel.HeaderTitle>Enroll cluster</SidePanel.HeaderTitle>
         </SidePanel.Header>
         <NotificationRow className="u-no-padding" />
         <SidePanel.Content className="u-no-padding">
@@ -133,4 +133,4 @@ const EnrolClusterPanel: FC = () => {
   );
 };
 
-export default EnrolClusterPanel;
+export default EnrollClusterPanel;

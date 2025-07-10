@@ -14,7 +14,7 @@ import ScrollableTable from "components/ScrollableTable";
 import SelectedTableNotification from "components/SelectedTableNotification";
 import SelectableMainTable from "components/SelectableMainTable";
 import RevokeTokenButton from "pages/clusters/actions/RevokeTokenButton";
-import EnrolClusterButton from "pages/clusters/actions/EnrolClusterButton";
+import EnrollClusterButton from "pages/clusters/actions/EnrollClusterButton";
 
 type Props = {
   processingNames: string[];
@@ -128,7 +128,7 @@ const ClusterListTokens: FC<Props> = ({
             title="No tokens found"
           >
             <p>There are no join tokens. Enroll a cluster to create one.</p>
-            <EnrolClusterButton />
+            <EnrollClusterButton />
           </EmptyState>
         </div>
       ) : (
