@@ -13,7 +13,7 @@ require (
 	github.com/pressly/goose/v3 v3.25.0
 	github.com/prometheus/common v0.66.1
 	github.com/prometheus/prometheus v0.305.0
-	github.com/spf13/cobra v1.9.1
+	github.com/spf13/cobra v1.10.1
 	github.com/zitadel/oidc/v3 v3.44.0
 	go.uber.org/automaxprocs v1.6.0
 	go.uber.org/zap v1.27.0
@@ -56,7 +56,7 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/sethvargo/go-retry v0.3.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
-	github.com/spf13/pflag v1.0.6 // indirect
+	github.com/spf13/pflag v1.0.9 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/zitadel/logging v0.6.2 // indirect
 	github.com/zitadel/schema v1.3.1 // indirect
