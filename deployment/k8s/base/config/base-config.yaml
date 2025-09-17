@@ -20,7 +20,8 @@ data:
   VERSION: base
   MANAGEMENT_API_TLS_PATH: /etc/ssl/management-api
   CLUSTER_CONNECTOR_TLS_PATH: /etc/ssl/cluster-connector
-  CLUSTER_CONNECTOR_ADDRESS: base
+  CLUSTER_CONNECTOR_DOMAIN: base
+  CLUSTER_CONNECTOR_PORT: base
   # oidc configs
   OIDC_CLIENT_ID: base
   OIDC_ISSUER: base

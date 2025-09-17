@@ -29,6 +29,13 @@ juju config microcloud-cluster-manager-k8s oidc-client-id=ababab
 juju config microcloud-cluster-manager-k8s oidc-audience=https://example.com/api/v2/
 ```
 
+Configure the domain for the management api and the cluster connector:
+
+```
+juju config microcloud-cluster-manager-k8s management-api-domain=ma.lxd-cm.local
+juju config microcloud-cluster-manager-k8s cluster-connector-domain=cc.lxd-cm.local
+```
+
 You might want to set a domain for your traefic controller
 ```
 juju config traefik-k8s external_hostname=example.com
