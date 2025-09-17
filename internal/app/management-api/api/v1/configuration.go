@@ -60,10 +60,15 @@ func mapEnvToConfig(cfg config.Config) models.Configuration {
 			Title:       "API Version",
 			Description: "The version of the API being used.",
 		},
-		ClusterConnectorAddress: models.ConfigData{
-			Value:       cfg.ClusterConnectorAddress,
-			Title:       "Cluster Connector Address",
-			Description: "The host address for the cluster-connector API.",
+		ClusterConnectorDomain: models.ConfigData{
+			Value:       cfg.ClusterConnectorDomain,
+			Title:       "Cluster Connector Domain",
+			Description: "The host domain for the cluster-connector API.",
+		},
+		ClusterConnectorPort: models.ConfigData{
+			Value:       cfg.ClusterConnectorPort,
+			Title:       "Cluster Connector Port",
+			Description: "The host port for the cluster-connector API.",
 		},
 		OIDCClientID: models.ConfigData{
 			Value:       cfg.OIDCClientID,

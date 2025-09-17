@@ -249,7 +249,7 @@ func remoteClusterStatusPost(rc types.RouteConfig) types.EndpointHandler {
 		// TODO: determine next update time
 		return response.SyncResponse(true, models.RemoteClusterStatusPostResponse{
 			NextUpdateInSeconds:   time.Now().Local().String(),
-			ClusterManagerAddress: rc.Env.ClusterConnectorAddress,
+			ClusterManagerAddress: rc.Env.ClusterConnectorDomain + ":" + rc.Env.ClusterConnectorPort,
 		}).Render(w, r)
 	}
 }

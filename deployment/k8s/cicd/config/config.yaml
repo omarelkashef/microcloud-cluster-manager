@@ -5,7 +5,8 @@ metadata:
     app: config
   name: config
 data:
-  CLUSTER_CONNECTOR_ADDRESS: "cc.lxd-cm.local:30000"
+  CLUSTER_CONNECTOR_DOMAIN: "cc.lxd-cm.local"
+  CLUSTER_CONNECTOR_PORT: "30000"
   CLUSTER_CONNECTOR_TLS_PATH: /etc/ssl/cluster-connector
   MANAGEMENT_API_TLS_PATH: /etc/ssl/management-api
   DB_DISABLE_TLS: "true"

@@ -73,7 +73,7 @@ func (c *cmdEnroll) Run(cmd *cobra.Command, args []string) error {
 	}
 
 	// get the cluster-connector service address for the token payload
-	clusterConnectorAddress := c.CFG.ClusterConnectorAddress
+	clusterConnectorAddress := c.CFG.ClusterConnectorDomain + ":" + c.CFG.ClusterConnectorPort
 
 	token := models.RemoteClusterTokenBody{
 		Secret:      secret,

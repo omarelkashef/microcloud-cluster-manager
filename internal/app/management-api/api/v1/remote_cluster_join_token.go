@@ -76,7 +76,7 @@ func tokenPost(rc types.RouteConfig) types.EndpointHandler {
 		}
 
 		// get the cluster-connector service address for the token payload
-		clusterConnectorAddress := rc.Env.ClusterConnectorAddress
+		clusterConnectorAddress := rc.Env.ClusterConnectorDomain + ":" + rc.Env.ClusterConnectorPort
 
 		token := models.RemoteClusterTokenBody{
 			Secret:      secret,

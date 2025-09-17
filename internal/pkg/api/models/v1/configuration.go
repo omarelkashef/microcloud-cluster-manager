@@ -9,14 +9,15 @@ type ConfigData struct {
 
 // Configuration represents application environment data shown to users.
 type Configuration struct {
-	APIVersion              ConfigData `json:"api_version"`
-	ClusterConnectorAddress ConfigData `json:"cluster_connector_address"`
-	OIDCClientID            ConfigData `json:"oidc_client_id"`
-	OIDCIssuer              ConfigData `json:"oidc_issuer"`
-	OIDCAudience            ConfigData `json:"oidc_audience"`
-	DBConnectionString      ConfigData `json:"db_connection_string"`
-	DBMaxIdleConns          ConfigData `json:"db_max_idle_conns"`
-	DBMaxOpenConns          ConfigData `json:"db_max_open_conns"`
-	GrafanaBaseURL          ConfigData `json:"grafana_base_url"`
-	PrometheusBaseURL       ConfigData `json:"prometheus_base_url"`
+	APIVersion             ConfigData `json:"api_version"`
+	ClusterConnectorDomain ConfigData `json:"cluster_connector_domain"`
+	ClusterConnectorPort   ConfigData `json:"cluster_connector_port"`
+	OIDCClientID           ConfigData `json:"oidc_client_id"`
+	OIDCIssuer             ConfigData `json:"oidc_issuer"`
+	OIDCAudience           ConfigData `json:"oidc_audience"`
+	DBConnectionString     ConfigData `json:"db_connection_string"`
+	DBMaxIdleConns         ConfigData `json:"db_max_idle_conns"`
+	DBMaxOpenConns         ConfigData `json:"db_max_open_conns"`
+	GrafanaBaseURL         ConfigData `json:"grafana_base_url"`
+	PrometheusBaseURL      ConfigData `json:"prometheus_base_url"`
 }

@@ -15,12 +15,13 @@ import (
 // Config represents the configurable environment variables for all services within the application.
 type Config struct {
 	// system configs
-	Version                 string
-	APIVersion              string
-	ManagementAPICert       *shared.CertInfo
-	ClusterConnectorCert    *shared.CertInfo
-	ClusterConnectorAddress string
-	TestMode                bool
+	Version                string
+	APIVersion             string
+	ManagementAPICert      *shared.CertInfo
+	ClusterConnectorCert   *shared.CertInfo
+	ClusterConnectorDomain string
+	ClusterConnectorPort   string
+	TestMode               bool
 	// db configs
 	database.DBConfig
 	// api configs
@@ -106,25 +107,26 @@ func LoadConfig() (*Config, error) {
 	oidcClientID := os.Getenv("OIDC_CLIENT_ID")
 	oidcIssuer := os.Getenv("OIDC_ISSUER")
 	oidcAudience := os.Getenv("OIDC_AUDIENCE")
-	if oidcClientID == "" || oidcIssuer == "" || oidcAudience == "" {
-		return nil, fmt.Errorf("OIDC_CLIENT_ID, OIDC_ISSUER, and OIDC_AUDIENCE are required")
+	if oidcClientID == "" || oidcIssuer == "" {
+		return nil, fmt.Errorf("OIDC_CLIENT_ID and OIDC_ISSUER are required")
 	}
 
 	grafanaBaseURL := os.Getenv("GRAFANA_BASE_URL")
 	prometheusBaseURL := os.Getenv("PROMETHEUS_BASE_URL")
 
 	return &Config{
-		Version:                 getEnvOrDefault("VERSION", "development"),
-		APIVersion:              getEnvOrDefault("API_VERSION", "1.0"),
-		ServerHost:              getEnvOrDefault("SERVER_HOST", "0.0.0.0"),
-		ServerPort:              getEnvOrDefault("SERVER_PORT", "9000"),
-		StatusPort:              getEnvOrDefault("STATUS_PORT", "10000"),
-		TestMode:                getEnvOrDefault("TEST_MODE", "false") == "true",
-		AllowedOrigins:          []string{"*"},
-		ReadTimeout:             10,
-		WriteTimeout:            10,
-		IdleTimeout:             60,
-		ClusterConnectorAddress: getEnvOrDefault("CLUSTER_CONNECTOR_ADDRESS", "cc.lxd-cm.local:30000"),
+		Version:                getEnvOrDefault("VERSION", "development"),
+		APIVersion:             getEnvOrDefault("API_VERSION", "1.0"),
+		ServerHost:             getEnvOrDefault("SERVER_HOST", "0.0.0.0"),
+		ServerPort:             getEnvOrDefault("SERVER_PORT", "9000"),
+		StatusPort:             getEnvOrDefault("STATUS_PORT", "10000"),
+		TestMode:               getEnvOrDefault("TEST_MODE", "false") == "true",
+		AllowedOrigins:         []string{"*"},
+		ReadTimeout:            10,
+		WriteTimeout:           10,
+		IdleTimeout:            60,
+		ClusterConnectorDomain: getEnvOrDefault("CLUSTER_CONNECTOR_DOMAIN", "cc.lxd-cm.local"),
+		ClusterConnectorPort:   getEnvOrDefault("CLUSTER_CONNECTOR_PORT", "30000"),
 		DBConfig: database.DBConfig{
 			DBPort:         getEnvOrDefault("DB_PORT", "5432"),
 			DBUser:         getEnvOrDefault("DB_USER", "admin"),
