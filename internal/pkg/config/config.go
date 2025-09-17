@@ -106,8 +106,8 @@ func LoadConfig() (*Config, error) {
 	oidcClientID := os.Getenv("OIDC_CLIENT_ID")
 	oidcIssuer := os.Getenv("OIDC_ISSUER")
 	oidcAudience := os.Getenv("OIDC_AUDIENCE")
-	if oidcClientID == "" || oidcIssuer == "" || oidcAudience == "" {
-		return nil, fmt.Errorf("OIDC_CLIENT_ID, OIDC_ISSUER, and OIDC_AUDIENCE are required")
+	if oidcClientID == "" || oidcIssuer == "" {
+		return nil, fmt.Errorf("OIDC_CLIENT_ID and OIDC_ISSUER are required")
 	}
 
 	grafanaBaseURL := os.Getenv("GRAFANA_BASE_URL")
