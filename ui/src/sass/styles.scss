@@ -88,3 +88,7 @@ body {
 .u-padding-top {
   padding-top: $spv--x-small;
 }
+
+.doughnut-chart__segment {
+  shape-rendering: crispedges;
+}

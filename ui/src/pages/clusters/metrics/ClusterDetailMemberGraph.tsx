@@ -50,6 +50,7 @@ const ClusterDetailMemberGraph: FC<Props> = ({ cluster }: Props) => {
             value: evacuatedMembers,
           },
           { color: "#C7162B", tooltip: "Blocked", value: blockedMembers },
+          { color: "#D3E4ED", tooltip: "", value: 0 },
         ]}
         size={150}
       />

@@ -46,6 +46,7 @@ const ClusterDetailInstanceGraph: FC<Props> = ({ cluster }: Props) => {
           },
           { color: "#24598f", tooltip: "Frozen", value: frozenInstances },
           { color: "#C7162B", tooltip: "Error", value: errorInstances },
+          { color: "#D3E4ED", tooltip: "", value: 0 },
         ]}
         size={150}
       />
