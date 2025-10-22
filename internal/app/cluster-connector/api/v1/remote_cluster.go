@@ -21,6 +21,7 @@ import (
 	"github.com/golang/snappy"
 	"github.com/jmoiron/sqlx"
 	"github.com/prometheus/common/expfmt"
+	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/prompb"
 )
 
@@ -256,7 +257,7 @@ func remoteClusterStatusPost(rc types.RouteConfig) types.EndpointHandler {
 
 // Parse the incoming Prometheus metrics (text format).
 func parsePrometheusMetrics(metricsText string, jobName string) ([]prompb.TimeSeries, error) {
-	var parser expfmt.TextParser
+	parser := expfmt.NewTextParser(model.LegacyValidation)
 	metricFamilies, err := parser.TextToMetricFamilies(bytes.NewReader([]byte(metricsText)))
 	if err != nil {
 		return nil, err

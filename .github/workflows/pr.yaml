@@ -15,16 +15,16 @@ jobs:
       pull-requests: read # to get list of commits from the PR
     runs-on: ubuntu-latest
     steps:
-      
+
       - name: Check if CLA signed
         uses: canonical/has-signed-canonical-cla@v2
-      
+
       - name: Get PR Commits
         id: 'get-pr-commits'
         uses: tim-actions/get-pr-commits@master
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Check that all commits are signed-off
         uses: tim-actions/dco@master
         with:
@@ -34,15 +34,15 @@ jobs:
     name: Lint Backend
     runs-on: ubuntu-latest
     steps:
-      
+
       - name: Checkout
         uses: actions/checkout@v5
-      
+
       - name: Install Go
         uses: actions/setup-go@v6
         with:
-          go-version: 1.24.x
-      
+          go-version: 1.25.x
+
       - name: Lint Backend
         run: make lint-backend
 
@@ -50,31 +50,31 @@ jobs:
     name: Lint UI
     runs-on: ubuntu-latest
     steps:
-      
+
       - name: Checkout
         uses: actions/checkout@v5
-      
+
       - name: Install Node
         uses: actions/setup-node@v6
         with:
           node-version: 22
-      
+
       - name: Install dependencies
         run: cd ui && yarn install --immutable
-      
+
       - name: Lint scss
         run: make lint-ui-scss
-      
+
       - name: Lint JS
         run: make lint-ui-js
-  
+
   build-rock:
     name: Build Rock
     runs-on: ubuntu-latest
     outputs:
       image-name: ${{ steps.rock-to-docker.outputs.image-name }}
     steps:
-      
+
       - name: Checkout
         uses: actions/checkout@v5
 
@@ -82,22 +82,22 @@ jobs:
         uses: canonical/setup-lxd@v0.1.3
         with:
           channel: 5.21/stable
-      
+
       - name: Run Rockcraft
         run: |
           export PATH=$PATH:/snap/bin
           sudo snap install --channel latest/stable --classic rockcraft
           rockcraft pack --verbosity debug
-      
+
       - name: Move rock to docker daemon
         id: rock-to-docker
         run: |
           make rock-to-docker
           echo "image-name=$(make docker-image-name)" >> $GITHUB_OUTPUT
-      
+
       - name: Convert docker image to tarbal
         run: make docker-image-to-tarball
-      
+
       - name: Upload image tarball
         uses: actions/upload-artifact@v4
         with:
@@ -110,16 +110,16 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-rock
     steps:
-      
+
       - name: Checkout
         uses: actions/checkout@v5
-      
+
       - name: Download image
         uses: actions/download-artifact@v5
         with:
           name: docker-image
           path: docker-image
-      
+
       - name: Setup microk8s cluster
         uses: balchua/microk8s-actions@v0.4.3
         with:
@@ -130,12 +130,12 @@ jobs:
 
       - name: Deploy k8s resources
         run: deployment/k8s/cicd/deploy-cos-on-microk8s.sh ${{ needs.build-rock.outputs.image-name }}
-      
+
       - name: Install Go
         uses: actions/setup-go@v6
         with:
-          go-version: 1.24.x
-      
+          go-version: 1.25.x
+
       - name: Run backend E2E tests
         run: make test-e2e
 
@@ -148,16 +148,16 @@ jobs:
         browser: ["chromium", "firefox"]
     needs: build-rock
     steps:
-      
+
       - name: Checkout
         uses: actions/checkout@v5
-      
+
       - name: Download image
         uses: actions/download-artifact@v5
         with:
           name: docker-image
           path: docker-image
-      
+
       - name: Setup microk8s cluster
         uses: balchua/microk8s-actions@v0.4.3
         with:
@@ -165,22 +165,22 @@ jobs:
           # load local rock image into k8s cluster
           # https://microk8s.io/docs/sideload
           sideload-images-path: '${{ github.workspace }}/docker-image'
-      
+
       - name: Deploy k8s resources
         run: deployment/k8s/cicd/deploy-cos-on-microk8s.sh ${{ needs.build-rock.outputs.image-name }}
-      
+
       - name: Install Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 22
-      
+
       - name: Install dependencies
         run: |
           set -eux
           cd ui
           yarn install --immutable
           npx playwright install --with-deps ${{ matrix.browser }}
-      
+
       - name: Setup for tests
         shell: bash
         env:
@@ -189,10 +189,10 @@ jobs:
         run: |
           echo "OIDC_USER=$OIDC_USER" >> ui/.env.local
           echo "OIDC_PASSWORD=$OIDC_PASSWORD" >> ui/.env.local
-      
+
       - name: Run Playwright tests
         run: make test-ui-e2e PROJECT=${{ matrix.browser }}
-      
+
       - name: Upload ${{ matrix.browser }} blob reports to be merged
         if: always()
         uses: actions/upload-artifact@v4
@@ -201,16 +201,16 @@ jobs:
           path: ui/blob-report
           retention-days: 1
 
-  merge-ui-e2e-reports: 
+  merge-ui-e2e-reports:
     name: Merge UI E2E reports
     if: always()
     needs: ui-e2e
     runs-on: ubuntu-latest
     steps:
-      
+
       - name: Checkout
         uses: actions/checkout@v5
-      
+
       - name: Install Node.js
         uses: actions/setup-node@v6
         with:
@@ -222,11 +222,11 @@ jobs:
           path: blob-reports
           pattern: blob-report-*
           merge-multiple: true
-      
+
       # NOTE: there is no need to install playwright dependencies since we only need to merge reports here
       - name: Merge into HTML Report
         run: npx playwright merge-reports --reporter html ./blob-reports
-      
+
       - name: Upload merged report
         uses: actions/upload-artifact@v4
         if: always()
