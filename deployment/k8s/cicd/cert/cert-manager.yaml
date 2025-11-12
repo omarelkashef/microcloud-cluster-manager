@@ -12108,6 +12108,7 @@ rules:
     verbs: ["get", "create", "update", "patch"]
   - apiGroups: ["admissionregistration.k8s.io"]
     resources: ["validatingwebhookconfigurations", "mutatingwebhookconfigurations"]
+    resourceNames: [ "cert-manager-webhook" ]
     verbs: ["get", "list", "watch", "update", "patch"]
   - apiGroups: ["apiregistration.k8s.io"]
     resources: ["apiservices"]
