@@ -31,7 +31,7 @@ juju config microcloud-cluster-manager-k8s oidc-client-id=ababab
 juju config microcloud-cluster-manager-k8s oidc-audience=https://example.com/api/v2/
 ```
 
-Configure the domain for the management api and the cluster connector, this can also be exposed IP addresses but using domains is recommended:
+Configure the domain for the management api and the cluster connector. You can also use externally exposed IP addresses, but using domains are recommended:
 
 ```
 juju config microcloud-cluster-manager-k8s management-api-domain=ma.microcloud-cm-example.local
