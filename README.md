@@ -24,21 +24,20 @@ juju integrate traefik-k8s:traefik-route microcloud-cluster-manager-k8s
 For authentication you need an OIDC provider. You can use Auth0, Ory Hydra, Keycloak, Microsoft Entra among others. See [LXD documentation on OIDC](https://documentation.ubuntu.com/lxd/latest/howto/oidc/) for how to configure the provider side. The callback path is `/oidc/callback`, but in contrast to LXD it must be without the port 8443 as cluster manager listens on the default port 443.
 
 Configure the cluster manager charm with your auth provider:
-
 ```
 juju config microcloud-cluster-manager-k8s oidc-issuer=https://example.com/
 juju config microcloud-cluster-manager-k8s oidc-client-id=ababab
 juju config microcloud-cluster-manager-k8s oidc-audience=https://example.com/api/v2/
 ```
 
-Configure the domain for the management api and the cluster connector. You can also use externally exposed IP addresses, but using domains are recommended:
+Configure the domain for the management api and the cluster connector. You can also use externally exposed IP addresses, but using domains are recommended. The `management-api-domain` is the address for the management interface and its api. The `cluster-connector-domain` is used by clusters to send heartbeats to the cluster manager, it does not need to be exposed to public internet.
 
 ```
-juju config microcloud-cluster-manager-k8s management-api-domain=ma.microcloud-cm-example.local
-juju config microcloud-cluster-manager-k8s cluster-connector-domain=cc.microcloud-cm-example.local
+juju config microcloud-cluster-manager-k8s management-api-domain=example.com
+juju config microcloud-cluster-manager-k8s cluster-connector-domain=cluster-connector.example.com
 ```
 
-You might want to set a domain for your traefic controller
+You might want to set the domain for your traefic controller
 ```
 juju config traefik-k8s external_hostname=example.com
 ```
