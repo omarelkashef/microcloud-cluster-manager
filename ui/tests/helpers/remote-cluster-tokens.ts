@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import { expect } from "@playwright/test";
+import { expect } from "../fixtures/test-extension";
 
 export const createRemoteClusterToken = async (
   page: Page,

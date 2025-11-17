@@ -95,6 +95,23 @@ clean-dev:
 	docker images -f "dangling=true" -q | xargs -r docker rmi
 	docker images --filter=reference='microcloud-cluster-manager:*' -q | xargs -I {} docker rmi {} -f
 
+.PHONY: clean
+clean:
+	rm -rf cmd/app-coverage
+	rm -rf internal/app/management-api/api/v1/static/ui
+	rm -rf test/coverage
+	rm -rf test/keys
+	rm -rf ui/blog-report
+	rm -rf ui/build
+	rm -rf ui/coverage
+	rm -rf ui/keys
+	rm -rf ui/node_modules
+	rm -rf ui/playwright-report
+	rm -rf ui/test-results
+	rm -rf ui/.dotrun.json
+	rm -rf ui/haproxy-local.cfg
+	rm -rf vendor
+
 .PHONY: dev
 dev: start-cluster dev-juju-setup dev-k8s-deploy
 
@@ -179,6 +196,10 @@ copy-ui:
 .PHONY: build
 build: build-ui copy-ui
 	$(GO) build -C cmd -o $(GO_BIN) ./
+
+.PHONY: build-coverage
+build-coverage: build-ui copy-ui
+	$(GO) build -C cmd -cover -o app-coverage ./
 
 # ====================================================================
 # CI k8s deployment utilities

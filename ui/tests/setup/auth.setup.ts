@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import { expect, test as setup } from "@playwright/test";
+import { expect, test as setup } from "../fixtures/test-extension";
 import { authFile } from "../fixtures/constants";
 
 const loginUser = async (page: Page, sso: boolean) => {
