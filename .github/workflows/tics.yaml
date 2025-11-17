@@ -54,10 +54,10 @@ jobs:
         retention-days: 1
 
     - name: Produce TICS report
-      shell: bash
-      run: |
-        set -x
-        export TICSAUTHTOKEN=${{ secrets.TICSAUTHTOKEN }}
-        # need to source .profile, or TICSQServer command won't be found
-        source ~/.profile
-        TICSQServer -project microcloud-cluster-manager -tmpdir /tmp/tics -branchdir .
+      uses: tiobe/tics-github-action@v3
+      with:
+        mode: qserver
+        project: microcloud-cluster-manager
+        viewerUrl: https://canonical.tiobe.com/tiobeweb/TICS/api/cfg?name=GoProjects
+        ticsAuthToken: ${{ secrets.TICSAUTHTOKEN }}
+        installTics: true
