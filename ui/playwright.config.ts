@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import path from "path";
 import { authFile } from "./tests/fixtures/constants";
 import { fileURLToPath } from "url";
+import type { TestOptions } from "./tests/fixtures/test-extension";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 // provide environment variables from .env.local to all tests
@@ -12,7 +13,7 @@ dotenv.config({ path: path.resolve(__dirname, ".env.local") });
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
-const config: PlaywrightTestConfig = {
+const config: PlaywrightTestConfig<TestOptions> = {
   testDir: "./tests",
   /* Maximum time one test can run for. */
   timeout: 120_000,
@@ -57,12 +58,17 @@ const config: PlaywrightTestConfig = {
     // Setup project
     {
       name: "setup-chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+          ...devices["Desktop Chrome"],
+          hasCoverage: true,
+      },
       testMatch: /.*\.setup\.ts/,
     },
     {
       name: "setup-firefox",
-      use: { ...devices["Desktop Firefox"] },
+      use: {
+          ...devices["Desktop Firefox"],
+      },
       testMatch: /.*\.setup\.ts/,
     },
     {
@@ -70,6 +76,7 @@ const config: PlaywrightTestConfig = {
       use: {
         ...devices["Desktop Chrome"],
         storageState: authFile,
+        hasCoverage: true,
       },
       dependencies: ["setup-chromium"],
     },

@@ -117,10 +117,6 @@ func tokenPost(rc types.RouteConfig) types.EndpointHandler {
 			return response.SmartError(err).Render(w, r)
 		}
 
-		if err != nil {
-			return response.InternalError(err).Render(w, r)
-		}
-
 		return response.SyncResponse(true, models.RemoteClusterTokenPostResponse{Token: encodedToken}).Render(w, r)
 	}
 }

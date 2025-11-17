@@ -1,5 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
-import { expect } from "@playwright/test";
+import { expect } from "../fixtures/test-extension";
 import { randomNameSuffix } from "./name";
 
 export const randomClusterName = (): string => {

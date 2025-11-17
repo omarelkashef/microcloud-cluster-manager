@@ -24,6 +24,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v5
 
+    - name: Install Dotrun
+      run: sudo pip3 install dotrun
+
     - name: Install Node for frontend dependencies
       uses: actions/setup-node@v6
       with:

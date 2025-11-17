@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 # setup /etc/hosts entries for local domains
 make add-hosts
 
@@ -72,15 +74,35 @@ sleep 10
 echo "running golang e2e tests..."
 go test -count=1 -v ./test/e2e
 
+# run ui unit tests
+echo "running ui unit tests..."
+rm -rf ui/coverage
+cd ui
+yarn test-unit-coverage
+cd ..
+
 # run ui e2e tests
-echo "running playwright e2e tests..."
+echo "running ui e2e tests..."
 echo "OIDC_USER=lxd-site-manager-e2e-tests@example.org" >> ui/.env.local
 echo "OIDC_PASSWORD=abcDEF111" >> ui/.env.local
 cd ui
+dotrun &
+curl --head --fail --retry-delay 2 --retry 100 --retry-connrefused --insecure https://ma.lxd-cm.local:8414
 npx playwright install --with-deps chromium
+unset CI # ensure we run against dotrun ui, so the correct source maps and paths are used
+yarn test-e2e-coverage
+export CI=1
 cd ..
-export CI=true
-make test-ui-e2e PROJECT=chromium
+DOTRUN_CONTAINER_ID=$(docker ps | grep dotrun | awk '{print $1}' | tail -n1)
+docker stop $DOTRUN_CONTAINER_ID
+
+# combine ui coverage reports
+echo "combining ui coverage reports..."
+cd ui
+yarn test-combine-coverage-reports
+cd ..
+cp ui/coverage/playwright-report/cobertura-coverage.xml test/coverage/coverage-ui.xml
+cp -R ui/coverage/playwright-report test/coverage
 
 # kill app processes
 echo "stopping services..."
@@ -101,5 +123,11 @@ echo "convert coverage report to xml..."
 go install github.com/boumenot/gocover-cobertura@latest
 go tool covdata textfmt -i="${GOCOVERDIR}" -o "${GOCOVERDIR}"/coverage.out
 gocover-cobertura < "${GOCOVERDIR}"/coverage.out > "${GOCOVERDIR}"/coverage-go.xml
+
+# move coverage reports to .coverage folder for TICS
+rm -rf .coverage
+mkdir -p .coverage
+cp test/coverage/coverage-go.xml .coverage/coverage-go.xml
+cp test/coverage/coverage-ui.xml .coverage/coverage-ui.xml
 
 echo "done."
