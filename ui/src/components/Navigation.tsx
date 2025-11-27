@@ -119,6 +119,21 @@ const Navigation: FC = () => {
                   <div className="u-truncate">{identity?.name}</div>
                 </div>
               </li>
+              <li className="p-side-navigation__item">
+                <a
+                  className="p-side-navigation__link"
+                  title="Report a bug"
+                  href="https://github.com/canonical/microcloud-cluster-manager/issues/new"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Icon
+                    className="is-light p-side-navigation__icon p-side-logout"
+                    name="submit-bug"
+                  />
+                  Report a bug
+                </a>
+              </li>
               <hr className="is-dark navigation-hr" />
               <li className="p-side-navigation__item">
                 <a
