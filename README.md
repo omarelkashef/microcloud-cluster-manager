@@ -80,6 +80,8 @@ juju run --model cos grafana/leader get-admin-password
 
 In the Cluster Manager web interface, you will see a new button on the cluster details page deep linking into the Grafana dashboard.
 
+<img alt="Grafana LXD Dashboard" src="https://assets.ubuntu.com/v1/86529be2-cluster_manager_grafana_cos.png" />
+
 # Development setup
 
 **CAUTION**: The `install-deps` target has been tested only in an Ubuntu Linux environment and may not work on other operating systems. It is strongly recommended that you avoid running this directly on your host machine. Instead, use it as a convenient method for setting up a VM-based development environment.
