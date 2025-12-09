@@ -18,6 +18,7 @@ juju deploy microcloud-cluster-manager-k8s --channel edge --trust
 
 juju integrate postgresql-k8s:database microcloud-cluster-manager-k8s
 juju integrate self-signed-certificates:certificates microcloud-cluster-manager-k8s
+juju integrate self-signed-certificates:send-ca-cert microcloud-cluster-manager-k8s
 juju integrate traefik-k8s:traefik-route microcloud-cluster-manager-k8s
 ```
 
@@ -49,6 +50,11 @@ Now you can access the web ui via https://example.com
 ## Enroll your first cluster
 
 <img width="1435" height="745" alt="image" src="https://github.com/user-attachments/assets/987942d6-d53f-470e-b1a9-081b171a23f7" />
+
+Alternatively, use the enroll-cluster command to create a join token for your first cluster on the command line
+```
+juju run microcloud-cluster-manager-k8s/0 enroll-cluster cluster=foo
+```
 
 ## Explore your first clusters details
 
