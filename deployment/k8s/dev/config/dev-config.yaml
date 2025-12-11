@@ -20,8 +20,9 @@ data:
   CLUSTER_CONNECTOR_DOMAIN: "cc.lxd-cm.local"
   CLUSTER_CONNECTOR_PORT: "30000"
   # oidc configs
-  OIDC_CLIENT_ID: OZSAeCbqAXZid3LL1gRQEkLXP9KlwZtJ
-  OIDC_ISSUER: https://lxd-ui-demo.us.auth0.com/
-  OIDC_AUDIENCE: https://lxd-ui-demo.us.auth0.com/api/v2/
+  OIDC_CLIENT_ID: RYDnMpkygLAMfeo17lU7LYwWGxisRuRR
+  OIDC_CLIENT_SECRET: CNKX4UmrZKZJq5rJy5VM_JfcNPqkws1rwWWQk_q0oyZ8gABARr19ic7xrhPssGA1
+  OIDC_ISSUER: https://dev-h6c02msuggpi6ijh.eu.auth0.com/
+  OIDC_AUDIENCE: https://dev-h6c02msuggpi6ijh.eu.auth0.com/api/v2/
   PROMETHEUS_BASE_URL: http://192.168.1.133/cos-prometheus-0/api/v1/write
   GRAFANA_BASE_URL: http://192.168.1.133:30001/cos-grafana/d/bGY-LSB7k

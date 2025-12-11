@@ -202,8 +202,8 @@ make test-e2e
 The UI e2e tests steps through the OIDC authentication flow using a pre-configured auth0 account. For the tests to work locally, you will need to create a file at the path `ui/.env.local` containing the following variables:
 
 ```
-OIDC_USER="lxd-site-manager-e2e-tests@example.org"
-OIDC_PASSWORD="abcDEF111"
+OIDC_USER="cluster-manager-e2e-tests@example.org"
+OIDC_PASSWORD="cluster-manager-e2e-password"
 ```
 
 If it's the first time you are running UI e2e tests, you should first install playwright and its browsers:

@@ -40,9 +40,10 @@ make build-coverage
 # set environment variables
 export DB_HOST=localhost
 export DB_PASSWORD=admin
-export OIDC_AUDIENCE=https://lxd-ui-demo.us.auth0.com/api/v2/
-export OIDC_CLIENT_ID=OZSAeCbqAXZid3LL1gRQEkLXP9KlwZtJ
-export OIDC_ISSUER=https://lxd-ui-demo.us.auth0.com/
+export OIDC_AUDIENCE=https://dev-h6c02msuggpi6ijh.eu.auth0.com/api/v2/
+export OIDC_CLIENT_ID=RYDnMpkygLAMfeo17lU7LYwWGxisRuRR
+export OIDC_CLIENT_SECRET=CNKX4UmrZKZJq5rJy5VM_JfcNPqkws1rwWWQk_q0oyZ8gABARr19ic7xrhPssGA1
+export OIDC_ISSUER=https://dev-h6c02msuggpi6ijh.eu.auth0.com/
 export MANAGEMENT_API_TLS_PATH="$KEY_DIR"
 export CLUSTER_CONNECTOR_TLS_PATH="$KEY_DIR"
 export TEST_MODE=true
@@ -91,8 +92,8 @@ cd ..
 
 # run ui e2e tests
 echo "running ui e2e tests..."
-echo "OIDC_USER=lxd-site-manager-e2e-tests@example.org" >> ui/.env.local
-echo "OIDC_PASSWORD=abcDEF111" >> ui/.env.local
+echo "OIDC_USER=cluster-manager-e2e-tests@example.org" >> ui/.env.local
+echo "OIDC_PASSWORD=cluster-manager-e2e-password" >> ui/.env.local
 cd ui
 dotrun &
 curl --head --fail --retry-delay 2 --retry 100 --retry-connrefused --insecure https://ma.lxd-cm.local:8414

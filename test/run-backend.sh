@@ -40,9 +40,10 @@ make build
 # set environment variables
 export DB_HOST=localhost
 export DB_PASSWORD=admin
-export OIDC_AUDIENCE=https://lxd-ui-demo.us.auth0.com/api/v2/
-export OIDC_CLIENT_ID=OZSAeCbqAXZid3LL1gRQEkLXP9KlwZtJ
-export OIDC_ISSUER=https://lxd-ui-demo.us.auth0.com/
+export OIDC_AUDIENCE=https://dev-h6c02msuggpi6ijh.eu.auth0.com/api/v2/
+export OIDC_CLIENT_ID=RYDnMpkygLAMfeo17lU7LYwWGxisRuRR
+export OIDC_CLIENT_SECRET=CNKX4UmrZKZJq5rJy5VM_JfcNPqkws1rwWWQk_q0oyZ8gABARr19ic7xrhPssGA1
+export OIDC_ISSUER=https://dev-h6c02msuggpi6ijh.eu.auth0.com/
 export MANAGEMENT_API_TLS_PATH="$KEY_DIR"
 export CLUSTER_CONNECTOR_TLS_PATH="$KEY_DIR"
 export CLUSTER_CONNECTOR_PORT=9000

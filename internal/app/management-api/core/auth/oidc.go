@@ -43,6 +43,7 @@ type Verifier struct {
 	relyingParty rp.RelyingParty
 
 	clientID       string
+	clientSecret   string
 	issuer         string
 	audience       string
 	clusterCert    func() *shared.CertInfo
@@ -323,7 +324,7 @@ func (o *Verifier) setRelyingParty(ctx context.Context, r *http.Request) error {
 
 	callbackURL := getCallbackURL(r.Host)
 
-	relyingParty, err := rp.NewRelyingPartyOIDC(ctx, o.issuer, o.clientID, "", callbackURL, oidcScopes, options...)
+	relyingParty, err := rp.NewRelyingPartyOIDC(ctx, o.issuer, o.clientID, o.clientSecret, callbackURL, oidcScopes, options...)
 	if err != nil {
 		return fmt.Errorf("Failed to get OIDC relying party: %w", err)
 	}
@@ -495,7 +496,7 @@ func (o *Verifier) Host() string {
 }
 
 // NewVerifier returns a Verifier.
-func NewVerifier(issuer string, clientID string, audience string, cert *shared.CertInfo) (*Verifier, error) {
+func NewVerifier(issuer string, clientID string, clientSecret string, audience string, cert *shared.CertInfo) (*Verifier, error) {
 	// Setup a http client for communicating with the OIDC provider.
 	httpClientFunc := func() (*http.Client, error) {
 		client, err := util.HTTPClient("", http.ProxyFromEnvironment)
@@ -528,6 +529,7 @@ func NewVerifier(issuer string, clientID string, audience string, cert *shared.C
 	verifier := &Verifier{
 		issuer:               issuer,
 		clientID:             clientID,
+		clientSecret:         clientSecret,
 		audience:             audience,
 		clusterCert:          certFunc,
 		configExpiryInterval: defaultConfigExpiryInterval,
