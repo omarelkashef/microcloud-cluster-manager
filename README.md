@@ -28,6 +28,7 @@ Configure the cluster manager charm with your auth provider:
 ```
 juju config microcloud-cluster-manager-k8s oidc-issuer=https://example.com/
 juju config microcloud-cluster-manager-k8s oidc-client-id=ababab
+juju config microcloud-cluster-manager-k8s oidc-client-secret=cdcdcd
 juju config microcloud-cluster-manager-k8s oidc-audience=https://example.com/api/v2/
 ```
 
