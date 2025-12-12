@@ -232,6 +232,7 @@ deploy-db:
 .PHONY: deploy-configs
 deploy-configs:
 	@echo "Deploying configs..."
+	sed -i 's/PROMETHEUS_ADDRESS/$(PROMETHEUS_ADDRESS)/g' deployment/k8s/cicd/config/config.yaml
 	kubectl apply -f deployment/k8s/cicd/config/config.yaml
 	kubectl wait --for=create --timeout=600s cm/config -n default
 	@echo "Configs is ready!"
@@ -266,7 +267,7 @@ deploy-ingress:
 deploy-ci-k8s-cluster:
 	$(MAKE) deploy-cert-manager
 	$(MAKE) deploy-db
-	$(MAKE) deploy-configs
+	$(MAKE) deploy-configs PROMETHEUS_ADDRESS=$(PROMETHEUS_ADDRESS)
 	$(MAKE) deploy-management-api IMAGE_NAME=$(IMAGE_NAME)
 	$(MAKE) deploy-cluster-connector IMAGE_NAME=$(IMAGE_NAME)
 	$(MAKE) deploy-ingress
