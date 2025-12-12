@@ -24,6 +24,7 @@ data:
   CLUSTER_CONNECTOR_PORT: base
   # oidc configs
   OIDC_CLIENT_ID: base
+  OIDC_CLIENT_SECRET: base
   OIDC_ISSUER: base
   OIDC_AUDIENCE: base
   GRAFANA_BASE_URL: http://base

@@ -13,6 +13,7 @@ type Configuration struct {
 	ClusterConnectorDomain ConfigData `json:"cluster_connector_domain"`
 	ClusterConnectorPort   ConfigData `json:"cluster_connector_port"`
 	OIDCClientID           ConfigData `json:"oidc_client_id"`
+	OIDCClientSecret       ConfigData `json:"oidc_client_secret"`
 	OIDCIssuer             ConfigData `json:"oidc_issuer"`
 	OIDCAudience           ConfigData `json:"oidc_audience"`
 	DBConnectionString     ConfigData `json:"db_connection_string"`

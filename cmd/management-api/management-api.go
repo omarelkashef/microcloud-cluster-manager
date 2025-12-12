@@ -61,6 +61,7 @@ func Run() (err error) {
 	oidcVerifier, err := auth.NewVerifier(
 		cfg.OIDCIssuer,
 		cfg.OIDCClientID,
+		cfg.OIDCClientSecret,
 		cfg.OIDCAudience,
 		cfg.ManagementAPICert,
 	)

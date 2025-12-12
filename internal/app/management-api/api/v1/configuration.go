@@ -73,7 +73,12 @@ func mapEnvToConfig(cfg config.Config) models.Configuration {
 		OIDCClientID: models.ConfigData{
 			Value:       cfg.OIDCClientID,
 			Title:       "OIDC Client ID",
-			Description: "The OpenID Conenct client ID for the application.",
+			Description: "The OpenID Connect client ID for the application.",
+		},
+		OIDCClientSecret: models.ConfigData{
+			Value:       cfg.OIDCClientSecret,
+			Title:       "OIDC Client Secret",
+			Description: "The OpenID Connect client secret for the application.",
 		},
 		OIDCIssuer: models.ConfigData{
 			Value:       cfg.OIDCIssuer,

@@ -228,8 +228,8 @@ jobs:
       - name: Setup for tests
         shell: bash
         env:
-          OIDC_USER: lxd-site-manager-e2e-tests@example.org
-          OIDC_PASSWORD: abcDEF111
+          OIDC_USER: cluster-manager-e2e-tests@example.org
+          OIDC_PASSWORD: cluster-manager-e2e-password
         run: |
           echo "OIDC_USER=$OIDC_USER" >> ui/.env.local
           echo "OIDC_PASSWORD=$OIDC_PASSWORD" >> ui/.env.local

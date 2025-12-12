@@ -33,9 +33,10 @@ type Config struct {
 	WriteTimeout   int
 	IdleTimeout    int
 	// oidc configs
-	OIDCClientID string
-	OIDCIssuer   string
-	OIDCAudience string
+	OIDCClientID     string
+	OIDCClientSecret string
+	OIDCIssuer       string
+	OIDCAudience     string
 	// cos configs
 	GrafanaBaseURL    string
 	PrometheusBaseURL string
@@ -105,6 +106,7 @@ func LoadConfig() (*Config, error) {
 
 	// OIDC Config
 	oidcClientID := os.Getenv("OIDC_CLIENT_ID")
+	oidcClientSecret := os.Getenv("OIDC_CLIENT_SECRET")
 	oidcIssuer := os.Getenv("OIDC_ISSUER")
 	oidcAudience := os.Getenv("OIDC_AUDIENCE")
 	if oidcClientID == "" || oidcIssuer == "" {
@@ -138,6 +140,7 @@ func LoadConfig() (*Config, error) {
 			DBDisableTLS:   getEnvOrDefault("DB_DISABLE_TLS", "true") == "true",
 		},
 		OIDCClientID:      oidcClientID,
+		OIDCClientSecret:  oidcClientSecret,
 		OIDCIssuer:        oidcIssuer,
 		OIDCAudience:      oidcAudience,
 		GrafanaBaseURL:    grafanaBaseURL,
