@@ -173,7 +173,7 @@ jobs:
           sideload-images-path: '${{ github.workspace }}/docker-image'
 
       - name: Deploy k8s resources
-        run: deployment/k8s/cicd/deploy-cos-on-microk8s.sh ${{ needs.build-rock.outputs.image-name }}
+        run: deployment/k8s/cicd/deploy-on-microk8s.sh ${{ needs.build-rock.outputs.image-name }}
 
       - name: Install Go
         uses: actions/setup-go@v6
@@ -211,7 +211,7 @@ jobs:
           sideload-images-path: '${{ github.workspace }}/docker-image'
 
       - name: Deploy k8s resources
-        run: deployment/k8s/cicd/deploy-cos-on-microk8s.sh ${{ needs.build-rock.outputs.image-name }}
+        run: deployment/k8s/cicd/deploy-on-microk8s.sh ${{ needs.build-rock.outputs.image-name }}
 
       - name: Install Node.js
         uses: actions/setup-node@v6
