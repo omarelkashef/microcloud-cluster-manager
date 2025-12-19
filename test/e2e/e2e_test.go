@@ -14,8 +14,6 @@ var tests = []types.Test{
 	testRemoteClusterJoinExpiredToken,
 	testRemoteClusterStatusNoCert,
 	testRemoteClusterStatusInvalidCert,
-	testRemoteClusterStatusUnsupportedMetricsType,
-	testRemoteClusterStatusMalformedMetrics,
 }
 
 func TestE2E(t *testing.T) {

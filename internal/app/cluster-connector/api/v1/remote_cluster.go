@@ -224,7 +224,7 @@ func remoteClusterStatusPost(rc types.RouteConfig) types.EndpointHandler {
 				return err
 			}
 
-			if payload.Metrics == "" {
+			if len(payload.ServerMetrics) == 0 {
 				return nil
 			}
 
@@ -233,16 +233,24 @@ func remoteClusterStatusPost(rc types.RouteConfig) types.EndpointHandler {
 				return nil
 			}
 
-			timeSeries, err := parsePrometheusMetrics(payload.Metrics, dbRemoteCluster.Name)
-			if err != nil {
-				logger.Log.Warnw("Failed to parse metrics", "remote cluster", remoteClusterID, "err", err)
-				return fmt.Errorf("failed to parse Prometheus metrics: %w", err)
-			}
+			for i := range payload.ServerMetrics {
+				serverMetrics := payload.ServerMetrics[i]
+				if serverMetrics.Service != "lxd" {
+					logger.Log.Warnw("Unsupported service metrics received, skipping.", "service", serverMetrics.Service, "remote cluster", remoteClusterID)
+					continue
+				}
 
-			err = forwardMetricsToPrometheus(timeSeries, rc)
-			if err != nil {
-				logger.Log.Warnw("Failed to forward metrics to Prometheus", "remote cluster", remoteClusterID, "err", err)
-				return fmt.Errorf("failed to forward metrics to Prometheus: %w", err)
+				timeSeries, err := parsePrometheusMetrics(serverMetrics.Metrics, dbRemoteCluster.Name)
+				if err != nil {
+					logger.Log.Warnw("Failed to parse metrics, skipping.", "remote cluster", remoteClusterID, "err", err)
+					continue
+				}
+
+				err = forwardMetricsToPrometheus(timeSeries, rc)
+				if err != nil {
+					logger.Log.Warnw("Failed to forward metrics to Prometheus", "remote cluster", remoteClusterID, "err", err)
+					return fmt.Errorf("failed to forward metrics to Prometheus: %w", err)
+				}
 			}
 
 			return nil

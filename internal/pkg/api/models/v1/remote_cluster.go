@@ -16,6 +16,13 @@ type StatusDistribution struct {
 	Count  int64  `json:"count"`
 }
 
+// ServerMetrics represents the metrics from one cluster member service.
+type ServerMetrics struct {
+	Member  string `json:"member"`
+	Metrics string `json:"metrics"`
+	Service string `json:"service"`
+}
+
 // RemoteCluster is a standalone or clustered LXD cluster.
 type RemoteCluster struct {
 	Name               string               `json:"name"`
@@ -69,7 +76,7 @@ type RemoteClusterStatusPost struct {
 	DiskUsage         int64                `json:"disk_usage"`
 	MemberStatuses    []StatusDistribution `json:"member_statuses"`
 	InstanceStatuses  []StatusDistribution `json:"instance_statuses"`
-	Metrics           string               `json:"metrics"`
+	ServerMetrics     []ServerMetrics      `json:"server_metrics"`
 	UIURL             string               `json:"ui_url"`
 }
 
