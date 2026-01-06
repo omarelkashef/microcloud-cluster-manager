@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"strings"
 	"testing"
 	"time"
 
@@ -69,62 +68,6 @@ func testRemoteClusterStatusInvalidCert(env *helpers.Environment) (testName stri
 	}
 }
 
-func testRemoteClusterStatusUnsupportedMetricsType(env *helpers.Environment) (testName string, testFunc func(t *testing.T)) {
-	return "lxd remote cluster status update with unsupported metric type", func(t *testing.T) {
-		remoteClusterName := helpers.GetRandomName("remote_cluster_status_unsupported_metrics_type")
-		var condition string
-
-		{
-			condition = "Should fail status update request with an unsupported metric type"
-
-			tokenData, err := helpers.RegisterRemoteCluster(env, remoteClusterName)
-			if err != nil {
-				helpers.LogTestOutcome(t, condition, err)
-			}
-
-			err = sendStatusUpdateUnSupportedMetricType(env, *tokenData)
-			if err != nil && strings.Contains(err.Error(), "failed to parse Prometheus metrics") {
-				err = nil
-			} else {
-				err = errors.New("expected parsing error not received")
-			}
-
-			helpers.LogTestOutcome(t, condition, err)
-		}
-
-		env.RemoveRemoteClusterToken(remoteClusterName)
-		env.RemoveRemoteCluster(remoteClusterName)
-	}
-}
-
-func testRemoteClusterStatusMalformedMetrics(env *helpers.Environment) (testName string, testFunc func(t *testing.T)) {
-	return "lxd remote cluster status update with malformed metrics", func(t *testing.T) {
-		remoteClusterName := helpers.GetRandomName("remote_cluster_status_malformed_metrics")
-		var condition string
-
-		{
-			condition = "Should fail status update request with malformed metrics"
-
-			tokenData, err := helpers.RegisterRemoteCluster(env, remoteClusterName)
-			if err != nil {
-				helpers.LogTestOutcome(t, condition, err)
-			}
-
-			err = sendStatusUpdateMalformedMetrics(env, *tokenData)
-			if err != nil && strings.Contains(err.Error(), "failed to parse Prometheus metrics") {
-				err = nil
-			} else {
-				err = errors.New("expected parsing error not received")
-			}
-
-			helpers.LogTestOutcome(t, condition, err)
-		}
-
-		env.RemoveRemoteClusterToken(remoteClusterName)
-		env.RemoveRemoteCluster(remoteClusterName)
-	}
-}
-
 // sendStatusUpdateNoCert sends a status update to the Cluster Manager with no client certificate.
 func sendStatusUpdateNoCert(env *helpers.Environment, tokenData models.RemoteClusterTokenBody) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -164,38 +107,4 @@ func sendStatusUpdateInvalidCert(env *helpers.Environment, tokenData models.Remo
 
 	path := api.NewURL().Scheme("https").Host(tokenData.Addresses[0]).Path("1.0", "remote-clusters", "status")
 	return tlsClient.Query(ctx, http.MethodPost, path, nil, nil, nil)
-}
-
-// sendStatusUpdateUnSupportedMetricType sends a status update to the Cluster Manager with unsupported Metrics.
-func sendStatusUpdateUnSupportedMetricType(env *helpers.Environment, tokenData models.RemoteClusterTokenBody) error {
-	// Only gauge and counter metric types are supported; summary should trigger an error.
-	metricsText := `# HELP http_requests_total Total HTTP requests
-	# TYPE http_requests_total counter
-	http_requests_total{method="GET",status="200"} 1024
-	# HELP http_request_duration_seconds A summary of the HTTP request durations in seconds.
-	# TYPE http_request_duration_seconds summary
-	http_request_duration_seconds{quantile="0.5"} 0.12
-	`
-
-	input := helpers.CreateStatusPostData()
-	input.Metrics = metricsText
-
-	_, err := helpers.SendStatusUpdate(env, tokenData, input)
-	return err
-}
-
-// sendStatusUpdateMalformedMetrics sends a status update to the Cluster Manager with malformed Metrics.
-func sendStatusUpdateMalformedMetrics(env *helpers.Environment, tokenData models.RemoteClusterTokenBody) error {
-	metricsText := `# HELP http_requests_total Total HTTP requests
-	# TYPE http_requests_total counter
-	http_requests_total{method="GET",status="200"} 1024
-	# HELP http_request_duration_seconds A summary of the HTTP request durations in seconds.
-	# TYPE http_request_duration_seconds summary
-	http_request_duration_seconds{quantile="0.5"} 0.12` // Missing newline at the end
-
-	input := helpers.CreateStatusPostData()
-	input.Metrics = metricsText
-
-	_, err := helpers.SendStatusUpdate(env, tokenData, input)
-	return err
 }

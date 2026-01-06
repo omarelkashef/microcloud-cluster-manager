@@ -156,33 +156,35 @@ func testRemoteClusterSuccess(env *helpers.Environment) (testName string, testFu
 }
 
 func testRemoteClusterSuccessWithMetrics(env *helpers.Environment) (testName string, testFunc func(t *testing.T)) {
-	return "lxd remote cluster join and status updates with metrics under normal conditions", func(t *testing.T) {
+	return "lxd remote cluster join and status updates with metrics from multiple servers under normal conditions", func(t *testing.T) {
 		remoteClusterName := helpers.GetRandomName("remote_cluster_e2e_with_metrics")
 		var condition string
 		{
-			condition = "Should be able to receive a status update with metrics"
+			condition = "Should be able to receive a status update with metrics from multiple servers"
 
 			tokenData, err := helpers.RegisterRemoteCluster(env, remoteClusterName)
 			if err != nil {
 				helpers.LogTestOutcome(t, condition, err)
 			}
-			instanceName := helpers.GetRandomName("e2e-random-instance")
+			instanceMember1 := helpers.GetRandomName("e2e-random-instance-member-1")
+			metricsMember1 := models.ServerMetrics{
+				Member:  "member1",
+				Service: "lxd",
+				Metrics: getServerMetricsWithInstance(instanceMember1),
+			}
 
-			metricsText := fmt.Sprintf(`# HELP lxd_cpu_seconds_total Total CPU time used
-			# TYPE lxd_cpu_seconds_total gauge
-			lxd_cpu_seconds_total{instance="inst1",project="default"} 100.0
-			lxd_cpu_seconds_total{instance="inst2",project="default"} 200.0
-			lxd_cpu_seconds_total{instance="%s",project="other"} 300.0
-			# HELP http_requests_total Total HTTP requests
-			# TYPE http_requests_total counter
-			http_requests_total{method="GET",status="200"} 1024
-			# HELP lxd_memory_bytes Memory usage
-			# TYPE lxd_memory_bytes gauge
-			lxd_memory_bytes{instance="inst1"} 2048.0
-			`, instanceName)
+			instanceMember2 := helpers.GetRandomName("e2e-random-instance-member-2")
+			metricsMember2 := models.ServerMetrics{
+				Member:  "member2",
+				Service: "lxd",
+				Metrics: getServerMetricsWithInstance(instanceMember2),
+			}
 
 			input := helpers.CreateStatusPostData()
-			input.Metrics = metricsText
+			input.ServerMetrics = []models.ServerMetrics{
+				metricsMember1,
+				metricsMember2,
+			}
 
 			_, err = helpers.SendStatusUpdate(env, *tokenData, input)
 
@@ -196,12 +198,33 @@ func testRemoteClusterSuccessWithMetrics(env *helpers.Environment) (testName str
 				helpers.LogTestOutcome(t, condition, err)
 			}
 
-			if !strings.Contains(prometheusResponse, instanceName) {
-				err = fmt.Errorf("metrics not found in Prometheus")
+			if !strings.Contains(prometheusResponse, instanceMember1) {
+				err = fmt.Errorf("instance from cluster member1 not found in Prometheus")
+				helpers.LogTestOutcome(t, condition, err)
+			}
+
+			if !strings.Contains(prometheusResponse, instanceMember2) {
+				err = fmt.Errorf("instance from cluster member2 not found in Prometheus")
 				helpers.LogTestOutcome(t, condition, err)
 			}
 
 			helpers.LogTestOutcome(t, condition, nil)
 		}
 	}
+}
+
+func getServerMetricsWithInstance(instanceName string) string {
+	metricsText := fmt.Sprintf(`# HELP lxd_cpu_seconds_total Total CPU time used
+			# TYPE lxd_cpu_seconds_total gauge
+			lxd_cpu_seconds_total{instance="inst1",project="default"} 100.0
+			lxd_cpu_seconds_total{instance="inst2",project="default"} 200.0
+			lxd_cpu_seconds_total{instance="%s",project="other"} 300.0
+			# HELP http_requests_total Total HTTP requests
+			# TYPE http_requests_total counter
+			http_requests_total{method="GET",status="200"} 1024
+			# HELP lxd_memory_bytes Memory usage
+			# TYPE lxd_memory_bytes gauge
+			lxd_memory_bytes{instance="inst1"} 2048.0
+			`, instanceName)
+	return metricsText
 }
