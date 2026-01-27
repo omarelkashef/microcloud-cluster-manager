@@ -43,7 +43,7 @@ const BulkConfigurePanelInput: FC<Props> = ({
               appearance="base"
               type="button"
               hasIcon
-              title="Set value"
+              title={`Set ${label}`}
               onClick={() => {
                 setValue(areAllValuesEqual ? firstValue : defaultValue);
                 setTimeout(() => {

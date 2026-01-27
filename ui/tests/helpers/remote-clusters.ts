@@ -6,6 +6,11 @@ export const randomClusterName = (): string => {
   return `playwright-token-${randomNameSuffix()}`;
 };
 
+export const randomSeedClusterName = (): string => {
+  const randomInt = Math.floor(Math.random() * 20) + 1;
+  return `cluster-${randomInt.toString().padStart(2, "0")}`;
+};
+
 export const ensureClusterExists = async (
   page: Page,
   cluster: string,
@@ -15,15 +20,23 @@ export const ensureClusterExists = async (
   await expect(clusterNameCell).toBeVisible();
 };
 
-export const setClusterDiskLimit = async (
+export const goToClusterDetail = async (
   page: Page,
   cluster: string,
-  limit: string,
 ): Promise<void> => {
   await page.goto("/ui");
   await page.getByRole("link", { name: cluster }).click();
+};
+
+export const setClusterConfig = async (
+  page: Page,
+  cluster: string,
+  configLabel: string,
+  value: string,
+): Promise<void> => {
+  await goToClusterDetail(page, cluster);
   await page.getByRole("button", { name: "Configure", exact: true }).click();
-  await page.getByLabel("Disk threshold").fill(limit);
+  await page.getByLabel(configLabel).fill(value);
   await page.getByRole("button", { name: "Save changes" }).click();
   await expect(page.getByText(`Updated cluster ${cluster}`)).toBeVisible();
 };
