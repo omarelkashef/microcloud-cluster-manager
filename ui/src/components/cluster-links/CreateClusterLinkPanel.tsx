@@ -22,7 +22,7 @@ import * as Yup from "yup";
 import ClusterSelector from "components/ClusterSelector";
 import { getLinkIconType, LINK_TYPES } from "util/clusterLinkTypes";
 import ResourceIcon from "components/ResourceIcon";
-import { hasTargetEnd, isBidirectional, isPublic } from "util/clusterLinks";
+import { hasTargetCleanup, isBidirectional, isPublic } from "util/clusterLinks";
 import PanelSection from "components/PanelSection";
 import { queryKeys } from "util/queryKeys";
 
@@ -81,7 +81,7 @@ const CreateClusterLinkPanel: FC = () => {
         void queryClient.invalidateQueries({
           queryKey: [queryKeys.clusters, values.sourceCluster, queryKeys.links],
         });
-        if (hasTargetEnd(values)) {
+        if (hasTargetCleanup(values)) {
           void queryClient.invalidateQueries({
             queryKey: [queryKeys.identities, values.targetCluster],
           });
