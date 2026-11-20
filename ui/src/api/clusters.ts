@@ -97,17 +97,17 @@ export const updateClusterLink = async (
   ).then(handleResponse);
 };
 
-export const deleteClusterLink = async (
+export const deleteClusterLinks = async (
   source: string,
-  clusterLinkName: string,
-  removeReverseEdge: boolean,
+  links: { name: string; removeReverseEdge: boolean }[],
 ): Promise<void> => {
-  const query = removeReverseEdge ? "?removeReverseEdge=true" : "";
-
-  await fetch(
-    `/1.0/remote-cluster/${encodeURIComponent(source)}/cluster-links/${encodeURIComponent(clusterLinkName)}${query}`,
-    {
-      method: "DELETE",
-    },
-  ).then(handleResponse);
+  return Promise.allSettled(
+    links.map(async ({ name, removeReverseEdge }) => {
+      const query = removeReverseEdge ? "?removeReverseEdge=true" : "";
+      return fetch(
+        `/1.0/remote-cluster/${encodeURIComponent(source)}/cluster-links/${encodeURIComponent(name)}${query}`,
+        { method: "DELETE" },
+      ).then(handleResponse);
+    }),
+  ).then(handleSettledResult);
 };

@@ -34,7 +34,6 @@ import {
   getLinkIdentity,
   getReverseLink,
   isBidirectional,
-  isUnidirectional,
 } from "util/clusterLinks";
 import { queryKeys } from "util/queryKeys";
 import PanelSection from "components/PanelSection";
@@ -68,7 +67,6 @@ const EditClusterLinkPanel: FC = () => {
   const { data: identities = [] } = useIdentities(clusterName);
 
   const link = clusterLinks.find((item) => item.name === linkName);
-  // The cluster the link points at, if it is known to the cluster manager.
   const targetCluster = link ? getLinkedCluster(link, clusters) : undefined;
   const linkType = LINK_TYPES.find((type) => type.value === link?.type);
   const identity = getLinkIdentity(identities, panelParams.clusterLink);
@@ -86,11 +84,11 @@ const EditClusterLinkPanel: FC = () => {
     enableReinitialize: true,
     onSubmit: async (values) => {
       setError(null);
+      let updateAttempted = false;
       let sourceUpdated = false;
+      let targetUpdateAttempted: string | undefined;
       const updateBoth =
-        link &&
-        (isBidirectional(link) || isUnidirectional(link)) &&
-        values.applyDescriptionToBoth;
+        link && isBidirectional(link) && values.applyDescriptionToBoth;
 
       try {
         if (!link || !cluster) {
@@ -116,6 +114,7 @@ const EditClusterLinkPanel: FC = () => {
           }
         }
 
+        updateAttempted = true;
         await updateClusterLink(
           clusterName,
           linkName,
@@ -125,7 +124,6 @@ const EditClusterLinkPanel: FC = () => {
           }),
         );
         sourceUpdated = true;
-        // TODO: replace by ClusterLinkRichChip
         toastNotify.success(
           <>
             Cluster link <b>{link.name}</b> on <b>{clusterName}</b> saved.
@@ -133,6 +131,7 @@ const EditClusterLinkPanel: FC = () => {
         );
 
         if (reverseLink && targetCluster) {
+          targetUpdateAttempted = targetCluster.name;
           await updateClusterLink(
             targetCluster.name,
             reverseLink.name,
@@ -162,17 +161,20 @@ const EditClusterLinkPanel: FC = () => {
           ),
         );
       } finally {
-        void queryClient.invalidateQueries({
-          queryKey: [queryKeys.clusters, clusterName, queryKeys.links],
-        });
-        if (updateBoth && targetCluster) {
+        if (updateAttempted) {
           void queryClient.invalidateQueries({
-            queryKey: [queryKeys.clusters, targetCluster.name, queryKeys.links],
+            queryKey: [queryKeys.clusters, clusterName, queryKeys.links],
           });
         }
-        void queryClient.invalidateQueries({
-          queryKey: [queryKeys.identities],
-        });
+        if (targetUpdateAttempted) {
+          void queryClient.invalidateQueries({
+            queryKey: [
+              queryKeys.clusters,
+              targetUpdateAttempted,
+              queryKeys.links,
+            ],
+          });
+        }
       }
     },
   });
@@ -268,7 +270,7 @@ const EditClusterLinkPanel: FC = () => {
                   {linkType?.label ?? link.type}
                 </p>
                 {linkType && (
-                  <p className="p-form-help-text">{linkType.help}</p>
+                  <p className="p-form-help-text">{linkType.description}</p>
                 )}
               </div>
             </PanelSection>
