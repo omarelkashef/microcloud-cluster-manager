@@ -24,7 +24,7 @@ import { getLinkIconType, LINK_TYPES } from "util/clusterLinkTypes";
 import ResourceIcon from "components/ResourceIcon";
 import { hasTargetCleanup, isBidirectional, isPublic } from "util/clusterLinks";
 import PanelSection from "components/PanelSection";
-import { queryKeys } from "util/queryKeys";
+import { allClusterLinksQueryKey, queryKeys } from "util/queryKeys";
 
 const CreateClusterLinkPanel: FC = () => {
   const panelParams = usePanelParams();
@@ -78,6 +78,9 @@ const CreateClusterLinkPanel: FC = () => {
         notify.failure("Failure creating cluster link.", error);
       })
       .finally(() => {
+        void queryClient.invalidateQueries({
+          queryKey: allClusterLinksQueryKey,
+        });
         void queryClient.invalidateQueries({
           queryKey: [queryKeys.clusters, values.sourceCluster, queryKeys.links],
         });
@@ -151,7 +154,7 @@ const CreateClusterLinkPanel: FC = () => {
     !formik.values.name ||
     isAlternateTargetAddressInvalid;
 
-  if (!cluster) {
+  if (clusterName && !cluster) {
     return null;
   }
 
@@ -196,12 +199,27 @@ const CreateClusterLinkPanel: FC = () => {
                 </PanelSection>
                 <PanelSection header="Details">
                   <div className="cluster-link-endpoints">
-                    <Input
-                      type="text"
-                      label="Source"
-                      value={cluster?.name ?? clusterName}
-                      readOnly
-                    />
+                    {clusterName ? (
+                      <Input
+                        type="text"
+                        label="Source"
+                        value={cluster?.name ?? clusterName}
+                        readOnly
+                      />
+                    ) : (
+                      <ClusterSelector
+                        value={formik.values.sourceCluster}
+                        setValue={(value) => {
+                          void formik.setFieldValue("sourceCluster", value);
+                        }}
+                        ignoreOptions={[formik.values.targetCluster]}
+                        selectProps={{
+                          id: "source-cluster",
+                          label: "Source",
+                          "aria-label": "Source cluster",
+                        }}
+                      />
+                    )}
                     <span
                       className="cluster-link-endpoints__arrow"
                       aria-hidden="true"

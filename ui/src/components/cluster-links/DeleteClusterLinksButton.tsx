@@ -17,7 +17,7 @@ import {
   isBidirectional,
 } from "util/clusterLinks";
 import { pluralize } from "util/helpers";
-import { queryKeys } from "util/queryKeys";
+import { allClusterLinksQueryKey, queryKeys } from "util/queryKeys";
 
 interface Props {
   cluster: string;
@@ -116,6 +116,7 @@ const DeleteClusterLinksButton: FC<Props> = ({
     }
 
     await Promise.all([
+      queryClient.invalidateQueries({ queryKey: allClusterLinksQueryKey }),
       ...Array.from(linkClusters, async (clusterName) =>
         queryClient.invalidateQueries({
           queryKey: [queryKeys.clusters, clusterName, queryKeys.links],

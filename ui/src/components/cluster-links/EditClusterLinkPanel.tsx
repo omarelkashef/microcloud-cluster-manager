@@ -30,7 +30,7 @@ import {
   getLinkIdentity,
   isBidirectional,
 } from "util/clusterLinks";
-import { queryKeys } from "util/queryKeys";
+import { allClusterLinksQueryKey, queryKeys } from "util/queryKeys";
 import PanelSection from "components/PanelSection";
 
 interface EditClusterLinkFormValues {
@@ -162,6 +162,9 @@ const EditClusterLinkPanel: FC = () => {
         );
       } finally {
         if (updateAttempted) {
+          void queryClient.invalidateQueries({
+            queryKey: allClusterLinksQueryKey,
+          });
           void queryClient.invalidateQueries({
             queryKey: [queryKeys.clusters, clusterName, queryKeys.links],
           });
